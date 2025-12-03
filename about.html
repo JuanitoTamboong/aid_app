@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>About AidTracker</title>
+<style>
+  body {
+    margin: 0;
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(135deg, #0a1636 80%, #d4af37 20%);
+    background-attachment: fixed; /* FIXED BACKGROUND */
+    background-size: cover;
+    color: #fff;
+    line-height: 1.7;
+    padding: 40px 15%;
+    min-height: 100vh;
+  }
+
+  .container {
+    background: rgba(255, 255, 255, 0.05);
+    border: 2px solid #d4af37;
+    border-radius: 15px;
+    padding: 40px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.4);
+  }
+
+  h1 {
+    text-align: center;
+    color: #fcd34d;
+    font-size: 2.2rem;
+    margin-bottom: 15px;
+  }
+
+  h3 {
+    color: #ffe066;
+    margin-top: 30px;
+  }
+
+  hr {
+    border: 1px solid #fcd34d;
+    width: 60%;
+    margin: 0 auto 30px;
+  }
+
+  p, li {
+    color: #eaeaea;
+    font-size: 16px;
+  }
+
+  ul {
+    margin-left: 30px;
+  }
+
+  li b {
+    color: #fcd34d;
+  }
+
+  .return-button {
+    background-color: #16224d;
+    border: 2px solid #fcd34d;
+    color: #fcd34d;
+    padding: 8px 16px;
+    font-size: 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: block;
+    margin: 0 auto 20px;
+  }
+
+  .return-button:hover {
+    background-color: #fcd34d;
+    color: #0a1636;
+  }
+
+  @media (max-width: 768px) {
+    body {
+      padding: 20px;
+    }
+    .container {
+      padding: 20px;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <button class="return-button" onclick="goBack()">Return</button>
+
+  <h1>AidTracker</h1>
+  <hr>
+
+  <p>
+    <b>AidTracker</b> is a mobile emergency response application designed to enhance emergency response capabilities, particularly in areas with limited access to emergency services. It streamlines communication between residents and responders, ensuring rapid and organized responses during emergencies.
+  </p>
+
+  <h3>Key Importance and Benefits:</h3>
+  <ul>
+    <li><b>Faster Incident Reporting:</b>
+      <ul>
+        <li>Enables quicker reporting of emergencies with accurate location data, reducing delays in relaying critical information.</li>
+        <li>Simplifies the process for residents to report incidents such as fires, accidents, and medical emergencies.</li>
+      </ul>
+    </li>
+    <li><b>Reduced Response Time:</b>
+      <ul>
+        <li>Decreases the time it takes for responders to reach emergency situations by providing real-time reporting and location tracking.</li>
+        <li>Streamlines coordination among different emergency services to ensure a quicker and more efficient response.</li>
+      </ul>
+    </li>
+    <li><b>Improved Coordination:</b>
+      <ul>
+        <li>Facilitates easier coordination between different emergency services, enhancing overall response effectiveness.</li>
+        <li>Provides a centralized platform for managing and tracking emergency responses.</li>
+      </ul>
+    </li>
+    <li><b>Efficient Resource Allocation:</b>
+      <ul>
+        <li>Optimizes resource allocation through data-driven decision-making tools for responders.</li>
+        <li>Ensures that resources are deployed effectively to the areas where they are needed most.</li>
+      </ul>
+    </li>
+    <li><b>Enhanced Public Awareness and Preparedness:</b>
+      <ul>
+        <li>Increases public awareness and preparedness by offering educational materials and proactive alerts within the app.</li>
+        <li>Keeps residents informed about the progress of emergency responses, fostering a sense of security and community engagement.</li>
+      </ul>
+    </li>
+    <li><b>Mitigating Impact of Disasters:</b>
+      <ul>
+        <li>Aims to reduce response times, ultimately saving lives and minimizing property damage.</li>
+        <li>Addresses challenges posed by both natural disasters (typhoons, earthquakes) and human-made incidents (fires, accidents).</li>
+      </ul>
+    </li>
+    <li><b>Technology-Driven Approach:</b>
+      <ul>
+        <li>Integrates local capacity with digital tools to better respond to both human-made and natural disasters.</li>
+        <li>Highlights the need for a more connected, technology-driven approach to emergency management.</li>
+      </ul>
+    </li>
+    <li><b>Community Resilience:</b>
+      <ul>
+        <li>Fosters a safer, more resilient community by improving how emergencies are reported and managed.</li>
+        <li>Serves as a model for other local communities facing similar challenges in emergency management.</li>
+      </ul>
+    </li>
+    <li><b>Effective Communication:</b>
+      <ul>
+        <li>Enhances communication and coordination among key stakeholders, including residents, barangay officials, rescuers, and system administrators.</li>
+        <li>Provides real-time alerts and status updates to keep residents informed about emergency responses.</li>
+      </ul>
+    </li>
+    <li><b>Data-Driven Decision Making:</b>
+      <ul>
+        <li>System admins can generate reports based on recorded activities, supporting planning and performance reviews.</li>
+        <li>Enables continuous improvement in handling human-made emergencies through data analysis.</li>
+      </ul>
+    </li>
+  </ul>
+</div>
+
+<script>
+function goBack() {
+  window.history.back();
+}
+</script>
+
+</body>
+</html>

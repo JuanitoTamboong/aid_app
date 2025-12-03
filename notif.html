@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AidTracker Notifications</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+/* === Background Gradient === */
+body {
+  margin: 0;
+  font-family: 'Poppins', sans-serif;
+  background: #0a1636;
+  color: white;
+  min-height: 100vh;
+}
+
+/* === Header === */
+.header {
+  background: rgba(10, 22, 54, 0.9);
+  color: #fcd34d;
+  padding: 10px 20px;
+  font-size: 20px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 2px solid #d4af37;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+
+.header button {
+  background: #d4af37;
+  color: #0a1636;
+  padding: 4px 12px;
+  border-radius: 6px;
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+.header button:hover {
+  background: #f2cb61;
+  transform: scale(1.05);
+}
+
+/* === Notification Cards === */
+#reportList {
+  padding: 20px;
+  max-width: 650px;
+  margin: 0 auto;
+}
+
+.notif {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(212, 175, 55, 0.7);
+  border-radius: 10px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+  padding: 16px;
+  margin-bottom: 16px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.notif:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+  transform: scale(1.03);
+}
+
+/* === Typography === */
+h3 {
+  color: #fcd34d;
+  font-size: 18px;
+  margin-bottom: 6px;
+}
+
+p {
+  color: #f3f4f6;
+  margin: 3px 0;
+  font-size: 14px;
+}
+
+.status-text {
+  font-weight: bold;
+  color: #38bdf8; /* light blue accent */
+}
+
+/* === Status section === */
+#status {
+  color: #f3f4f6;
+  text-align: center;
+  font-weight: 600;
+  margin-top: 15px;
+}
+</style>
+</head>
+
+<body>
+  <div class="header">
+    <button onclick="goBack()"> ← </button>
+    <span>📍 Notifications</span>
+    <div style="width:60px;"></div>
+  </div>
+
+  <div id="status" class="mt-4">Loading...</div>
+  <div id="reportList" class="mt-4"></div>
+
+<script>
+function goBack() {
+  window.location.href = "index.html";
+}
+
+localStorage.removeItem("hasNewNotif");
+
+async function loadReports(retries = 3) {
+  const statusEl = document.getElementById("status");
+  const container = document.getElementById("reportList");
+  statusEl.textContent = "Loading reports...";
+  container.innerHTML = "";
+
+  try {
+    const res = await fetch("http://localhost:3000/api/reports", { cache: "no-store" });
+    if (!res.ok) throw new Error("Server returned " + res.status);
+    const reports = await res.json();
+
+    if (reports.length === 0) {
+      statusEl.textContent = "No reports yet.";
+      return;
+    }
+
+    reports.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+    statusEl.textContent = `${reports.length} reports loaded`;
+
+    const statuses = JSON.parse(localStorage.getItem("reportStatuses") || "{}");
+
+    reports.forEach((r) => {
+      const notifId = r.id || r._id || String(r.timestamp);
+      const status = statuses[notifId] || "Active";
+
+      const div = document.createElement("div");
+      div.className = "notif";
+      div.dataset.id = notifId;
+      div.innerHTML = `
+        <h3>${r.type?.toUpperCase() || "ALERT"}</h3>
+        <p>Reported by: <strong>${r.reporter || "Anonymous"}</strong></p>
+        <p>${new Date(r.timestamp).toLocaleString()}</p>
+        <p>Lat: ${r.latitude?.toFixed(4)}, Lng: ${r.longitude?.toFixed(4)}</p>
+        <p>Status: <span class="status-text">${status}</span></p>
+      `;
+      div.onclick = () => {
+        localStorage.setItem("selectedReport", JSON.stringify(r));
+        window.location.href = "view-report.html";
+      };
+      container.appendChild(div);
+    });
+
+  } catch (err) {
+    console.error(err);
+    if (retries > 0) {
+      statusEl.textContent = "Retrying...";
+      setTimeout(() => loadReports(retries - 1), 1000);
+    } else {
+      statusEl.textContent = "⚠️ Failed to load reports.";
+    }
+  }
+}
+
+// Listen for updates
+window.addEventListener("storage", (event) => {
+  if (event.key === "reportStatusUpdate") {
+    const data = JSON.parse(event.newValue);
+    const notifDiv = document.querySelector(`.notif[data-id='${data.id}']`);
+    if (!notifDiv) return;
+
+    notifDiv.querySelector(".status-text").innerText = data.statusText;
+
+    const statuses = JSON.parse(localStorage.getItem("reportStatuses") || "{}");
+    statuses[data.id] = data.statusText;
+    localStorage.setItem("reportStatuses", JSON.stringify(statuses));
+
+    if (data.remove) notifDiv.remove();
+  }
+});
+
+loadReports();
+setInterval(loadReports, 5000);
+</script>
+</body>
+</html>
