@@ -3,201 +3,659 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Account Information</title>
+    <title>Account Information - AidTracker</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body {
+        * {
             margin: 0;
-            font-family: 'Poppins', sans-serif;
-            background: linear-gradient(135deg, #0a1636 70%, #d4af37 30%);
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a1636 70%, #1a2c5a 30%);
+            color: white;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        /* Container */
+        .account-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: linear-gradient(145deg, rgba(20, 35, 80, 0.95), rgba(10, 22, 54, 0.95));
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(252, 211, 77, 0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(252, 211, 77, 0.3);
+        }
+
+        .header-icon {
+            background: rgba(252, 211, 77, 0.1);
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: #fcd34d;
+            border: 1px solid rgba(252, 211, 77, 0.3);
+        }
+
+        .header-text h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #fcd34d;
+            margin-bottom: 4px;
+        }
+
+        .header-text p {
+            font-size: 0.9rem;
+            color: #a0aec0;
+        }
+
+        /* Profile Info */
+        .profile-info {
+            margin-bottom: 30px;
+        }
+
+        .info-card {
+            background: rgba(30, 45, 90, 0.5);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid rgba(252, 211, 77, 0.2);
+            margin-bottom: 15px;
+        }
+
+        .info-row {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .info-row:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+
+        .info-label {
+            min-width: 100px;
+            color: #94a3b8;
+            font-weight: 500;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .info-value {
+            flex: 1;
+            color: #f8fafc;
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+
+        .empty-value {
+            color: #a0aec0;
+            font-style: italic;
+        }
+
+        /* Buttons */
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border-radius: 10px;
+            border: none;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            flex: 1;
+            min-width: 140px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(to right, #fcd34d, #fbbf24);
+            color: #0a1636;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(to right, #fbbf24, #f59e0b);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(251, 191, 36, 0.3);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background: linear-gradient(to right, #ef4444, #dc2626);
             color: white;
         }
 
-        .container {
-            min-height: 50vh;
-           justify-content: center;
-            margin: 20px auto;
-            padding: 20px;
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(212, 175, 55, 0.8);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-            border-radius: 10px;
+        .btn-danger:hover {
+            background: linear-gradient(to right, #dc2626, #b91c1c);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
         }
 
-        @media (max-width: 600px) {
-            .container {
-                margin: 10px;
-                padding: 15px;
+        /* Edit Form */
+        .edit-form {
+            margin-top: 20px;
+        }
+
+        .form-section {
+            background: rgba(30, 45, 90, 0.5);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(252, 211, 77, 0.2);
+        }
+
+        .form-title {
+            color: #fcd34d;
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 6px;
+            color: #e2e8f0;
+            font-weight: 500;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .required {
+            color: #ef4444;
+            margin-left: 4px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(252, 211, 77, 0.3);
+            border-radius: 8px;
+            color: white;
+            font-size: 1rem;
+            transition: all 0.2s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #fcd34d;
+            background: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 0 0 3px rgba(252, 211, 77, 0.1);
+        }
+
+        .form-input::placeholder {
+            color: #94a3b8;
+        }
+
+        .form-select {
+            width: 100%;
+            padding: 12px 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(252, 211, 77, 0.3);
+            border-radius: 8px;
+            color: white;
+            font-size: 1rem;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23fcd34d' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 15px center;
+            background-size: 12px;
+            padding-right: 40px;
+        }
+
+        .form-select:focus {
+            outline: none;
+            border-color: #fcd34d;
+            background-color: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 0 0 3px rgba(252, 211, 77, 0.1);
+        }
+
+        .form-select option {
+            background: #0a1636;
+            color: white;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .account-container {
+                padding: 20px;
+            }
+            
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .button-group {
+                flex-direction: column;
+            }
+            
+            .btn {
+                min-width: 100%;
             }
         }
 
-        h1, h2 { color: #fcd34d; }
-
-        input, select {
-            width: 100%;
-            padding: 10px;
-            border-radius: 8px;
-            border: 1px solid #fcd34d;
-            background: rgba(10,22,54,0.1);
-            color: white;
-            margin-bottom: 12px;
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+            
+            .account-container {
+                padding: 15px;
+            }
+            
+            .header {
+                flex-direction: column;
+                text-align: center;
+                gap: 10px;
+            }
+            
+            .info-row {
+                flex-direction: column;
+                gap: 4px;
+            }
+            
+            .info-label {
+                min-width: auto;
+            }
         }
-
-        input::placeholder { color: #ffe066; }
-
-        button {
-            font-weight: bold;
-            padding: 10px 20px;
-            border-radius: 8px;
-            border: none;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-
-        .btn-edit { background: #0a1636; color: #fcd34d; padding: 10px; width: 100px; }
-        .btn-edit:hover { background: #16224d; }
-
-        .btn-return { background: #16224d; color: #ffe066;padding: 10px; width: 100px; }
-        .btn-return:hover { background: #0a1636; color: #fcd34d; }
-
-        .btn-clear { background: #e63946; color: white; }
-        .btn-clear:hover { background: #c5303f; }
-
-        .btn-save { background: #fcd34d; color: #0a1636; padding: 10px; width: 100px; }
-        .btn-save:hover { background: #ffe066; }
-
-        .btn-cancel { background: #16224d; color: #ffe066; padding: 10px; width: 100px; }
-        .btn-cancel:hover { background: #0a1636; color: #fcd34d; }
     </style>
 </head>
 <body>
-<div class="container">
-    <h1 class="text-lg md:text-2xl font-bold text-center mb-6">Account Information</h1>
-
-    <div id="profile">
-        <p><strong>Name:</strong> <span id="name"></span></p>
-        <p><strong>Address:</strong> <span id="address"></span></p>
-        <p><strong>Age:</strong> <span id="age"></span></p>
-        <p><strong>Sex:</strong> <span id="sex"></span></p>
-        <p><strong>Birthdate:</strong> <span id="birthdate"></span></p>
-
-        <div class="mt-4 flex justify-between flex-wrap gap-2">
-            <button onclick="showEditPage()" class="btn-edit">Edit</button>
-            <button onclick="goBack()" class="btn-return">Return</button>
-            <button onclick="clearAccount()" class="btn-clear">Clear Account</button>
+<div class="account-container">
+    <!-- Header -->
+    <div class="header">
+        <div class="header-icon">
+            <i class="fas fa-user-circle"></i>
+        </div>
+        <div class="header-text">
+            <h1>Account Information</h1>
+            <p>Manage your personal details and emergency reporting profile</p>
         </div>
     </div>
 
+    <!-- Profile Display -->
+    <div id="profile">
+        <div class="profile-info">
+            <div class="info-card">
+                <div class="info-row">
+                    <div class="info-label">
+                        <i class="fas fa-user"></i> Name
+                    </div>
+                    <div id="name" class="info-value empty-value">Not set</div>
+                </div>
+                
+                <div class="info-row">
+                    <div class="info-label">
+                        <i class="fas fa-map-marker-alt"></i> Address
+                    </div>
+                    <div id="address" class="info-value empty-value">Not set</div>
+                </div>
+                
+                <div class="info-row">
+                    <div class="info-label">
+                        <i class="fas fa-calendar-alt"></i> Age
+                    </div>
+                    <div id="age" class="info-value empty-value">Not set</div>
+                </div>
+                
+                <div class="info-row">
+                    <div class="info-label">
+                        <i class="fas fa-venus-mars"></i> Sex
+                    </div>
+                    <div id="sex" class="info-value empty-value">Not set</div>
+                </div>
+                
+                <div class="info-row">
+                    <div class="info-label">
+                        <i class="fas fa-birthday-cake"></i> Birthdate
+                    </div>
+                    <div id="birthdate" class="info-value empty-value">Not set</div>
+                </div>
+            </div>
+            
+            <p class="text-sm text-center text-gray-400 mt-4 mb-6">
+                <i class="fas fa-info-circle mr-2"></i>
+                Your information is used for emergency reporting and is stored locally on your device.
+            </p>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="button-group">
+            <button onclick="showEditPage()" class="btn btn-primary">
+                <i class="fas fa-edit"></i> Edit Profile
+            </button>
+            <button onclick="goBack()" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Go Back
+            </button>
+            <button onclick="clearAccount()" class="btn btn-danger">
+                <i class="fas fa-trash-alt"></i> Clear Account
+            </button>
+        </div>
+    </div>
+
+    <!-- Edit Form (Hidden by default) -->
     <div id="edit-profile" style="display: none;">
-        <h2 class="text-lg md:text-xl font-bold mb-4">Edit Information</h2>
-
-        <label>First Name:</label>
-        <input type="text" id="edit-firstname" placeholder="First Name">
-
-        <label>Last Name:</label>
-        <input type="text" id="edit-lastname" placeholder="Last Name">
-
-        <label>Address (Barangay):</label>
-        <select id="edit-address">
-            <option value="">-- Select Barangay --</option>
-            <option value="Amatong">Amatong</option>
-            <option value="Anahao">Anahao</option>
-            <option value="Bangon">Bangon</option>
-            <option value="Batiano">Batiano</option>
-            <option value="Budiong">Budiong</option>
-            <option value="Canduyong">Canduyong</option>
-            <option value="Dapawan">Dapawan</option>
-            <option value="Gabawan">Gabawan</option>
-            <option value="Libertad">Libertad</option>
-            <option value="Ligaya">Ligaya</option>
-            <option value="Liwanag">Liwanag</option>
-            <option value="Liwayway">Liwayway</option>
-            <option value="Malilico">Malilico</option>
-            <option value="Mayha">Mayha</option>
-            <option value="Panique">Panique</option>
-            <option value="Pato-o">Pato-o</option>
-            <option value="Poctoy">Poctoy</option>
-            <option value="Progreso Este">Progreso Este</option>
-            <option value="Progreso Weste">Progreso Weste</option>
-            <option value="Rizal">Rizal</option>
-            <option value="Tabing Dagat">Tabing Dagat</option>
-            <option value="Tabobo-an">Tabobo-an</option>
-            <option value="Tuburan">Tuburan</option>
-            <option value="Tumingad">Tumingad</option>
-            <option value="Tulay">Tulay</option>
-        </select>
-
-        <label>Age:</label>
-        <input type="text" id="edit-age" placeholder="Age" oninput="this.value = this.value.replace(/\D/g,'')">
-
-        <label>Sex:</label>
-        <select id="edit-sex">
-            <option value="Male">Male</option>
-            <option value="Female">Female</option>
-            <option value="Other">Other</option>
-        </select>
-
-        <label>Birthdate:</label>
-        <input type="date" id="edit-birthdate" max="9999-12-31">
-
-        <div class="flex justify-between flex-wrap gap-2">
-            <button onclick="saveInformation()" class="btn-save">Save</button>
-            <button onclick="hideEditPage()" class="btn-cancel">Cancel</button>
+        <div class="edit-form">
+            <div class="form-section">
+                <div class="form-title">
+                    <i class="fas fa-user-edit"></i> Personal Information
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-user"></i> First Name <span class="required">*</span>
+                        </label>
+                        <input type="text" id="edit-firstname" class="form-input" placeholder="Enter first name" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-user"></i> Last Name <span class="required">*</span>
+                        </label>
+                        <input type="text" id="edit-lastname" class="form-input" placeholder="Enter last name" required>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-map-marker-alt"></i> Barangay <span class="required">*</span>
+                    </label>
+                    <select id="edit-address" class="form-select" required>
+                        <option value="">-- Select Barangay --</option>
+                        <option value="Amatong">Amatong</option>
+                        <option value="Anahao">Anahao</option>
+                        <option value="Bangon">Bangon</option>
+                        <option value="Batiano">Batiano</option>
+                        <option value="Budiong">Budiong</option>
+                        <option value="Canduyong">Canduyong</option>
+                        <option value="Dapawan">Dapawan</option>
+                        <option value="Gabawan">Gabawan</option>
+                        <option value="Libertad">Libertad</option>
+                        <option value="Ligaya">Ligaya</option>
+                        <option value="Liwanag">Liwanag</option>
+                        <option value="Liwayway">Liwayway</option>
+                        <option value="Malilico">Malilico</option>
+                        <option value="Mayha">Mayha</option>
+                        <option value="Panique">Panique</option>
+                        <option value="Pato-o">Pato-o</option>
+                        <option value="Poctoy">Poctoy</option>
+                        <option value="Progreso Este">Progreso Este</option>
+                        <option value="Progreso Weste">Progreso Weste</option>
+                        <option value="Rizal">Rizal</option>
+                        <option value="Tabing Dagat">Tabing Dagat</option>
+                        <option value="Tabobo-an">Tabobo-an</option>
+                        <option value="Tuburan">Tuburan</option>
+                        <option value="Tumingad">Tumingad</option>
+                        <option value="Tulay">Tulay</option>
+                    </select>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-calendar-alt"></i> Age <span class="required">*</span>
+                        </label>
+                        <input type="text" id="edit-age" class="form-input" 
+                               placeholder="Enter age" 
+                               oninput="this.value = this.value.replace(/\D/g,'')"
+                               maxlength="3"
+                               required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-venus-mars"></i> Sex <span class="required">*</span>
+                        </label>
+                        <select id="edit-sex" class="form-select" required>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-birthday-cake"></i> Birthdate <span class="required">*</span>
+                    </label>
+                    <input type="date" id="edit-birthdate" class="form-input" required>
+                </div>
+            </div>
+            
+            <div class="button-group">
+                <button onclick="saveInformation()" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Save Changes
+                </button>
+                <button onclick="hideEditPage()" class="btn btn-secondary">
+                    <i class="fas fa-times"></i> Cancel
+                </button>
+            </div>
         </div>
     </div>
 </div>
 
 <script>
-function getSavedData() { let data = localStorage.getItem('profileData'); return data ? JSON.parse(data) : {}; }
-function saveToLocalStorage(data) { localStorage.setItem('profileData', JSON.stringify(data)); }
+// Local Storage Functions
+function getSavedData() { 
+    let data = localStorage.getItem('profileData'); 
+    return data ? JSON.parse(data) : {}; 
+}
 
+function saveToLocalStorage(data) { 
+    localStorage.setItem('profileData', JSON.stringify(data)); 
+}
+
+// Show/Hide Edit Form
 function showEditPage() {
     document.getElementById('profile').style.display = 'none';
     document.getElementById('edit-profile').style.display = 'block';
+    
     let savedData = getSavedData();
     document.getElementById('edit-firstname').value = savedData.firstName || '';
     document.getElementById('edit-lastname').value = savedData.lastName || '';
     document.getElementById('edit-address').value = savedData.address || '';
     document.getElementById('edit-age').value = savedData.age || '';
-    document.getElementById('edit-sex').value = savedData.sex || '';
+    document.getElementById('edit-sex').value = savedData.sex || 'Male';
     document.getElementById('edit-birthdate').value = savedData.birthdate || '';
+    
+    // Set max date to today
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('edit-birthdate').max = today;
 }
 
-function hideEditPage() { document.getElementById('edit-profile').style.display = 'none'; document.getElementById('profile').style.display = 'block'; }
+function hideEditPage() { 
+    document.getElementById('edit-profile').style.display = 'none'; 
+    document.getElementById('profile').style.display = 'block'; 
+}
 
+// Save Information
 function saveInformation() {
-    let firstName = document.getElementById('edit-firstname').value;
-    let lastName = document.getElementById('edit-lastname').value;
-    let fullName = `${firstName} ${lastName}`;
+    let firstName = document.getElementById('edit-firstname').value.trim();
+    let lastName = document.getElementById('edit-lastname').value.trim();
     let address = document.getElementById('edit-address').value;
-    let age = document.getElementById('edit-age').value;
+    let age = document.getElementById('edit-age').value.trim();
     let sex = document.getElementById('edit-sex').value;
     let birthdate = document.getElementById('edit-birthdate').value;
+    
+    // Validation
+    if (!firstName || !lastName) {
+        alert("Please enter both first and last name.");
+        return;
+    }
+    
+    if (!address) {
+        alert("Please select a barangay.");
+        return;
+    }
+    
+    if (!age) {
+        alert("Please enter your age.");
+        return;
+    }
+    
+    if (!birthdate) {
+        alert("Please select your birthdate.");
+        return;
+    }
+    
+    let fullName = `${firstName} ${lastName}`;
     localStorage.setItem("reporterName", fullName);
-    let profileData = { firstName, lastName, fullName, address, age, sex, birthdate };
+    
+    let profileData = { 
+        firstName, 
+        lastName, 
+        fullName, 
+        address, 
+        age, 
+        sex, 
+        birthdate 
+    };
+    
     saveToLocalStorage(profileData);
     updateProfileDisplay(profileData);
+    
+    // Show success message
+    alert("Profile updated successfully!");
     hideEditPage();
 }
 
+// Update Profile Display
 function updateProfileDisplay(data) {
-    document.getElementById('name').innerText = data.fullName;
-    document.getElementById('address').innerText = data.address;
-    document.getElementById('age').innerText = data.age;
-    document.getElementById('sex').innerText = data.sex;
-    document.getElementById('birthdate').innerText = data.birthdate;
-}
-
-function clearAccount() {
-    if (confirm("Are you sure you want to clear all account data? This action cannot be undone.")) {
-        localStorage.clear();
-        updateProfileDisplay({fullName:'',address:'',age:'',sex:'',birthdate:''});
-        alert("All account data cleared.");
+    const nameEl = document.getElementById('name');
+    const addressEl = document.getElementById('address');
+    const ageEl = document.getElementById('age');
+    const sexEl = document.getElementById('sex');
+    const birthdateEl = document.getElementById('birthdate');
+    
+    if (data.fullName) {
+        nameEl.textContent = data.fullName;
+        nameEl.className = 'info-value';
+    } else {
+        nameEl.textContent = 'Not set';
+        nameEl.className = 'info-value empty-value';
+    }
+    
+    if (data.address) {
+        addressEl.textContent = data.address;
+        addressEl.className = 'info-value';
+    } else {
+        addressEl.textContent = 'Not set';
+        addressEl.className = 'info-value empty-value';
+    }
+    
+    if (data.age) {
+        ageEl.textContent = data.age;
+        ageEl.className = 'info-value';
+    } else {
+        ageEl.textContent = 'Not set';
+        ageEl.className = 'info-value empty-value';
+    }
+    
+    if (data.sex) {
+        sexEl.textContent = data.sex;
+        sexEl.className = 'info-value';
+    } else {
+        sexEl.textContent = 'Not set';
+        sexEl.className = 'info-value empty-value';
+    }
+    
+    if (data.birthdate) {
+        birthdateEl.textContent = new Date(data.birthdate).toLocaleDateString();
+        birthdateEl.className = 'info-value';
+    } else {
+        birthdateEl.textContent = 'Not set';
+        birthdateEl.className = 'info-value empty-value';
     }
 }
 
-window.onload = function () { let savedData = getSavedData(); if (savedData) updateProfileDisplay(savedData); }
-function goBack() { window.history.back(); }
+// Clear Account
+function clearAccount() {
+    if (confirm("Are you sure you want to clear all account data?\n\nThis will remove:\n• Your name and personal details\n• Your address and barangay\n• All saved profile information\n\nThis action cannot be undone.")) {
+        localStorage.removeItem('profileData');
+        localStorage.removeItem('reporterName');
+        updateProfileDisplay({});
+        alert("All account data has been cleared.");
+    }
+}
+
+// Go Back
+function goBack() { 
+    window.history.back(); 
+}
+
+// Initialize on load
+window.onload = function () { 
+    let savedData = getSavedData(); 
+    if (savedData) {
+        updateProfileDisplay(savedData);
+    }
+    
+    // Set max date for birthdate input
+    const today = new Date().toISOString().split('T')[0];
+    if (document.getElementById('edit-birthdate')) {
+        document.getElementById('edit-birthdate').max = today;
+    }
+}
 </script>
 </body>
 </html>
