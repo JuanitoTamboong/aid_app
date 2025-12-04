@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Account Information</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -13,13 +14,21 @@
         }
 
         .container {
-            max-width: 500px;
-            margin: 50px auto;
+            min-height: 50vh;
+           justify-content: center;
+            margin: 20px auto;
             padding: 20px;
-            background: rgba(252,211,77,0.05);
-            border: 2px solid #fcd34d;
-            border-radius: 15px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.4);
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(212, 175, 55, 0.8);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                margin: 10px;
+                padding: 15px;
+            }
         }
 
         h1, h2 { color: #fcd34d; }
@@ -45,25 +54,25 @@
             transition: 0.3s;
         }
 
-        .btn-edit { background: #0a1636; color: #fcd34d; }
+        .btn-edit { background: #0a1636; color: #fcd34d; padding: 10px; width: 100px; }
         .btn-edit:hover { background: #16224d; }
 
-        .btn-return { background: #16224d; color: #ffe066; }
+        .btn-return { background: #16224d; color: #ffe066;padding: 10px; width: 100px; }
         .btn-return:hover { background: #0a1636; color: #fcd34d; }
 
         .btn-clear { background: #e63946; color: white; }
         .btn-clear:hover { background: #c5303f; }
 
-        .btn-save { background: #fcd34d; color: #0a1636; }
+        .btn-save { background: #fcd34d; color: #0a1636; padding: 10px; width: 100px; }
         .btn-save:hover { background: #ffe066; }
 
-        .btn-cancel { background: #16224d; color: #ffe066; }
+        .btn-cancel { background: #16224d; color: #ffe066; padding: 10px; width: 100px; }
         .btn-cancel:hover { background: #0a1636; color: #fcd34d; }
     </style>
 </head>
 <body>
 <div class="container">
-    <h1 class="text-2xl font-bold text-center mb-6">Account Information</h1>
+    <h1 class="text-lg md:text-2xl font-bold text-center mb-6">Account Information</h1>
 
     <div id="profile">
         <p><strong>Name:</strong> <span id="name"></span></p>
@@ -80,7 +89,7 @@
     </div>
 
     <div id="edit-profile" style="display: none;">
-        <h2 class="text-xl font-bold mb-4">Edit Information</h2>
+        <h2 class="text-lg md:text-xl font-bold mb-4">Edit Information</h2>
 
         <label>First Name:</label>
         <input type="text" id="edit-firstname" placeholder="First Name">
@@ -179,7 +188,13 @@ function updateProfileDisplay(data) {
     document.getElementById('birthdate').innerText = data.birthdate;
 }
 
-function clearAccount() { localStorage.clear(); updateProfileDisplay({fullName:'',address:'',age:'',sex:'',birthdate:''}); alert("All account data cleared."); }
+function clearAccount() {
+    if (confirm("Are you sure you want to clear all account data? This action cannot be undone.")) {
+        localStorage.clear();
+        updateProfileDisplay({fullName:'',address:'',age:'',sex:'',birthdate:''});
+        alert("All account data cleared.");
+    }
+}
 
 window.onload = function () { let savedData = getSavedData(); if (savedData) updateProfileDisplay(savedData); }
 function goBack() { window.history.back(); }

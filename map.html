@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!DOCTYPE html> 
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -9,22 +9,44 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
+<!-- Font Awesome for icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
 <style>
-html,body { height:100%; margin:0; font-family: 'Poppins', sans-serif; }
+html,body { 
+  height:100%; 
+  margin:0; 
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+}
 body {
   background: linear-gradient(135deg, #0a1636 70%, #d4af37 30%);
   color: white;
 }
-#map { height:100vh; width:100%; }
+#map { 
+  height:100vh; 
+  width:100%; 
+}
 
 /* Pulsing user marker */
 .pulse {
-  width:16px; height:16px; background:#4d67fc; border:2px solid #fff; border-radius:50%;
-  box-shadow:0 0 12px rgba(77, 115, 252, 0.8); position:relative;
+  width:16px; 
+  height:16px; 
+  background:#4d67fc; 
+  border:2px solid #fff; 
+  border-radius:50%;
+  box-shadow:0 0 12px rgba(77, 115, 252, 0.8); 
+  position:relative;
 }
 .pulse::after {
-  content:""; position:absolute; top:50%; left:50%; width:24px; height:24px; border-radius:50%;
-  background:rgba(252,211,77,0.3); transform:translate(-50%,-50%);
+  content:""; 
+  position:absolute; 
+  top:50%; 
+  left:50%; 
+  width:24px; 
+  height:24px; 
+  border-radius:50%;
+  background:rgba(252,211,77,0.3); 
+  transform:translate(-50%,-50%);
   animation:pulse 1.5s infinite ease-out;
 }
 @keyframes pulse {
@@ -32,21 +54,7 @@ body {
   70%{transform:translate(-50%,-50%) scale(2);opacity:0;}
   100%{transform:translate(-50%,-50%) scale(0.8);opacity:0;}
 }
-.header button {
-  background: #d4af37;
-  color: #0a1636;
-  padding: 4px 12px;
-  border-radius: 6px;
-  font-weight: bold;
-  transition: all 0.3s ease;
-}
 
-.header button:hover {
-  background: #f2cb61;
-  transform: scale(1.05);
-}
-
-/* Floating buttons */
 .map-button {
   position: fixed;
   bottom: 20px;
@@ -61,332 +69,789 @@ body {
   transition: all 0.3s ease;
   z-index: 1000;
 }
-.map-button:hover { background: #16224d; color: #ffe066; }
-#reportBtn { left:50%; transform:translateX(-50%); }
-#pinpointBtn { right:20px; display:flex; align-items:center; gap:6px; }
-#pinpointBtn img { width:18px; height:18px; filter: invert(95%) sepia(50%) saturate(600%) hue-rotate(190deg); }
+.map-button:hover { 
+  background: #16224d; 
+  color: #ffe066; 
+}
+#reportBtn { 
+  left:50%; 
+  transform:translateX(-50%); 
+}
+#pinpointBtn { 
+  right:20px; 
+  display:flex; 
+  align-items:center; 
+  gap:6px; 
+}
+#pinpointBtn img { 
+  width:18px; 
+  height:18px; 
+  filter: invert(95%) sepia(50%) saturate(600%) hue-rotate(190deg); 
+}
 
-/* Overlay popup styles */
+/* Header */
+.header { 
+  position: absolute; 
+  top: 15px; 
+  left: 15px; 
+  z-index: 1000; 
+}
+.header button { 
+  background: rgba(10, 22, 54, 0.85); 
+  color: #fcd34d; 
+  border: none; 
+  border-radius: 50%; 
+  width: 40px; 
+  height: 40px; 
+  font-size: 18px; 
+  cursor: pointer; 
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3); 
+}
+
+/* Page Title */
+.page-title {
+  position: absolute;
+  top: 20px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  z-index: 999;
+  margin: 0;
+  font-size: 1.4rem;
+  text-shadow: 1px 1px 3px rgba(0,0,0,0.7);
+  color: #fcd34d;
+}
+
+/* Popups */
 .alert-overlay {
-  position: fixed; top:0; left:0; width:100%; height:100%;
-  background-color: rgba(10,22,54,0.9);
-  display:flex; justify-content:center; align-items:center;
+  position: fixed; 
+  top:0; 
+  left:0; 
+  width:100%; 
+  height:100%;
+  background-color: rgba(10,22,54,0.95);
+  display:flex; 
+  justify-content:center; 
+  align-items:center;
   z-index: 2000;
+  padding: 15px;
 }
 .alert-box {
-  background: rgba(252,211,77,0.1); color: #fff;
-  padding:20px; border-radius:10px;
-  text-align:center; width:90%; max-width:400px;
-  border: 2px solid #fcd34d;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+  background: rgba(20, 35, 80, 0.95); 
+  color: #fff;
+  padding: 30px;
+  border-radius: 16px;
+  text-align: center;
+  width: 100%;
+  max-width: 420px;
+  border: 1px solid rgba(252,211,77,0.3);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
 }
-.alert-box button {
-  padding: 8px 18px;
-  border-radius: 6px;
-  border: none;
-  font-weight: bold;
+.alert-box h2 {
+  margin-top: 0;
+  margin-bottom: 20px;
+  color: #fcd34d;
+  font-size: 1.5rem;
+}
+.alert-box p {
+  margin-bottom: 25px;
+  line-height: 1.5;
+}
+
+/* Improved Form Alignment */
+.report-form {
+  width: 100%;
+  text-align: left;
+}
+
+.form-group {
+  margin-bottom: 20px;
+  width: 100%;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: #f0f0f0;
+  text-align: left;
+}
+
+/* File Upload Styling */
+.file-upload-wrapper {
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.file-input-container {
+  border: 2px dashed rgba(252, 211, 77, 0.4);
+  border-radius: 10px;
+  padding: 20px;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.05);
   cursor: pointer;
   transition: all 0.3s ease;
 }
-.alert-box button:hover { opacity: 0.85; }
-.hidden { display:none; }
 
-/* Fullscreen camera overlay */
+.file-input-container:hover {
+  border-color: #fcd34d;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.file-input-label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+}
+
+.file-input-icon {
+  font-size: 2rem;
+  color: #fcd34d;
+  margin-bottom: 8px;
+}
+
+.file-input-text {
+  font-size: 0.9rem;
+  color: #e0e0e0;
+  margin-bottom: 5px;
+}
+
+.file-input-hint {
+  font-size: 0.8rem;
+  color: #aaa;
+}
+
+#incidentPhoto {
+  display: none;
+}
+
+#fileName {
+  margin-top: 10px;
+  font-size: 0.85rem;
+  color: #fcd34d;
+  font-style: italic;
+  word-break: break-word;
+}
+
+/* Button Styling */
+.button-group {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.btn {
+  padding: 12px 20px;
+  border-radius: 8px;
+  border: none;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.95rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-width: 120px;
+  flex: 1;
+}
+
+.btn-primary {
+  background: linear-gradient(to right, #fcd34d, #fbbf24);
+  color: #0a1636;
+}
+
+.btn-primary:hover {
+  background: linear-gradient(to right, #fbbf24, #f59e0b);
+  transform: translateY(-2px);
+}
+
+.btn-secondary {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.btn-danger {
+  background: #e63946;
+  color: white;
+}
+
+.btn-danger:hover {
+  background: #d62839;
+}
+
+/* Form Action Buttons */
+.form-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 25px;
+  justify-content: center;
+}
+
+/* Image Preview */
+#capturedPreview {
+  max-width: 100%;
+  border-radius: 8px;
+  margin-top: 15px;
+  border: 2px solid rgba(252, 211, 77, 0.5);
+  display: none;
+}
+
+#capturedPreview.show {
+  display: block;
+}
+
+.hidden { 
+  display:none; 
+}
+
+/* Camera Overlay */
 #cameraOverlay {
   display: none;
   position: fixed;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  background-color: rgba(10,22,54,0.95);
+  top: 0; 
+  left: 0;
+  width: 100%; 
+  height: 100%;
+  background-color: rgba(10,22,54,0.98);
   justify-content: center;
   align-items: center;
   flex-direction: column;
   z-index: 3000;
+  padding: 20px;
 }
-
-#cameraOverlay video {
-  width: 100%;
-  height: auto;
-  max-height: 90%;
-  border-radius: 10px;
+#cameraOverlay video { 
+  width:100%; 
+  max-width:350px; 
+  border-radius:10px; 
+  border: 2px solid #fcd34d;
 }
-
-#cameraOverlay button {
-  margin-top: 15px;
+.camera-controls {
+  display: flex;
+  gap: 15px;
+  margin-top: 20px;
+}
+.camera-btn {
   padding: 12px 25px;
-  font-size: 18px;
-  cursor: pointer;
-  border-radius: 6px;
+  border-radius: 8px;
   border: none;
-  color: #0a1636;
   font-weight: bold;
+  cursor: pointer;
+  min-width: 120px;
 }
-#captureBtn { background-color: #fcd34d; }
-#closeCameraBtn { background-color: #e63946; color:white; }
-video, canvas { width:100%; max-width:350px; border-radius:10px; margin-top:10px; }
-input[type="file"] { margin:10px 0; }
+
+/* Responsive */
+@media (max-width: 480px) {
+  .alert-box {
+    padding: 20px;
+  }
+  
+  .btn {
+    min-width: 100px;
+    padding: 10px 15px;
+  }
+  
+  .form-actions {
+    flex-direction: column;
+  }
+}
 </style>
 </head>
 
 <body>
   <div class="header">
-<button onclick="goBack()"> ← </button></div>
-<h2 style="text-align:center; margin:10px;">AidTracker Map</h2>
-<div id="map"></div>
-
-<!-- Floating buttons -->
-<button id="reportBtn" class="map-button" onclick="showPenaltyPopup()">Report</button>
-<button id="pinpointBtn" class="map-button" onclick="startPinpoint()">
-  <img src="https://cdn-icons-png.flaticon.com/512/684/684908.png" alt="pin icon">
-</button>
-
-<!-- Penal Code Warning Popup -->
-<div class="alert-overlay hidden" id="penaltyPopup">
-  <div class="alert-box">
-    <h2>Fake Reporting Warning</h2>
-    <p>
-      Under <strong>Republic Act No. 10175</strong> (Cybercrime Prevention Act) and related laws, 
-      filing a <strong>false emergency report</strong> is punishable by fines and/or imprisonment. 
-      Please ensure that all information you provide is accurate.
-    </p>
-    <div style="margin-top:15px;">
-      <button onclick="hidePenaltyPopup()" style="background:#e63946;color:white;">Cancel</button>
-      <button onclick="continueToReport()" style="background:#fcd34d;">Continue</button>
-    </div>
+    <button onclick="goBack()">
+      <i class="fas fa-arrow-left"></i>
+    </button>
   </div>
-</div>
-
-<!-- Report Submission Popup -->
-<div class="alert-overlay hidden" id="reportPopup">
-  <div class="alert-box">
-    <h2>Submit Emergency Report</h2>
-    <p>You may attach or capture a photo of the incident.</p>
-
-    <input type="file" id="incidentPhoto" accept="image/*"><br>
-    <button onclick="openCamera()" style="background:#fcd34d;color:#0a1636;">📸 Open Camera</button>
-
-    <img id="capturedPreview" src="" class="hidden" alt="Captured Photo" style="margin-top:10px; max-width:100%; border-radius:8px;"/>
-    
-    <div style="margin-top:15px;">
-      <button onclick="submitReport()" style="background:#fcd34d;color:#0a1636;">Submit</button>
-      <button onclick="hideReportPopup()" style="background:#e63946;color:white;">Cancel</button>
-    </div>
-  </div>
-</div>
-
-<!-- Pinpoint Confirmation Popup -->
-<div class="alert-overlay hidden" id="pinConfirmPopup">
-  <div class="alert-box">
-    <h2>Location Selected</h2>
-    <p>Your chosen location has been pinned. Continue to report?</p>
-    <div style="margin-top:15px;">
-      <button onclick="hidePinConfirmPopup()" style="background:#e63946;color:white;margin-right:10px;">Cancel</button>
-      <button onclick="continueFromPin()" style="background:#fcd34d;color:#0a1636;">Continue</button>
-    </div>
-  </div>
-</div>
-
-<!-- Final Confirmation Popup -->
-<div class="alert-overlay hidden" id="alertOverlay">
-  <div class="alert-box">
-    <h2>Report Submitted</h2>
-    <p>Thank you for your report. We will review it shortly.</p>
-    <button onclick="hideAlert()" style="background:#fcd34d;color:#0a1636;">OK</button>
-  </div>
-</div>
-
-<!-- Fullscreen Camera Overlay -->
-<div id="cameraOverlay">
-  <video id="cameraFeed" autoplay playsinline></video>
-  <div>
-    <button id="captureBtn">Capture</button>
-    <button id="closeCameraBtn">Cancel</button>
-  </div>
-</div>
-
-<script>
-  function goBack() {
-  window.location.href = "index.html";
-}
-/* ===========================
-   MAP SETUP
-=========================== */
-const map = L.map('map').setView([12.35,122.0],11);
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
-  maxZoom:19,
-  attribution:'&copy; OpenStreetMap'
-}).addTo(map);
-
-let userMarker, userLocation = null;
-let manualMarker = null;
-let capturedBase64 = null;
-
-if(navigator.geolocation){
-  navigator.geolocation.watchPosition(pos=>{
-    const {latitude,longitude} = pos.coords;
-    userLocation = {lat:latitude,lng:longitude};
-    if(!userMarker){
-      userMarker = L.marker([latitude,longitude],
-        {icon:L.divIcon({html:'<div class="pulse"></div>'})}).addTo(map);
-      map.setView([latitude,longitude],14);
-    } else {
-      userMarker.setLatLng([latitude,longitude]);
-    }
-  }, ()=>alert("Please enable GPS."));
-}
-
-/* ===========================
-   PINPOINT LOCATION
-=========================== */
-function startPinpoint(){
-  alert("Click anywhere on the map to select the location you want to report.");
-  map.once('click', function(e){
-    if(manualMarker) map.removeLayer(manualMarker);
-    manualMarker = L.marker(e.latlng).addTo(map).bindPopup("Pinned Location").openPopup();
-    userLocation = e.latlng;
-    showPinConfirmPopup();
-  });
-}
-
-/* ===========================
-   POPUP CONTROL
-=========================== */
-function showPenaltyPopup(){ hideAllPopups(); document.getElementById('penaltyPopup').classList.remove('hidden'); }
-function hidePenaltyPopup(){ document.getElementById('penaltyPopup').classList.add('hidden'); }
-function continueToReport(){ hideAllPopups(); document.getElementById('reportPopup').classList.remove('hidden'); }
-function showPinConfirmPopup(){ hideAllPopups(); document.getElementById('pinConfirmPopup').classList.remove('hidden'); }
-function hidePinConfirmPopup(){ document.getElementById('pinConfirmPopup').classList.add('hidden'); }
-function continueFromPin(){ hidePinConfirmPopup(); setTimeout(() => showPenaltyPopup(), 200); }
-function showAlert(){ hideAllPopups(); document.getElementById('alertOverlay').classList.remove('hidden'); }
-function hideAlert(){ document.getElementById('alertOverlay').classList.add('hidden'); setTimeout(()=>window.location.href="index.html",1000);}
-function hideAllPopups(){ document.querySelectorAll('.alert-overlay').forEach(p => p.classList.add('hidden')); }
-
-/* ===========================
-   FULLSCREEN CAMERA
-=========================== */
-const cameraOverlay = document.getElementById("cameraOverlay");
-const cameraVideo = document.getElementById("cameraFeed");
-const captureBtn = document.getElementById("captureBtn");
-const closeCameraBtn = document.getElementById("closeCameraBtn");
-
-let cameraStream = null;
-
-// Open full-screen camera
-async function openCamera(){
-  hideAllPopups(); // hide report popup
-  cameraOverlay.style.display = 'flex';
-  try {
-    cameraStream = await navigator.mediaDevices.getUserMedia({ video: true });
-    cameraVideo.srcObject = cameraStream;
-  } catch(err){
-    alert("Unable to access camera.");
-    console.error(err);
-    cameraOverlay.style.display = 'none';
-  }
-}
-
-// Capture photo and return to report popup
-captureBtn.addEventListener("click", ()=>{
-  const canvas = document.createElement("canvas");
-  canvas.width = cameraVideo.videoWidth;
-  canvas.height = cameraVideo.videoHeight;
-  canvas.getContext("2d").drawImage(cameraVideo,0,0,canvas.width,canvas.height);
-  capturedBase64 = canvas.toDataURL("image/jpeg");
-
-  stopCamera();
-  cameraOverlay.style.display = 'none';
   
-  const preview = document.getElementById("capturedPreview");
-  preview.src = capturedBase64;
-  preview.classList.remove("hidden");
+  <h1 class="page-title">AidTracker Map</h1>
+  
+  <div id="map"></div>
 
-  document.getElementById('reportPopup').classList.remove('hidden');
-});
+  <!-- Buttons -->
+  <button id="reportBtn" class="map-button" onclick="showPenaltyPopup()">
+    <i class="fas fa-exclamation-triangle"></i> Report Emergency
+  </button>
+  
+  <button id="pinpointBtn" class="map-button" onclick="startPinpoint()">
+    <img src="https://cdn-icons-png.flaticon.com/512/684/684908.png">
+    Pinpoint Location
+  </button>
 
-// Cancel camera
-closeCameraBtn.addEventListener("click", ()=>{
-  stopCamera();
-  cameraOverlay.style.display = 'none';
-  document.getElementById('reportPopup').classList.remove('hidden');
-});
+  <!-- Popups -->
+  <div class="alert-overlay hidden" id="penaltyPopup">
+    <div class="alert-box">
+      <h2>Fake Reporting Warning</h2>
+      <p>Please ensure that all information is accurate. False reporting may result in penalties.</p>
+      <div class="button-group">
+        <button onclick="hidePenaltyPopup()" class="btn btn-danger">Cancel</button>
+        <button onclick="continueToReport()" class="btn btn-primary">Continue</button>
+      </div>
+    </div>
+  </div>
 
-// Stop camera stream
-function stopCamera(){
-  if(cameraStream){
-    cameraStream.getTracks().forEach(track=>track.stop());
-    cameraStream = null;
-  }
-}
+  <div class="alert-overlay hidden" id="reportPopup">
+    <div class="alert-box">
+      <h2>Submit Emergency Report</h2>
+      
+      <form class="report-form" id="emergencyForm">
+        <!-- Show accident type -->
+        <div class="form-group">
+          <label>Emergency Type</label>
+          <div style="
+            background: rgba(252, 211, 77, 0.1);
+            border: 1px solid rgba(252, 211, 77, 0.3);
+            border-radius: 8px;
+            padding: 12px 15px;
+            font-weight: 600;
+            color: #fcd34d;
+            text-align: center;
+            margin-bottom: 20px;
+          " id="emergencyTypeDisplay">
+            Loading type...
+          </div>
+        </div>
+        
+        <!-- Photo Upload -->
+        <div class="form-group">
+          <label>Incident Photo</label>
+          <div class="file-upload-wrapper">
+            <div class="file-input-container" onclick="document.getElementById('incidentPhoto').click()">
+              <label class="file-input-label">
+                <div class="file-input-icon">
+                  <i class="fas fa-cloud-upload-alt"></i>
+                </div>
+                <div class="file-input-text">Upload or Take Photo</div>
+                <div class="file-input-hint">Click to select file or use camera</div>
+                <input type="file" id="incidentPhoto" accept="image/*">
+              </label>
+            </div>
+            <div id="fileName"></div>
+          </div>
+          
+          <!-- Image Preview -->
+          <img id="capturedPreview" class="hidden">
+          
+          <!-- Camera Button -->
+          <div style="margin-top: 15px;">
+            <button type="button" onclick="openCamera()" class="btn btn-secondary">
+              <i class="fas fa-camera"></i> Open Camera
+            </button>
+          </div>
+        </div>
+        
+        <!-- Form Actions -->
+        <div class="form-actions">
+          <button type="button" onclick="submitReport()" class="btn btn-primary">
+            <i class="fas fa-paper-plane"></i> Submit Report
+          </button>
+          <button type="button" onclick="hideReportPopup()" class="btn btn-danger">
+            <i class="fas fa-times"></i> Cancel
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
 
-/* ===========================
-   REPORT CANCEL WITH RESET
-=========================== */
-function hideReportPopup(){
-  document.getElementById('reportPopup').classList.add('hidden');
-  stopCamera();
+  <div class="alert-overlay hidden" id="pinConfirmPopup">
+    <div class="alert-box">
+      <h2>Location Selected</h2>
+      <p>Continue to report?</p>
+      <div class="button-group">
+        <button onclick="hidePinConfirmPopup()" class="btn btn-danger">Cancel</button>
+        <button onclick="continueFromPin()" class="btn btn-primary">Continue</button>
+      </div>
+    </div>
+  </div>
 
-  // Clear captured camera photo
-  capturedBase64 = null;
-  const preview = document.getElementById("capturedPreview");
-  preview.src = "";
-  preview.classList.add("hidden");
+  <div class="alert-overlay hidden" id="alertOverlay">
+    <div class="alert-box">
+      <h2>Report Submitted</h2>
+      <p>Emergency services have been notified.</p>
+      <button onclick="hideAlert()" class="btn btn-primary">OK</button>
+    </div>
+  </div>
 
-  // Clear file input
-  const photoInput = document.getElementById('incidentPhoto');
-  photoInput.value = "";
-}
+  <!-- Camera -->
+  <div id="cameraOverlay">
+    <video id="cameraFeed" autoplay playsinline></video>
+    <div class="camera-controls">
+      <button id="captureBtn" class="camera-btn" style="background:#fcd34d;color:#0a1636;">
+        <i class="fas fa-camera"></i> Capture
+      </button>
+      <button id="closeCameraBtn" class="camera-btn" style="background:#e63946;color:white;">
+        <i class="fas fa-times"></i> Cancel
+      </button>
+    </div>
+  </div>
 
-/* ===========================
-   SUBMIT REPORT
-=========================== */
-async function submitReport(){
-  if(!userLocation){
-    alert("Please select or wait for a location.");
-    return;
-  }
-
-  const photoInput = document.getElementById('incidentPhoto');
-  let photoBase64 = capturedBase64;
-
-  if(!photoBase64 && photoInput.files.length > 0){
-    const file = photoInput.files[0];
-    photoBase64 = await toBase64(file);
-  }
-
-  const type = localStorage.getItem("accidentType") || "unknown";
-  const reporter = localStorage.getItem("profileName") || "Anonymous";
-
-  const report = {
-    type,
-    latitude: userLocation.lat,
-    longitude: userLocation.lng,
-    timestamp: new Date().toISOString(),
-    reporter,
-    photo: photoBase64
-  };
-
-  try{
-    const res = await fetch("http://localhost:3000/api/reports", {
-      method: "POST",
-      headers: {"Content-Type":"application/json"},
-      body: JSON.stringify(report)
+  <!-- Supabase Module -->
+  <script type="module">
+    // Import only what you need
+    import { saveReportToSupabase } from "./notif-report.js";
+    
+    // Make it available globally
+    window.saveReportToSupabase = saveReportToSupabase;
+    
+    // Initialize form and camera button listeners
+    document.addEventListener('DOMContentLoaded', function() {
+      const captureBtn = document.getElementById('captureBtn');
+      const closeCameraBtn = document.getElementById('closeCameraBtn');
+      const fileInput = document.getElementById('incidentPhoto');
+      const fileName = document.getElementById('fileName');
+      
+      if (captureBtn) {
+        captureBtn.onclick = capturePhoto;
+      }
+      
+      if (closeCameraBtn) {
+        closeCameraBtn.onclick = closeCamera;
+      }
+      
+      if (fileInput) {
+        fileInput.addEventListener('change', function(e) {
+          if (e.target.files.length > 0) {
+            const file = e.target.files[0];
+            fileName.textContent = `Selected: ${file.name} (${(file.size/1024/1024).toFixed(2)} MB)`;
+          } else {
+            fileName.textContent = '';
+          }
+        });
+      }
+      
+      // Prevent form submission
+      const form = document.getElementById('emergencyForm');
+      if (form) {
+        form.addEventListener('submit', function(e) {
+          e.preventDefault();
+          submitReport();
+        });
+      }
+      
+      // Display the accident type when report form is shown
+      updateEmergencyTypeDisplay();
     });
-    if(!res.ok) throw new Error("Server error");
-    hideReportPopup();
-    showAlert();
-  } catch(err){
-    alert("Failed to send report to server.");
-  }
-}
+  </script>
 
-function toBase64(file){
-  return new Promise((resolve,reject)=>{
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = ()=>resolve(reader.result);
-    reader.onerror = reject;
-  });
-}
-</script>
+  <script>
+    // Global variables
+    let map = null;
+    let userLocation = null;
+    let userMarker = null;
+    let manualMarker = null;
+    let capturedBase64 = null;
+    let cameraStream = null;
+
+    // Initialize when DOM loads
+    document.addEventListener('DOMContentLoaded', function() {
+      initializeMap();
+    });
+
+    /* ============================ MAP INITIALIZATION ============================= */
+    function initializeMap() {
+      map = L.map('map').setView([12.35, 122.0], 11);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+      
+      // Start GPS tracking
+      startGeoTracking();
+    }
+
+    function goBack(){ 
+      window.location = "index.html"; 
+    }
+
+    /* ============================ GPS TRACKING ============================= */
+    function startGeoTracking() {
+      if (navigator.geolocation) {
+        navigator.geolocation.watchPosition(
+          (pos) => {
+            const { latitude, longitude } = pos.coords;
+            userLocation = { lat: latitude, lng: longitude };
+
+            if (!userMarker) {
+              userMarker = L.marker([latitude, longitude], {
+                icon: L.divIcon({ html: '<div class="pulse"></div>' })
+              }).addTo(map);
+              map.setView([latitude, longitude], 14);
+            } else {
+              userMarker.setLatLng([latitude, longitude]);
+            }
+          },
+          (error) => {
+            console.error("Geolocation error:", error);
+            alert("Unable to get your location. Please enable GPS.");
+          },
+          {
+            enableHighAccuracy: true,
+            maximumAge: 10000,
+            timeout: 5000
+          }
+        );
+      } else {
+        alert("Geolocation is not supported by your browser.");
+      }
+    }
+
+    /* ============================ PINPOINT ============================= */
+    function startPinpoint() {
+      if (!map) {
+        alert("Map not loaded yet. Please wait.");
+        return;
+      }
+      
+      alert("Tap on map to set location.");
+      map.once("click", (e) => {
+        if (manualMarker) {
+          map.removeLayer(manualMarker);
+        }
+        manualMarker = L.marker(e.latlng).addTo(map);
+        userLocation = e.latlng;
+        showPinConfirmPopup();
+      });
+    }
+
+    /* ============================ POPUP MANAGEMENT ============================= */
+    const penaltyPopup = document.getElementById("penaltyPopup");
+    const reportPopup = document.getElementById("reportPopup");
+    const pinConfirmPopup = document.getElementById("pinConfirmPopup");
+    const alertOverlay = document.getElementById("alertOverlay");
+
+    function showPenaltyPopup() { 
+      hideAll(); 
+      penaltyPopup.classList.remove("hidden"); 
+    }
+
+    function hidePenaltyPopup() { 
+      penaltyPopup.classList.add("hidden"); 
+    }
+
+    function continueToReport() { 
+      hideAll(); 
+      reportPopup.classList.remove("hidden"); 
+    }
+
+    function showPinConfirmPopup() { 
+      hideAll(); 
+      pinConfirmPopup.classList.remove("hidden"); 
+    }
+
+    function hidePinConfirmPopup() { 
+      pinConfirmPopup.classList.add("hidden"); 
+    }
+
+    function continueFromPin() { 
+      hidePinConfirmPopup(); 
+      showPenaltyPopup(); 
+    }
+
+    function showAlert() { 
+      hideAll(); 
+      alertOverlay.classList.remove("hidden"); 
+    }
+
+    function hideAlert() { 
+      alertOverlay.classList.add("hidden"); 
+    }
+
+    function hideAll() {
+      document.querySelectorAll(".alert-overlay").forEach(x => x.classList.add("hidden"));
+    }
+
+    /* ============================ CAMERA FUNCTIONS ============================= */
+    const cameraOverlay = document.getElementById("cameraOverlay");
+    const cameraVideo = document.getElementById("cameraFeed");
+    const capturedPreview = document.getElementById("capturedPreview");
+
+    async function openCamera() {
+      hideAll();
+      cameraOverlay.style.display = "flex";
+
+      try {
+        cameraStream = await navigator.mediaDevices.getUserMedia({ 
+          video: { facingMode: 'environment' } 
+        });
+        cameraVideo.srcObject = cameraStream;
+      } catch (error) {
+        console.error("Camera error:", error);
+        alert("Unable to access camera. Please check permissions.");
+        cameraOverlay.style.display = "none";
+        reportPopup.classList.remove("hidden");
+      }
+    }
+
+    function capturePhoto() {
+      if (!cameraVideo || !cameraVideo.videoWidth) {
+        alert("Camera not ready. Please try again.");
+        return;
+      }
+
+      const canvas = document.createElement("canvas");
+      canvas.width = cameraVideo.videoWidth;
+      canvas.height = cameraVideo.videoHeight;
+      canvas.getContext("2d").drawImage(cameraVideo, 0, 0);
+      
+      // Reduce image quality to save bandwidth
+      capturedBase64 = canvas.toDataURL("image/jpeg", 0.7);
+
+      stopCamera();
+      cameraOverlay.style.display = "none";
+      
+      if (capturedPreview) {
+        capturedPreview.src = capturedBase64;
+        capturedPreview.classList.remove("hidden");
+        capturedPreview.classList.add("show");
+      }
+
+      // Update file input display
+      const fileName = document.getElementById("fileName");
+      if (fileName) {
+        fileName.textContent = "Photo captured from camera";
+      }
+
+      reportPopup.classList.remove("hidden");
+    }
+
+    function closeCamera() {
+      stopCamera();
+      cameraOverlay.style.display = "none";
+      reportPopup.classList.remove("hidden");
+    }
+
+    function stopCamera() {
+      if (cameraStream) {
+        cameraStream.getTracks().forEach(track => track.stop());
+        cameraStream = null;
+      }
+    }
+
+    /* ============================ UPDATE EMERGENCY TYPE DISPLAY ============================= */
+    function updateEmergencyTypeDisplay() {
+      const accidentType = localStorage.getItem("accidentType") || "emergency";
+      let displayText = "Emergency";
+      let typeValue = "emergency";
+      
+      // Map the accident type to display text and value
+      switch(accidentType) {
+        case "motor":
+          displayText = "Motor/Car Accident";
+          typeValue = "motor";
+          break;
+        case "fire":
+          displayText = "Fire Accident";
+          typeValue = "fire";
+          break;
+        case "assault":
+          displayText = "Assault Crime";
+          typeValue = "assault";
+          break;
+        default:
+          displayText = "Emergency";
+          typeValue = "emergency";
+      }
+      
+      // Update the display
+      const displayElement = document.getElementById("emergencyTypeDisplay");
+      if (displayElement) {
+        displayElement.textContent = displayText;
+      }
+      
+      // Store the actual type value for submission
+      window.currentAccidentType = typeValue;
+      window.currentAccidentDisplay = displayText;
+    }
+
+    /* ============================ SUBMIT REPORT ============================= */
+    async function submitReport() {
+      if (!userLocation) {
+        alert("Please select a location first.");
+        return;
+      }
+
+      const fileInput = document.getElementById("incidentPhoto");
+      let photoBase64 = capturedBase64;
+
+      if (!photoBase64 && fileInput.files.length > 0) {
+        const file = fileInput.files[0];
+        photoBase64 = await toBase64(file);
+      }
+
+      // Get the accident type from localStorage or use the current one
+      const accidentType = localStorage.getItem("accidentType") || window.currentAccidentType || "emergency";
+      const accidentDisplay = window.currentAccidentDisplay || "Emergency";
+      
+      const report = {
+        type: accidentType, // This will be "motor", "fire", "assault", etc.
+        type_display: accidentDisplay, // This will be "Motor/Car Accident", "Fire Accident", etc.
+        reporter: localStorage.getItem("profileName") || "Anonymous",
+        latitude: userLocation.lat,
+        longitude: userLocation.lng,
+        timestamp: new Date().toISOString()
+      };
+
+      try {
+        console.log("Submitting report...", report);
+        
+        // Check if function is available
+        if (typeof window.saveReportToSupabase !== 'function') {
+          throw new Error("Save function not loaded. Please refresh the page.");
+        }
+        
+        await window.saveReportToSupabase(report, photoBase64);
+        hideReportPopup();
+        showAlert();
+      } catch(err) {
+        console.error("Report submission error:", err);
+        
+        // User-friendly error messages
+        if (err.message.includes("Database table 'reports' doesn't exist")) {
+          alert("Database setup required. Please create the 'reports' table in Supabase.");
+        } else if (err.message.includes("Storage permission denied")) {
+          alert("Storage permissions not set. Check Supabase storage policies.");
+        } else {
+          alert("Failed to submit report: " + err.message);
+        }
+      }
+    }
+
+    function hideReportPopup() {
+      reportPopup.classList.add("hidden");
+      capturedBase64 = null;
+      
+      if (capturedPreview) {
+        capturedPreview.src = "";
+        capturedPreview.classList.add("hidden");
+        capturedPreview.classList.remove("show");
+      }
+      
+      // Reset form
+      const form = document.getElementById("emergencyForm");
+      if (form) {
+        form.reset();
+      }
+      
+      const fileName = document.getElementById("fileName");
+      if (fileName) {
+        fileName.textContent = "";
+      }
+    }
+
+    function toBase64(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+  </script>
 </body>
 </html>

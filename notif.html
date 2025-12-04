@@ -5,184 +5,693 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AidTracker Notifications</title>
 <script src="https://cdn.tailwindcss.com"></script>
+<!-- Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
 <style>
-/* === Background Gradient === */
-body {
+* {
   margin: 0;
-  font-family: 'Poppins', sans-serif;
-  background: #0a1636;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(135deg, #0a1636 70%, #1a2c5a 30%);
   color: white;
   min-height: 100vh;
+  padding-bottom: 20px;
 }
 
 /* === Header === */
 .header {
-  background: rgba(10, 22, 54, 0.9);
+  background: linear-gradient(135deg, #0a1636 0%, #1e3a8a 100%);
   color: #fcd34d;
-  padding: 10px 20px;
-  font-size: 20px;
-  font-weight: bold;
+  padding: 15px 20px;
+  font-size: 1.3rem;
+  font-weight: 600;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-bottom: 2px solid #d4af37;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  border-bottom: 2px solid rgba(212, 175, 55, 0.5);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  backdrop-filter: blur(10px);
 }
 
-.header button {
-  background: #d4af37;
+.back-btn {
+  background: rgba(252, 211, 77, 0.9);
   color: #0a1636;
-  padding: 4px 12px;
-  border-radius: 6px;
-  font-weight: bold;
-  transition: all 0.3s ease;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+  font-size: 0.95rem;
 }
 
-.header button:hover {
-  background: #f2cb61;
-  transform: scale(1.05);
+.back-btn:hover {
+  background: #fcd34d;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(252, 211, 77, 0.3);
+}
+
+/* === Main Container === */
+.container {
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 20px;
 }
 
 /* === Notification Cards === */
-#reportList {
-  padding: 20px;
-  max-width: 650px;
-  margin: 0 auto;
+.notif-container {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-top: 20px;
 }
 
 .notif {
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(212, 175, 55, 0.7);
-  border-radius: 10px;
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
-  padding: 16px;
-  margin-bottom: 16px;
+  background: linear-gradient(145deg, rgba(30, 45, 90, 0.9), rgba(20, 35, 80, 0.9));
+  border: 1px solid rgba(252, 211, 77, 0.3);
+  border-radius: 12px;
+  padding: 20px;
   cursor: pointer;
-  transition: all 0.25s ease;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(10px);
+  position: relative;
+  overflow: hidden;
 }
 
 .notif:hover {
-  background-color: rgba(255, 255, 255, 0.2);
-  transform: scale(1.03);
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(252, 211, 77, 0.2);
+  border-color: rgba(252, 211, 77, 0.5);
+  background: linear-gradient(145deg, rgba(40, 55, 100, 0.9), rgba(30, 45, 90, 0.9));
 }
 
-/* === Typography === */
-h3 {
+.notif::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: linear-gradient(to bottom, #fcd34d, #fbbf24);
+}
+
+/* Emergency Type Badge */
+.emergency-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  margin-bottom: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.motor-badge {
+  background: rgba(220, 38, 38, 0.2);
+  color: #fca5a5;
+  border: 1px solid rgba(220, 38, 38, 0.4);
+}
+
+.fire-badge {
+  background: rgba(249, 115, 22, 0.2);
+  color: #fdba74;
+  border: 1px solid rgba(249, 115, 22, 0.4);
+}
+
+.assault-badge {
+  background: rgba(139, 92, 246, 0.2);
+  color: #c4b5fd;
+  border: 1px solid rgba(139, 92, 246, 0.4);
+}
+
+.emergency-badge {
+  background: rgba(59, 130, 246, 0.2);
+  color: #93c5fd;
+  border: 1px solid rgba(59, 130, 246, 0.4);
+}
+
+/* Card Content */
+.notif-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 15px;
+}
+
+.text-content {
+  flex: 1;
+}
+
+.notif-title {
+  font-size: 1.2rem;
+  font-weight: 600;
   color: #fcd34d;
-  font-size: 18px;
-  margin-bottom: 6px;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
-p {
-  color: #f3f4f6;
-  margin: 3px 0;
-  font-size: 14px;
+.notif-details {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 12px;
 }
 
-.status-text {
-  font-weight: bold;
-  color: #38bdf8; /* light blue accent */
+.detail-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  font-size: 0.85rem;
 }
 
-/* === Status section === */
+.detail-label {
+  color: #94a3b8;
+  font-weight: 500;
+  min-width: 80px;
+}
+
+.detail-value {
+  color: #e2e8f0;
+  font-weight: 500;
+}
+
+/* Status Badge */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-top: 10px;
+}
+
+.status-active {
+  background: rgba(34, 197, 94, 0.2);
+  color: #86efac;
+  border: 1px solid rgba(34, 197, 94, 0.4);
+}
+
+.status-resolved {
+  background: rgba(59, 130, 246, 0.2);
+  color: #93c5fd;
+  border: 1px solid rgba(59, 130, 246, 0.4);
+}
+
+.status-inprogress {
+  background: rgba(245, 158, 11, 0.2);
+  color: #fcd34d;
+  border: 1px solid rgba(245, 158, 11, 0.4);
+}
+
+.status-cancelled {
+  background: rgba(107, 114, 128, 0.2);
+  color: #d1d5db;
+  border: 1px solid rgba(107, 114, 128, 0.4);
+}
+
+/* Photo Preview */
+.photo-preview {
+  width: 80px;
+  height: 80px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 2px solid rgba(252, 211, 77, 0.3);
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+.photo-preview:hover {
+  border-color: #fcd34d;
+  transform: scale(1.05);
+}
+
+.photo-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.no-photo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.05);
+  color: #94a3b8;
+  font-size: 0.8rem;
+}
+
+/* === Loading State === */
 #status {
   color: #f3f4f6;
   text-align: center;
   font-weight: 600;
+  margin-top: 40px;
+  font-size: 1.1rem;
+}
+
+.loading-dots:after {
+  content: '.';
+  animation: dots 1.5s steps(5, end) infinite;
+}
+
+@keyframes dots {
+  0%, 20% { content: '.'; }
+  40% { content: '..'; }
+  60%, 100% { content: '...'; }
+}
+
+/* === Empty State === */
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: #94a3b8;
+}
+
+.empty-icon {
+  font-size: 4rem;
+  color: rgba(252, 211, 77, 0.3);
+  margin-bottom: 20px;
+}
+
+.empty-title {
+  font-size: 1.4rem;
+  color: #fcd34d;
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+
+.empty-subtitle {
+  font-size: 1rem;
+  max-width: 400px;
+  margin: 0 auto;
+  line-height: 1.5;
+}
+
+/* === Error State === */
+.error-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: #fca5a5;
+  background: rgba(220, 38, 38, 0.1);
+  border-radius: 12px;
+  border: 1px solid rgba(220, 38, 38, 0.3);
+  margin: 20px 0;
+}
+
+.error-icon {
+  font-size: 3rem;
+  margin-bottom: 15px;
+}
+
+.error-title {
+  font-size: 1.2rem;
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+
+.retry-btn {
+  background: linear-gradient(to right, #fcd34d, #fbbf24);
+  color: #0a1636;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 24px;
+  font-weight: 600;
+  cursor: pointer;
   margin-top: 15px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+}
+
+.retry-btn:hover {
+  background: linear-gradient(to right, #fbbf24, #f59e0b);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(251, 191, 36, 0.3);
+}
+
+/* === Refresh Indicator === */
+.refresh-indicator {
+  text-align: center;
+  color: #94a3b8;
+  font-size: 0.85rem;
+  margin-top: 20px;
+  padding: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* === Responsive === */
+@media (max-width: 768px) {
+  .container {
+    padding: 15px;
+  }
+  
+  .notif {
+    padding: 15px;
+  }
+  
+  .notif-details {
+    grid-template-columns: 1fr;
+  }
+  
+  .photo-preview {
+    width: 70px;
+    height: 70px;
+  }
+  
+  .back-btn span {
+    display: none;
+  }
+  
+  .back-btn {
+    padding: 8px 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .header {
+    padding: 12px 15px;
+    font-size: 1.1rem;
+  }
+  
+  .notif-content {
+    flex-direction: column;
+  }
+  
+  .photo-preview {
+    width: 100%;
+    height: 120px;
+    margin-top: 10px;
+  }
 }
 </style>
 </head>
 
 <body>
+  <!-- Header -->
   <div class="header">
-    <button onclick="goBack()"> ← </button>
-    <span>📍 Notifications</span>
-    <div style="width:60px;"></div>
+    <button class="back-btn" onclick="goBack()">
+      <i class="fas fa-arrow-left"></i>
+      <span>Back</span>
+    </button>
+    <span><i class="fas fa-bell"></i> Emergency Reports</span>
+    <div style="width: 60px;"></div> <!-- Spacer for alignment -->
   </div>
 
-  <div id="status" class="mt-4">Loading...</div>
-  <div id="reportList" class="mt-4"></div>
+  <!-- Main Content -->
+  <div class="container">
+    <!-- Loading/Status Message -->
+    <div id="status" class="mt-4">Loading emergency reports<span class="loading-dots"></span></div>
+    
+    <!-- Reports Container -->
+    <div id="reportList" class="notif-container"></div>
+    
+    <!-- Refresh Indicator -->
+    <div id="refreshIndicator" class="refresh-indicator" style="display: none;">
+      Auto-refresh enabled • Updates every 10 seconds
+    </div>
+  </div>
 
-<script>
-function goBack() {
-  window.location.href = "index.html";
-}
+  <!-- Load Supabase JS -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 
-localStorage.removeItem("hasNewNotif");
+  <script>
+    // --- CONFIG ---
+    const SUPABASE_URL = 'https://gwvepxupoxyyydnisulb.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_4baWNqraxymp0Gal3OKhxQ_Bl-IHHdt';
 
-async function loadReports(retries = 3) {
-  const statusEl = document.getElementById("status");
-  const container = document.getElementById("reportList");
-  statusEl.textContent = "Loading reports...";
-  container.innerHTML = "";
+    // Initialize Supabase
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-  try {
-    const res = await fetch("http://localhost:3000/api/reports", { cache: "no-store" });
-    if (!res.ok) throw new Error("Server returned " + res.status);
-    const reports = await res.json();
-
-    if (reports.length === 0) {
-      statusEl.textContent = "No reports yet.";
-      return;
+    function goBack() {
+      window.location.href = "index.html";
     }
 
-    reports.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-    statusEl.textContent = `${reports.length} reports loaded`;
+    // Clear notification flag
+    localStorage.removeItem("hasNewNotification");
 
-    const statuses = JSON.parse(localStorage.getItem("reportStatuses") || "{}");
+    // Get badge class based on emergency type
+    function getBadgeClass(type) {
+      switch(type) {
+        case 'motor': return 'motor-badge';
+        case 'fire': return 'fire-badge';
+        case 'assault': return 'assault-badge';
+        default: return 'emergency-badge';
+      }
+    }
 
-    reports.forEach((r) => {
-      const notifId = r.id || r._id || String(r.timestamp);
-      const status = statuses[notifId] || "Active";
+    // Get display text for emergency type
+    function getTypeDisplay(type) {
+      switch(type) {
+        case 'motor': return 'Motor Accident';
+        case 'fire': return 'Fire Accident';
+        case 'assault': return 'Assault Crime';
+        default: return 'Emergency';
+      }
+    }
 
-      const div = document.createElement("div");
-      div.className = "notif";
-      div.dataset.id = notifId;
-      div.innerHTML = `
-        <h3>${r.type?.toUpperCase() || "ALERT"}</h3>
-        <p>Reported by: <strong>${r.reporter || "Anonymous"}</strong></p>
-        <p>${new Date(r.timestamp).toLocaleString()}</p>
-        <p>Lat: ${r.latitude?.toFixed(4)}, Lng: ${r.longitude?.toFixed(4)}</p>
-        <p>Status: <span class="status-text">${status}</span></p>
-      `;
-      div.onclick = () => {
-        localStorage.setItem("selectedReport", JSON.stringify(r));
-        window.location.href = "view-report.html";
-      };
-      container.appendChild(div);
+    // Get icon for emergency type
+    function getTypeIcon(type) {
+      switch(type) {
+        case 'motor': return 'fas fa-car-crash';
+        case 'fire': return 'fas fa-fire';
+        case 'assault': return 'fas fa-user-shield';
+        default: return 'fas fa-exclamation-triangle';
+      }
+    }
+
+    async function loadReports(retries = 3) {
+      const statusEl = document.getElementById("status");
+      const container = document.getElementById("reportList");
+      const refreshIndicator = document.getElementById("refreshIndicator");
+      
+      statusEl.textContent = "Loading emergency reports" + (retries < 3 ? " (retrying)" : "") + "...";
+      container.innerHTML = "";
+      refreshIndicator.style.display = 'none';
+
+      try {
+        console.log("Fetching reports from Supabase...");
+        
+        // Fetch reports from Supabase
+        const { data: reports, error } = await supabase
+          .from('reports')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        if (error) {
+          console.error("Supabase error:", error);
+          throw new Error(`Database error: ${error.message}`);
+        }
+
+        console.log("Reports received:", reports);
+
+        if (!reports || reports.length === 0) {
+          statusEl.style.display = 'none';
+          container.innerHTML = `
+            <div class="empty-state">
+              <div class="empty-icon">
+                <i class="fas fa-inbox"></i>
+              </div>
+              <div class="empty-title">No Reports Yet</div>
+              <div class="empty-subtitle">
+                No emergency reports have been submitted. Be the first to report an emergency!
+              </div>
+            </div>
+          `;
+          return;
+        }
+
+        statusEl.style.display = 'none';
+        refreshIndicator.style.display = 'block';
+        
+        // Load statuses from localStorage
+        const statuses = JSON.parse(localStorage.getItem("reportStatuses") || "{}");
+
+        reports.forEach((report) => {
+          const reportId = report.id;
+          const status = statuses[reportId] || "Active";
+          
+          // Determine status class
+          let statusClass = 'status-active';
+          if (status === 'Resolved') statusClass = 'status-resolved';
+          if (status === 'In Progress') statusClass = 'status-inprogress';
+          if (status === 'Cancelled') statusClass = 'status-cancelled';
+
+          const div = document.createElement("div");
+          div.className = "notif";
+          div.dataset.id = reportId;
+          
+          // Format time
+          const reportTime = new Date(report.created_at);
+          const timeString = reportTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+          const dateString = reportTime.toLocaleDateString();
+          
+          div.innerHTML = `
+            <div class="emergency-badge ${getBadgeClass(report.type)}">
+              <i class="${getTypeIcon(report.type)}"></i> ${getTypeDisplay(report.type)}
+            </div>
+            
+            <div class="notif-content">
+              <div class="text-content">
+                <div class="notif-title">
+                  <i class="fas fa-user-circle"></i>
+                  ${report.reporter || "Anonymous"}
+                </div>
+                
+                <div class="notif-details">
+                  <div class="detail-item">
+                    <span class="detail-label"><i class="far fa-clock"></i> Time:</span>
+                    <span class="detail-value">${timeString}</span>
+                  </div>
+                  
+                  <div class="detail-item">
+                    <span class="detail-label"><i class="far fa-calendar"></i> Date:</span>
+                    <span class="detail-value">${dateString}</span>
+                  </div>
+                  
+                  <div class="detail-item">
+                    <span class="detail-label"><i class="fas fa-map-marker-alt"></i> Location:</span>
+                    <span class="detail-value">${report.latitude?.toFixed(4)}, ${report.longitude?.toFixed(4)}</span>
+                  </div>
+                  
+                  <div class="detail-item">
+                    <span class="detail-label"><i class="fas fa-info-circle"></i> ID:</span>
+                    <span class="detail-value">${reportId.slice(0, 8)}...</span>
+                  </div>
+                </div>
+                
+                <div class="status-badge ${statusClass}">
+                  <i class="fas fa-circle"></i> ${status}
+                </div>
+              </div>
+              
+              <div class="photo-preview ${report.photo_url ? '' : 'no-photo'}">
+                ${report.photo_url ? 
+                  `<img src="${report.photo_url}" alt="Incident photo">` : 
+                  `<span><i class="fas fa-camera"></i> No photo</span>`
+                }
+              </div>
+            </div>
+          `;
+          
+          // Click to view report on map
+          div.onclick = () => {
+            localStorage.setItem("selectedReport", JSON.stringify(report));
+            window.location.href = `view-report.html?id=${reportId}`;
+          };
+          
+          container.appendChild(div);
+        });
+
+      } catch (err) {
+        console.error("Error loading reports:", err);
+        
+        if (retries > 0) {
+          statusEl.textContent = `Connection issue. Retrying in 2 seconds... (${retries} attempts left)`;
+          setTimeout(() => loadReports(retries - 1), 2000);
+        } else {
+          statusEl.style.display = 'none';
+          container.innerHTML = `
+            <div class="error-state">
+              <div class="error-icon">
+                <i class="fas fa-exclamation-circle"></i>
+              </div>
+              <div class="error-title">Connection Error</div>
+              <p>Failed to load emergency reports. Please check your connection.</p>
+              <p style="margin-top: 10px; font-size: 0.9rem; color: #fca5a5;">${err.message}</p>
+              <button class="retry-btn" onclick="loadReports()">
+                <i class="fas fa-sync-alt"></i> Try Again
+              </button>
+            </div>
+          `;
+        }
+      }
+    }
+
+    // Listen for status updates from other tabs
+    window.addEventListener("storage", (event) => {
+      if (event.key === "reportStatusUpdate") {
+        try {
+          const data = JSON.parse(event.newValue);
+          const notifDiv = document.querySelector(`.notif[data-id='${data.id}']`);
+          
+          if (notifDiv) {
+            // Update status badge
+            let statusClass = 'status-active';
+            if (data.statusText === 'Resolved') statusClass = 'status-resolved';
+            if (data.statusText === 'In Progress') statusClass = 'status-inprogress';
+            if (data.statusText === 'Cancelled') statusClass = 'status-cancelled';
+            
+            const statusBadge = notifDiv.querySelector('.status-badge');
+            statusBadge.className = `status-badge ${statusClass}`;
+            statusBadge.innerHTML = `<i class="fas fa-circle"></i> ${data.statusText}`;
+            
+            // Update localStorage
+            const statuses = JSON.parse(localStorage.getItem("reportStatuses") || "{}");
+            statuses[data.id] = data.statusText;
+            localStorage.setItem("reportStatuses", JSON.stringify(statuses));
+            
+            // Visual effect for dismissed reports
+            if (data.remove) {
+              notifDiv.style.opacity = "0.7";
+              notifDiv.style.filter = "grayscale(0.5)";
+            }
+          }
+        } catch (e) {
+          console.error("Error processing storage event:", e);
+        }
+      }
     });
 
-  } catch (err) {
-    console.error(err);
-    if (retries > 0) {
-      statusEl.textContent = "Retrying...";
-      setTimeout(() => loadReports(retries - 1), 1000);
-    } else {
-      statusEl.textContent = "⚠️ Failed to load reports.";
+    // Auto-refresh every 10 seconds
+    let refreshInterval;
+    function startAutoRefresh(seconds = 10) {
+      if (refreshInterval) clearInterval(refreshInterval);
+      refreshInterval = setInterval(loadReports, seconds * 1000);
     }
-  }
-}
 
-// Listen for updates
-window.addEventListener("storage", (event) => {
-  if (event.key === "reportStatusUpdate") {
-    const data = JSON.parse(event.newValue);
-    const notifDiv = document.querySelector(`.notif[data-id='${data.id}']`);
-    if (!notifDiv) return;
+    // Stop auto-refresh
+    function stopAutoRefresh() {
+      if (refreshInterval) {
+        clearInterval(refreshInterval);
+        refreshInterval = null;
+      }
+    }
 
-    notifDiv.querySelector(".status-text").innerText = data.statusText;
+    // Initialize when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+      loadReports();
+      startAutoRefresh(10);
+      
+      // Stop auto-refresh when page is hidden
+      document.addEventListener('visibilitychange', function() {
+        if (document.hidden) {
+          stopAutoRefresh();
+        } else {
+          startAutoRefresh(10);
+        }
+      });
+    });
 
-    const statuses = JSON.parse(localStorage.getItem("reportStatuses") || "{}");
-    statuses[data.id] = data.statusText;
-    localStorage.setItem("reportStatuses", JSON.stringify(statuses));
-
-    if (data.remove) notifDiv.remove();
-  }
-});
-
-loadReports();
-setInterval(loadReports, 5000);
-</script>
+    // Make functions available globally
+    window.loadReports = loadReports;
+  </script>
 </body>
 </html>

@@ -15,11 +15,11 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '10mb' }));
 
 const REPORTS_FILE = path.join(__dirname, "reports.json");
 // Serve pages
-app.get("/", (req, res) => res.sendFile(path.join(__dirname, "home.html")));
+app.get("/", (req, res) => res.sendFile(path.join(__dirname, "index.html")));
 app.get("/map", (req, res) => res.sendFile(path.join(__dirname, "map.html")));
 app.get("/notif", (req, res) => res.sendFile(path.join(__dirname, "notif.html")));
 

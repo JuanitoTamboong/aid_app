@@ -4,73 +4,229 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>View Report Location</title>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="https://cdn.tailwindcss.com"></script>
 
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  
   <style>
     html, body { height: 100%; margin: 0; }
     #map { height: 100vh; width: 100%; }
-    .back-btn {
-      position: absolute;
-      top: 15px;
-      left: 15px;
-      z-index: 1000;
-      background: white;
-      border-radius: 8px;
-      padding: 8px 12px;
-      cursor: pointer;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-      font-weight: 600;
-    }
     .popup-img {
       width: 100%;
       max-width: 250px;
-      height: auto;
       border-radius: 8px;
       margin-top: 8px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+      cursor: pointer;
+    }
+    .popup-img:hover {
+      opacity: 0.9;
+    }
+    #loading {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 18px;
+      color: #333;
+      background: white;
+      padding: 20px;
+      border-radius: 5px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      z-index: 1000;
     }
   </style>
 </head>
 <body>
+  <div id="loading">Loading report location...</div>
   <div id="map"></div>
 
+  <!-- Load scripts -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+
   <script>
-    // Retrieve selected report from localStorage
-    const report = JSON.parse(localStorage.getItem("selectedReport"));
-    if (!report) {
-      alert("No report data found.");
-      window.location.href = "notif.html";
+    // --- GET REPORT ID FROM URL ---
+    const urlParams = new URLSearchParams(window.location.search);
+    const reportID = urlParams.get("id");
+
+    // --- SUPABASE CONFIG (YOUR ACTUAL CONFIG) ---
+    const supabaseUrl = 'https://gwvepxupoxyyydnisulb.supabase.co';
+    const supabaseKey = 'sb_publishable_4baWNqraxymp0Gal3OKhxQ_Bl-IHHdt';
+    
+    // Create Supabase client
+    const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+    // --- LOAD REPORT FROM SUPABASE ---
+    async function loadReport() {
+      try {
+        if (!reportID) {
+          alert("Missing report ID! Please go back to notifications.");
+          window.location.href = "notif.html";
+          return;
+        }
+
+        console.log("Fetching report ID:", reportID);
+
+        // Fetch report from Supabase
+        const { data: report, error } = await supabase
+          .from('reports')
+          .select('*')
+          .eq('id', reportID)
+          .single(); // Get single record
+
+        if (error) {
+          console.error("Supabase error:", error);
+          alert("Report not found or database error: " + error.message);
+          window.location.href = "notif.html";
+          return;
+        }
+
+        if (!report) {
+          alert("Report not found in database.");
+          window.location.href = "notif.html";
+          return;
+        }
+
+        console.log("Report loaded:", report);
+
+        if (!report.latitude || !report.longitude) {
+          alert("Report is missing coordinates!");
+          return;
+        }
+
+        // Hide loading, show map
+        document.getElementById('loading').style.display = 'none';
+        
+        // Initialize map
+        const map = L.map("map").setView([report.latitude, report.longitude], 15);
+
+        // Add OpenStreetMap tiles
+        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+          maxZoom: 19,
+          attribution: "&copy; OpenStreetMap contributors"
+        }).addTo(map);
+
+        // Create popup content
+        let popupContent = `
+          <div style="text-align:center; padding: 10px; max-width: 300px;">
+            <h3 style="font-weight: bold; font-size: 18px; color: #dc2626; margin-bottom: 8px;">
+              ${report.type?.toUpperCase() || 'EMERGENCY'}
+            </h3>
+            <p style="font-size: 14px; color: #374151; margin-bottom: 4px;">
+              <strong>Reporter:</strong> ${report.reporter || 'Anonymous'}<br>
+              <strong>Time:</strong> ${new Date(report.created_at).toLocaleString()}<br>
+              <strong>Location:</strong> ${report.latitude?.toFixed(6)}, ${report.longitude?.toFixed(6)}
+            </p>
+        `;
+
+        if (report.photo_url) {
+          popupContent += `
+            <div style="margin-top: 8px;">
+              <img src="${report.photo_url}" 
+                   class="popup-img" 
+                   alt="Report photo"
+                   onclick="window.open('${report.photo_url}', '_blank')"
+                   title="Click to view full size">
+              <p style="color: #6b7280; font-size: 11px; margin-top: 4px;">
+                Click image to view full size
+              </p>
+            </div>
+          `;
+        }
+        
+        popupContent += `</div>`;
+
+        // Add marker with custom icon
+        const marker = L.marker([report.latitude, report.longitude], {
+          icon: L.icon({
+            iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+            popupAnchor: [1, -34]
+          })
+        }).addTo(map);
+        
+        marker.bindPopup(popupContent).openPopup();
+
+        // Add circle for visibility
+        L.circle([report.latitude, report.longitude], {
+          color: 'red',
+          fillColor: '#f03',
+          fillOpacity: 0.2,
+          radius: 50
+        }).addTo(map);
+
+        // Add user location if available
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(
+            (position) => {
+              const userLat = position.coords.latitude;
+              const userLng = position.coords.longitude;
+              
+              // Add user marker
+              const userMarker = L.marker([userLat, userLng], {
+                icon: L.divIcon({
+                  html: '<div style="background-color: #4d67fc; width: 16px; height: 16px; border: 2px solid white; border-radius: 50%; box-shadow: 0 0 10px rgba(77, 103, 252, 0.8);"></div>',
+                  className: 'user-marker',
+                  iconSize: [16, 16],
+                  iconAnchor: [8, 8]
+                })
+              }).addTo(map);
+              
+              userMarker.bindPopup("Your current location").openPopup();
+              
+              // Draw line from user to report
+              L.polyline([
+                [userLat, userLng],
+                [report.latitude, report.longitude]
+              ], {
+                color: 'blue',
+                dashArray: '5, 5',
+                weight: 2
+              }).addTo(map);
+              
+              // Calculate distance
+              const distance = calculateDistance(userLat, userLng, report.latitude, report.longitude);
+              L.popup()
+                .setLatLng([(userLat + report.latitude) / 2, (userLng + report.longitude) / 2])
+                .setContent(`Distance: ${distance.toFixed(2)} km`)
+                .openOn(map);
+            },
+            (error) => {
+              console.log("Geolocation error:", error);
+            }
+          );
+        }
+
+        // Add zoom controls
+        L.control.zoom({ position: 'topright' }).addTo(map);
+
+        // Add scale
+        L.control.scale({ imperial: false, position: 'bottomleft' }).addTo(map);
+
+      } catch (error) {
+        console.error("Error loading report:", error);
+        document.getElementById('loading').innerHTML = 
+          '<div style="color: red;">Error: ' + error.message + 
+          '<br><br><button onclick="location.href=\'notif.html\'">Go Back</button></div>';
+      }
     }
 
-    // Initialize map
-    const map = L.map("map").setView([report.latitude, report.longitude], 15);
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      maxZoom: 19,
-      attribution: "&copy; OpenStreetMap"
-    }).addTo(map);
-
-    // Prepare popup content
-    let popupContent = `
-      <div style="text-align:center;">
-        <h3 class="font-bold text-lg text-red-600">${report.type?.toUpperCase() || "UNKNOWN INCIDENT"}</h3>
-        <p class="text-sm text-gray-700">
-          Reported at: ${new Date(report.timestamp).toLocaleString()}<br>
-          <span class="text-gray-500">Lat: ${report.latitude.toFixed(4)}, Lng: ${report.longitude.toFixed(4)}</span>
-        </p>
-    `;
-
-    // If photo exists, include it
-    if (report.photo) {
-      popupContent += `<img src="${report.photo}" alt="Incident Photo" class="popup-img" />`;
+    // Calculate distance between two coordinates in kilometers
+    function calculateDistance(lat1, lon1, lat2, lon2) {
+      const R = 6371; // Earth's radius in km
+      const dLat = (lat2 - lat1) * Math.PI / 180;
+      const dLon = (lon2 - lon1) * Math.PI / 180;
+      const a = 
+        Math.sin(dLat/2) * Math.sin(dLat/2) +
+        Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+        Math.sin(dLon/2) * Math.sin(dLon/2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+      return R * c;
     }
 
-    popupContent += `</div>`;
-
-    // Add marker and popup
-    const marker = L.marker([report.latitude, report.longitude]).addTo(map);
-    marker.bindPopup(popupContent).openPopup();
+    // Load when page is ready
+    document.addEventListener('DOMContentLoaded', loadReport);
   </script>
 </body>
 </html>
