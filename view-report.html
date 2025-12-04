@@ -34,6 +34,15 @@
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
       z-index: 1000;
     }
+    /* Custom marker for user location */
+    .user-marker {
+      background-color: #4d67fc;
+      width: 16px;
+      height: 16px;
+      border: 2px solid white;
+      border-radius: 50%;
+      box-shadow: 0 0 10px rgba(77, 103, 252, 0.8);
+    }
   </style>
 </head>
 <body>
@@ -163,43 +172,80 @@
               const userLat = position.coords.latitude;
               const userLng = position.coords.longitude;
               
-              // Add user marker
-              const userMarker = L.marker([userLat, userLng], {
-                icon: L.divIcon({
-                  html: '<div style="background-color: #4d67fc; width: 16px; height: 16px; border: 2px solid white; border-radius: 50%; box-shadow: 0 0 10px rgba(77, 103, 252, 0.8);"></div>',
-                  className: 'user-marker',
-                  iconSize: [16, 16],
-                  iconAnchor: [8, 8]
-                })
-              }).addTo(map);
+              // Get current user's name from localStorage
+              const currentUserName = localStorage.getItem('profileName') || 'Anonymous';
+              const reportReporter = report.reporter || 'Anonymous';
               
-              userMarker.bindPopup("Your current location").openPopup();
+              // Debug logging
+              console.log("=== DEBUG INFO ===");
+              console.log("Current user from localStorage:", currentUserName);
+              console.log("Report reporter from DB:", reportReporter);
+              console.log("Are they equal?", currentUserName === reportReporter);
+              console.log("Current user trimmed/lowercase:", currentUserName.trim().toLowerCase());
+              console.log("Report reporter trimmed/lowercase:", reportReporter.trim().toLowerCase());
+              console.log("Are they equal after cleaning?", 
+                currentUserName.trim().toLowerCase() === reportReporter.trim().toLowerCase());
+              console.log("=== END DEBUG ===");
               
-              // Draw line from user to report
-              L.polyline([
-                [userLat, userLng],
-                [report.latitude, report.longitude]
-              ], {
-                color: 'blue',
-                dashArray: '5, 5',
-                weight: 2
-              }).addTo(map);
+              // Clean and compare names (case-insensitive, trimmed)
+              const cleanCurrentUser = currentUserName.trim().toLowerCase();
+              const cleanReportReporter = reportReporter.trim().toLowerCase();
               
-              // Calculate distance
-              const distance = calculateDistance(userLat, userLng, report.latitude, report.longitude);
-              L.popup()
-                .setLatLng([(userLat + report.latitude) / 2, (userLng + report.longitude) / 2])
-                .setContent(`Distance: ${distance.toFixed(2)} km`)
-                .openOn(map);
+              // Only show user location and line if current user is NOT the reporter
+              if (cleanCurrentUser !== cleanReportReporter) {
+                console.log("Different user - showing line and distance");
+                
+                // Add user marker
+                const userMarker = L.marker([userLat, userLng], {
+                  icon: L.divIcon({
+                    html: '<div class="user-marker"></div>',
+                    className: 'user-marker-div',
+                    iconSize: [16, 16],
+                    iconAnchor: [8, 8]
+                  })
+                }).addTo(map);
+                
+                userMarker.bindPopup("Your current location").openPopup();
+                
+                // Draw line from user to report
+                L.polyline([
+                  [userLat, userLng],
+                  [report.latitude, report.longitude]
+                ], {
+                  color: 'blue',
+                  weight: 2,
+                  opacity: 0.7
+                }).addTo(map);
+                
+                // Calculate distance
+                const distance = calculateDistance(userLat, userLng, report.latitude, report.longitude);
+                L.popup()
+                  .setLatLng([(userLat + report.latitude) / 2, (userLng + report.longitude) / 2])
+                  .setContent(`Distance: ${distance.toFixed(2)} km`)
+                  .openOn(map);
+              } else {
+                console.log("Same user - not showing line");
+                // Current user is the reporter, so don't show their location or line
+                
+                // You could optionally show a different marker for the reporter's current location
+                // but without a line connecting to the report
+                const reporterMarker = L.marker([userLat, userLng], {
+                  icon: L.divIcon({
+                    html: '<div class="user-marker" style="background-color: #10b981;"></div>',
+                    className: 'reporter-marker-div',
+                    iconSize: [16, 16],
+                    iconAnchor: [8, 8]
+                  })
+                }).addTo(map);
+                
+                reporterMarker.bindPopup("You are here (reporter)").openPopup();
+              }
             },
             (error) => {
               console.log("Geolocation error:", error);
             }
           );
         }
-
-        // Add zoom controls
-        L.control.zoom({ position: 'topright' }).addTo(map);
 
         // Add scale
         L.control.scale({ imperial: false, position: 'bottomleft' }).addTo(map);
