@@ -589,7 +589,7 @@ body {
   <div class="alert-overlay hidden" id="alertOverlay">
     <div class="alert-box">
       <h2>Report Submitted</h2>
-      <p>Emergency services have been notified.</p>
+      <p id="successMessage">Emergency services have been notified.</p>
       <button onclick="goBackToIndex()" class="btn btn-primary">OK</button>
     </div>
   </div>
@@ -876,6 +876,12 @@ body {
     function showAlert() { 
       hideAll(); 
       alertOverlay.classList.remove("hidden"); 
+      
+      // Update the success message with status
+      const successMsg = document.getElementById("successMessage");
+      if (successMsg) {
+        successMsg.textContent = "Emergency report submitted successfully. Status: Pending - Awaiting response from emergency services.";
+      }
     }
 
     function hideAlert() { 
@@ -1046,13 +1052,15 @@ body {
         reporter: localStorage.getItem("profileName") || "Anonymous",
         latitude: reportLocation.lat,
         longitude: reportLocation.lng,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
+        status: "pending"  // ADDED: Automatic pending status
       };
 
       // Show location info for debugging
       console.log("Submitting report from location:", reportLocation);
       console.log("Current user location:", currentUserLocation);
       console.log("Using pinpoint location:", pinpointMarker ? "YES" : "NO");
+      console.log("Report status:", report.status);
 
       try {
         console.log("Submitting report...", report);
