@@ -34,15 +34,6 @@
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
       z-index: 1000;
     }
-    /* Custom marker for user location */
-    .user-marker {
-      background-color: #4d67fc;
-      width: 16px;
-      height: 16px;
-      border: 2px solid white;
-      border-radius: 50%;
-      box-shadow: 0 0 10px rgba(77, 103, 252, 0.8);
-    }
   </style>
 </head>
 <body>
@@ -58,7 +49,7 @@
     const urlParams = new URLSearchParams(window.location.search);
     const reportID = urlParams.get("id");
 
-    // --- SUPABASE CONFIG (YOUR ACTUAL CONFIG) ---
+    // --- SUPABASE CONFIG ---
     const supabaseUrl = 'https://gwvepxupoxyyydnisulb.supabase.co';
     const supabaseKey = 'sb_publishable_4baWNqraxymp0Gal3OKhxQ_Bl-IHHdt';
     
@@ -81,7 +72,7 @@
           .from('reports')
           .select('*')
           .eq('id', reportID)
-          .single(); // Get single record
+          .single();
 
         if (error) {
           console.error("Supabase error:", error);
@@ -106,7 +97,7 @@
         // Hide loading, show map
         document.getElementById('loading').style.display = 'none';
         
-        // Initialize map
+        // Initialize map centered on report location
         const map = L.map("map").setView([report.latitude, report.longitude], 15);
 
         // Add OpenStreetMap tiles
@@ -115,22 +106,26 @@
           attribution: "&copy; OpenStreetMap contributors"
         }).addTo(map);
 
-        // Create popup content
+        // Create detailed popup content
         let popupContent = `
           <div style="text-align:center; padding: 10px; max-width: 300px;">
             <h3 style="font-weight: bold; font-size: 18px; color: #dc2626; margin-bottom: 8px;">
               ${report.type?.toUpperCase() || 'EMERGENCY'}
             </h3>
-            <p style="font-size: 14px; color: #374151; margin-bottom: 4px;">
-              <strong>Reporter:</strong> ${report.reporter || 'Anonymous'}<br>
-              <strong>Time:</strong> ${new Date(report.created_at).toLocaleString()}<br>
-              <strong>Location:</strong> ${report.latitude?.toFixed(6)}, ${report.longitude?.toFixed(6)}
-            </p>
+            <div style="text-align: left; font-size: 14px; color: #374151;">
+              <p><strong>Reporter:</strong> ${report.reporter || 'Anonymous'}</p>
+              <p><strong>Time Reported:</strong> ${new Date(report.created_at).toLocaleString()}</p>
+              <p><strong>Coordinates:</strong> ${report.latitude?.toFixed(6)}, ${report.longitude?.toFixed(6)}</p>
+              ${report.location ? `<p><strong>Address:</strong> ${report.location}</p>` : ''}
+              ${report.description ? `<p><strong>Description:</strong> ${report.description}</p>` : ''}
+              ${report.status ? `<p><strong>Status:</strong> ${report.status}</p>` : ''}
+              ${report.priority ? `<p><strong>Priority:</strong> ${report.priority}</p>` : ''}
+            </div>
         `;
 
         if (report.photo_url) {
           popupContent += `
-            <div style="margin-top: 8px;">
+            <div style="margin-top: 12px;">
               <img src="${report.photo_url}" 
                    class="popup-img" 
                    alt="Report photo"
@@ -145,7 +140,7 @@
         
         popupContent += `</div>`;
 
-        // Add marker with custom icon
+        // Add main report marker
         const marker = L.marker([report.latitude, report.longitude], {
           icon: L.icon({
             iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
@@ -157,98 +152,18 @@
         
         marker.bindPopup(popupContent).openPopup();
 
-        // Add circle for visibility
+        // Add circle around report for better visibility
         L.circle([report.latitude, report.longitude], {
           color: 'red',
           fillColor: '#f03',
-          fillOpacity: 0.2,
-          radius: 50
+          fillOpacity: 0.1,
+          radius: 100
         }).addTo(map);
 
-        // Add user location if available
-        if (navigator.geolocation) {
-          navigator.geolocation.getCurrentPosition(
-            (position) => {
-              const userLat = position.coords.latitude;
-              const userLng = position.coords.longitude;
-              
-              // Get current user's name from localStorage
-              const currentUserName = localStorage.getItem('profileName') || 'Anonymous';
-              const reportReporter = report.reporter || 'Anonymous';
-              
-              // Debug logging
-              console.log("=== DEBUG INFO ===");
-              console.log("Current user from localStorage:", currentUserName);
-              console.log("Report reporter from DB:", reportReporter);
-              console.log("Are they equal?", currentUserName === reportReporter);
-              console.log("Current user trimmed/lowercase:", currentUserName.trim().toLowerCase());
-              console.log("Report reporter trimmed/lowercase:", reportReporter.trim().toLowerCase());
-              console.log("Are they equal after cleaning?", 
-                currentUserName.trim().toLowerCase() === reportReporter.trim().toLowerCase());
-              console.log("=== END DEBUG ===");
-              
-              // Clean and compare names (case-insensitive, trimmed)
-              const cleanCurrentUser = currentUserName.trim().toLowerCase();
-              const cleanReportReporter = reportReporter.trim().toLowerCase();
-              
-              // Only show user location and line if current user is NOT the reporter
-              if (cleanCurrentUser !== cleanReportReporter) {
-                console.log("Different user - showing line and distance");
-                
-                // Add user marker
-                const userMarker = L.marker([userLat, userLng], {
-                  icon: L.divIcon({
-                    html: '<div class="user-marker"></div>',
-                    className: 'user-marker-div',
-                    iconSize: [16, 16],
-                    iconAnchor: [8, 8]
-                  })
-                }).addTo(map);
-                
-                userMarker.bindPopup("Your current location").openPopup();
-                
-                // Draw line from user to report
-                L.polyline([
-                  [userLat, userLng],
-                  [report.latitude, report.longitude]
-                ], {
-                  color: 'blue',
-                  weight: 2,
-                  opacity: 0.7
-                }).addTo(map);
-                
-                // Calculate distance
-                const distance = calculateDistance(userLat, userLng, report.latitude, report.longitude);
-                L.popup()
-                  .setLatLng([(userLat + report.latitude) / 2, (userLng + report.longitude) / 2])
-                  .setContent(`Distance: ${distance.toFixed(2)} km`)
-                  .openOn(map);
-              } else {
-                console.log("Same user - not showing line");
-                // Current user is the reporter, so don't show their location or line
-                
-                // You could optionally show a different marker for the reporter's current location
-                // but without a line connecting to the report
-                const reporterMarker = L.marker([userLat, userLng], {
-                  icon: L.divIcon({
-                    html: '<div class="user-marker" style="background-color: #10b981;"></div>',
-                    className: 'reporter-marker-div',
-                    iconSize: [16, 16],
-                    iconAnchor: [8, 8]
-                  })
-                }).addTo(map);
-                
-                reporterMarker.bindPopup("You are here (reporter)").openPopup();
-              }
-            },
-            (error) => {
-              console.log("Geolocation error:", error);
-            }
-          );
-        }
-
-        // Add scale
+        // Add scale control only (Leaflet adds zoom control automatically)
         L.control.scale({ imperial: false, position: 'bottomleft' }).addTo(map);
+        
+        // REMOVED: L.control.zoom() - Leaflet adds this automatically
 
       } catch (error) {
         console.error("Error loading report:", error);
@@ -256,19 +171,6 @@
           '<div style="color: red;">Error: ' + error.message + 
           '<br><br><button onclick="location.href=\'notif.html\'">Go Back</button></div>';
       }
-    }
-
-    // Calculate distance between two coordinates in kilometers
-    function calculateDistance(lat1, lon1, lat2, lon2) {
-      const R = 6371; // Earth's radius in km
-      const dLat = (lat2 - lat1) * Math.PI / 180;
-      const dLon = (lon2 - lon1) * Math.PI / 180;
-      const a = 
-        Math.sin(dLat/2) * Math.sin(dLat/2) +
-        Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
-        Math.sin(dLon/2) * Math.sin(dLon/2);
-      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-      return R * c;
     }
 
     // Load when page is ready

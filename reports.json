@@ -1,1 +1,505 @@
-[]
+[
+  {
+    "type": "fire",
+    "timestamp": "10/21/2025, 8:53:09 AM",
+    "latitude": 12.401264463348694,
+    "longitude": 121.97511221993118
+  },
+  {
+    "type": "fire",
+    "timestamp": "10/21/2025, 8:54:15 AM",
+    "latitude": 12.401264463348694,
+    "longitude": 121.97511221993118
+  },
+  {
+    "type": "motor",
+    "timestamp": "10/21/2025, 9:19:21 AM",
+    "latitude": 12.401298734270792,
+    "longitude": 121.97520795709254
+  },
+  {
+    "type": "fire",
+    "timestamp": "10/21/2025, 11:44:25 AM",
+    "latitude": 12.401291436175887,
+    "longitude": 121.975214514802
+  },
+  {
+    "type": "motor",
+    "timestamp": "10/21/2025, 11:47:53 AM",
+    "latitude": 12.401284609284254,
+    "longitude": 121.97522552438396
+  },
+  {
+    "type": "motor",
+    "timestamp": "10/21/2025, 12:04:07 PM",
+    "latitude": 12.401349328915831,
+    "longitude": 121.9753846191128
+  },
+  {
+    "type": "motor",
+    "timestamp": "10/21/2025, 12:13:17 PM",
+    "latitude": 12.401308236248614,
+    "longitude": 121.97524757223863
+  },
+  {
+    "type": "motor",
+    "timestamp": "10/21/2025, 12:17:42 PM",
+    "latitude": 12.401279429778752,
+    "longitude": 121.97517360202292
+  },
+  {
+    "type": "motor",
+    "timestamp": "10/21/2025, 12:38:09 PM",
+    "latitude": 12.401314913880684,
+    "longitude": 121.97527382224054
+  },
+  {
+    "type": "fire",
+    "timestamp": "10/21/2025, 1:11:35 PM",
+    "latitude": 12.401291436175887,
+    "longitude": 121.975214514802
+  },
+  {
+    "type": "fire",
+    "timestamp": "10/21/2025, 1:28:32 PM",
+    "latitude": 12.401262613187482,
+    "longitude": 121.9751347980857
+  },
+  {
+    "type": "motor",
+    "timestamp": "10/21/2025, 1:32:22 PM",
+    "latitude": 12.401279429778752,
+    "longitude": 121.97517360202292
+  },
+  {
+    "type": "motor",
+    "timestamp": "10/21/2025, 1:34:09 PM",
+    "latitude": 12.401287523287282,
+    "longitude": 121.97514284730607
+  },
+  {
+    "type": "motor",
+    "timestamp": "10/21/2025, 1:55:27 PM",
+    "latitude": 12.401304267609706,
+    "longitude": 121.97526075021989
+  },
+  {
+    "type": "assault",
+    "timestamp": "10/21/2025, 2:02:04 PM",
+    "latitude": 12.401318306512133,
+    "longitude": 121.9752322031918
+  },
+  {
+    "type": "motor",
+    "timestamp": "10/23/2025, 1:27:45 PM",
+    "latitude": 12.401303221450709,
+    "longitude": 121.97521379042642
+  },
+  {
+    "type": "assault",
+    "timestamp": "10/23/2025, 1:29:59 PM",
+    "latitude": 12.401279990408458,
+    "longitude": 121.97519048855054
+  },
+  {
+    "type": "fire",
+    "timestamp": "10/23/2025, 8:12:23 PM",
+    "latitude": 12.401167520676033,
+    "longitude": 121.97491681241641
+  },
+  {
+    "type": "motor",
+    "timestamp": "11/5/2025, 7:28:33 PM",
+    "latitude": 12.4048095,
+    "longitude": 121.98287425
+  },
+  {
+    "type": "responder_on_the_way",
+    "timestamp": "11/5/2025, 8:06:00 PM",
+    "latitude": 12.4048095,
+    "longitude": 121.98287425,
+    "targetReport": {
+      "type": "fire",
+      "timestamp": "10/23/2025, 8:12:23 PM",
+      "latitude": 12.401167520676033,
+      "longitude": 121.97491681241641
+    }
+  },
+  {
+    "type": "responder_on_the_way",
+    "timestamp": "11/5/2025, 8:06:00 PM",
+    "latitude": 12.4048095,
+    "longitude": 121.98287425,
+    "targetReport": {
+      "type": "fire",
+      "timestamp": "10/23/2025, 8:12:23 PM",
+      "latitude": 12.401167520676033,
+      "longitude": 121.97491681241641
+    }
+  },
+  {
+    "type": "responder_on_the_way",
+    "timestamp": "11/5/2025, 8:06:00 PM",
+    "latitude": 12.4048095,
+    "longitude": 121.98287425,
+    "targetReport": {
+      "type": "fire",
+      "timestamp": "10/23/2025, 8:12:23 PM",
+      "latitude": 12.401167520676033,
+      "longitude": 121.97491681241641
+    }
+  },
+  {
+    "type": "responder_on_the_way",
+    "timestamp": "11/5/2025, 8:06:00 PM",
+    "latitude": 12.4048095,
+    "longitude": 121.98287425,
+    "targetReport": {
+      "type": "fire",
+      "timestamp": "10/23/2025, 8:12:23 PM",
+      "latitude": 12.401167520676033,
+      "longitude": 121.97491681241641
+    }
+  },
+  {
+    "type": "motor",
+    "timestamp": "11/11/2025, 8:35:48 PM",
+    "latitude": 12.4048095,
+    "longitude": 121.98287425
+  },
+  {
+    "type": "motor",
+    "latitude": 12.4048095,
+    "longitude": 121.98287425,
+    "timestamp": "2025-11-11T12:54:47.336Z",
+    "reporter": "Anonymous"
+  },
+  {
+    "type": "motor",
+    "latitude": 12.4048095,
+    "longitude": 121.98287425,
+    "timestamp": "2025-11-11T13:00:25.379Z",
+    "reporter": "test"
+  },
+  {
+    "type": "motor",
+    "latitude": 12.4048095,
+    "longitude": 121.98287425,
+    "timestamp": "2025-11-11T13:11:34.105Z",
+    "reporter": "test"
+  },
+  {
+    "type": "motor",
+    "latitude": 12.4048095,
+    "longitude": 121.98287425,
+    "timestamp": "2025-11-11T13:23:08.087Z",
+    "reporter": "test"
+  },
+  {
+    "type": "motor",
+    "latitude": 12.4048095,
+    "longitude": 121.98287425,
+    "timestamp": "2025-11-11T13:28:27.653Z",
+    "reporter": "Ira"
+  },
+  {
+    "type": "assault",
+    "latitude": 12.4048095,
+    "longitude": 121.98287425,
+    "timestamp": "2025-11-11T13:33:48.505Z",
+    "reporter": "Adddd"
+  },
+  {
+    "type": "fire",
+    "latitude": 12.4048095,
+    "longitude": 121.98287425,
+    "timestamp": "2025-11-11T13:34:24.053Z",
+    "reporter": "Adddd"
+  },
+  {
+    "type": "fire",
+    "latitude": 12.39510663533801,
+    "longitude": 121.98333246639591,
+    "timestamp": "2025-11-12T07:14:01.934Z",
+    "reporter": "ches"
+  },
+  {
+    "type": "responder on the way",
+    "timestamp": "11/12/2025, 3:20:44 PM",
+    "latitude": 12.395146,
+    "longitude": 121.9833315,
+    "targetReport": {
+      "type": "motor",
+      "latitude": 12.4048095,
+      "longitude": 121.98287425,
+      "timestamp": "2025-11-11T13:23:08.087Z",
+      "reporter": "test"
+    }
+  },
+  {
+    "type": "responder on the way",
+    "timestamp": "11/12/2025, 3:24:28 PM",
+    "latitude": 14.4276391,
+    "longitude": 120.9372429,
+    "targetReport": {
+      "type": "fire",
+      "latitude": 12.39510663533801,
+      "longitude": 121.98333246639591,
+      "timestamp": "2025-11-12T07:14:01.934Z",
+      "reporter": "ches"
+    }
+  },
+  {
+    "type": "motor",
+    "latitude": 12.4048095,
+    "longitude": 121.98287425,
+    "timestamp": "2025-11-12T13:39:00.342Z",
+    "reporter": "jihi"
+  },
+  {
+    "type": "motor",
+    "latitude": 12.4048095,
+    "longitude": 121.98287425,
+    "timestamp": "2025-11-12T13:43:22.841Z",
+    "reporter": "jihi"
+  },
+  {
+    "type": "motor",
+    "latitude": 12.4048095,
+    "longitude": 121.98287425,
+    "timestamp": "2025-11-12T14:38:48.523Z",
+    "reporter": "IRa test"
+  },
+  {
+    "type": "motor",
+    "latitude": 12.396518760333253,
+    "longitude": 121.98443776427106,
+    "timestamp": "2025-11-13T06:40:42.677Z",
+    "reporter": "testf testl",
+    "photo": null
+  },
+  {
+    "type": "fire",
+    "latitude": 12.404070401779439,
+    "longitude": 121.98316334809269,
+    "timestamp": "2025-11-13T07:20:30.718Z",
+    "reporter": "testf testl",
+    "photo": "uploads/report_1763018431164.jpeg"
+  },
+  {
+    "type": "assault",
+    "latitude": 12.38981939757912,
+    "longitude": 121.96506066765558,
+    "timestamp": "2025-11-13T07:30:07.980Z",
+    "reporter": "testf testl",
+    "photo": "uploads/report_1763019008214.jpeg"
+  },
+  {
+    "type": "motor",
+    "latitude": 12.401251333333335,
+    "longitude": 121.97511949999998,
+    "timestamp": "2025-11-13T08:10:55.441Z",
+    "reporter": "testf testl",
+    "photo": "uploads/report_1763021455944.jpeg"
+  },
+  {
+    "type": "motor",
+    "latitude": 12.401244927735908,
+    "longitude": 121.975400074737,
+    "timestamp": "2025-11-14T04:46:28.710Z",
+    "reporter": "tst test",
+    "photo": null
+  },
+  {
+    "type": "motor",
+    "latitude": 12.402645336425506,
+    "longitude": 121.98187692668117,
+    "timestamp": "2025-11-14T04:47:02.258Z",
+    "reporter": "tst test",
+    "photo": null
+  },
+  {
+    "type": "fire",
+    "latitude": 12.395055,
+    "longitude": 121.983596,
+    "timestamp": "2025-11-14T05:27:52.551Z",
+    "reporter": "tst test",
+    "photo": null
+  },
+  {
+    "type": "fire",
+    "latitude": 12.400954592939383,
+    "longitude": 121.98442446369437,
+    "timestamp": "2025-11-14T05:43:39.502Z",
+    "reporter": "tst test",
+    "photo": "uploads/report_1763099019585.png"
+  },
+  {
+    "type": "assault",
+    "latitude": 12.398845389663382,
+    "longitude": 121.98261298095888,
+    "timestamp": "2025-11-14T06:04:03.147Z",
+    "reporter": "tst test",
+    "photo": null
+  },
+  {
+    "type": "assault",
+    "latitude": 12.396802854456263,
+    "longitude": 121.98301225573579,
+    "timestamp": "2025-11-14T06:11:19.334Z",
+    "reporter": "tst test",
+    "photo": null
+  },
+  {
+    "type": "motor",
+    "latitude": 12.399851,
+    "longitude": 121.982097,
+    "timestamp": "2025-11-14T06:21:38.391Z",
+    "reporter": "tst test",
+    "photo": "uploads/report_1763101298478.png"
+  },
+  {
+    "type": "assault",
+    "latitude": 12.399851,
+    "longitude": 121.982097,
+    "timestamp": "2025-11-14T06:34:50.708Z",
+    "reporter": "ytytf ",
+    "photo": null
+  },
+  {
+    "type": "motor",
+    "latitude": 12.402883412811818,
+    "longitude": 121.98592775024308,
+    "timestamp": "2025-11-14T06:38:29.327Z",
+    "reporter": "ytytf ",
+    "photo": null
+  },
+  {
+    "type": "assault",
+    "latitude": 12.400345771902513,
+    "longitude": 121.98757734027042,
+    "timestamp": "2025-11-14T06:42:23.909Z",
+    "reporter": "ytytf ",
+    "photo": null
+  },
+  {
+    "type": "motor",
+    "latitude": 12.395818180272547,
+    "longitude": 121.98518927987958,
+    "timestamp": "2025-11-14T06:51:35.684Z",
+    "reporter": "ytytf ",
+    "photo": null
+  },
+  {
+    "type": "motor",
+    "latitude": 12.394355008842387,
+    "longitude": 121.98183330747723,
+    "timestamp": "2025-11-14T07:04:31.414Z",
+    "reporter": "Maria Czarina Maham",
+    "photo": "uploads/report_1763103871497.png"
+  },
+  {
+    "type": "motor",
+    "latitude": 14.58,
+    "longitude": 121.05,
+    "timestamp": "2025-11-14T07:07:57.744Z",
+    "reporter": "Maria Czarina Maham",
+    "photo": null
+  },
+  {
+    "type": "motor",
+    "latitude": 12.412808955564017,
+    "longitude": 121.99314416827721,
+    "timestamp": "2025-11-14T07:08:32.858Z",
+    "reporter": "Maria Czarina Maham",
+    "photo": null
+  },
+  {
+    "type": "motor",
+    "latitude": 12.396268,
+    "longitude": 121.983429,
+    "timestamp": "2025-11-14T07:28:55.745Z",
+    "reporter": "jiervy benedicto",
+    "photo": null
+  },
+  {
+    "type": "motor",
+    "latitude": 12.396970008892305,
+    "longitude": 121.97871861501125,
+    "timestamp": "2025-11-14T07:29:33.116Z",
+    "reporter": "jiervy benedicto",
+    "photo": null
+  },
+  {
+    "type": "motor",
+    "latitude": 12.396499,
+    "longitude": 121.9836735,
+    "timestamp": "2025-11-14T07:40:55.108Z",
+    "reporter": "hhu bunj",
+    "photo": null
+  },
+  {
+    "type": "fire",
+    "latitude": 12.396499,
+    "longitude": 121.9836735,
+    "timestamp": "2025-11-14T07:47:27.360Z",
+    "reporter": "hhu bunj",
+    "photo": null
+  },
+  {
+    "type": "fire",
+    "latitude": 12.400154636358959,
+    "longitude": 121.97846101584582,
+    "timestamp": "2025-11-14T07:49:18.186Z",
+    "reporter": "hhu bunj",
+    "photo": null
+  },
+  {
+    "type": "fire",
+    "latitude": 12.396499,
+    "longitude": 121.9836735,
+    "timestamp": "2025-11-14T08:07:50.166Z",
+    "reporter": "hhu bunj",
+    "photo": null
+  },
+  {
+    "type": "motor",
+    "latitude": 14.58,
+    "longitude": 121.05,
+    "timestamp": "2025-11-14T08:13:41.830Z",
+    "reporter": "hhu bunj",
+    "photo": "uploads/report_1763108021903.png"
+  },
+  {
+    "type": "fire",
+    "latitude": 12.399851,
+    "longitude": 121.982097,
+    "timestamp": "2025-11-14T08:22:52.079Z",
+    "reporter": "fgytg fdxgfch",
+    "photo": null
+  },
+  {
+    "type": "motor",
+    "latitude": 12.398175,
+    "longitude": 121.98288525,
+    "timestamp": "2025-11-14T08:36:06.655Z",
+    "reporter": "fgytg fdxgfch",
+    "photo": null
+  },
+  {
+    "type": "fire",
+    "latitude": 12.396815112938693,
+    "longitude": 121.98418425481573,
+    "timestamp": "2025-11-14T08:40:26.353Z",
+    "reporter": "fgytg fdxgfch",
+    "photo": null
+  },
+  {
+    "type": "motor",
+    "latitude": 12.399851,
+    "longitude": 121.982097,
+    "timestamp": "2025-11-14T08:41:34.958Z",
+    "reporter": "fgytg fdxgfch",
+    "photo": null
+  }
+]
