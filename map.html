@@ -56,6 +56,27 @@ body {
   100%{transform:translate(-50%,-50%) scale(0.8);opacity:0;}
 }
 
+/* Custom marker for pinpointed location */
+.pinpoint-marker {
+  background-color: #fcd34d;
+  width: 20px;
+  height: 20px;
+  border: 3px solid #0a1636;
+  border-radius: 50%;
+  box-shadow: 0 0 15px rgba(252, 211, 77, 0.8);
+  position: relative;
+}
+.pinpoint-marker::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 2px;
+  height: 15px;
+  background-color: #0a1636;
+}
+
 /* FIXED: Button container for better mobile layout */
 .button-container {
   position: fixed;
@@ -200,10 +221,11 @@ body {
   text-align: left;
 }
 
-/* File Upload Styling */
+/* File Upload Styling - FIXED */
 .file-upload-wrapper {
   width: 100%;
   margin-bottom: 20px;
+  overflow: hidden;
 }
 
 .file-input-container {
@@ -214,6 +236,7 @@ body {
   background: rgba(255, 255, 255, 0.05);
   cursor: pointer;
   transition: all 0.3s ease;
+  overflow: hidden;
 }
 
 .file-input-container:hover {
@@ -226,6 +249,8 @@ body {
   flex-direction: column;
   align-items: center;
   cursor: pointer;
+  width: 100%;
+  height: 100%;
 }
 
 .file-input-icon {
@@ -255,6 +280,7 @@ body {
   color: #fcd34d;
   font-style: italic;
   word-break: break-word;
+  text-align: center;
 }
 
 /* Button Styling */
@@ -319,17 +345,22 @@ body {
   justify-content: center;
 }
 
-/* Image Preview */
+/* Image Preview - FIXED: Proper constraints */
 #capturedPreview {
-  max-width: 100%;
+  max-width: 100% !important;
+  max-height: 250px !important;
+  width: auto !important;
+  height: auto !important;
   border-radius: 8px;
-  margin-top: 15px;
+  margin: 15px auto !important;
   border: 2px solid rgba(252, 211, 77, 0.5);
   display: none;
+  object-fit: contain !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 #capturedPreview.show {
-  display: block;
+  display: block !important;
 }
 
 .hidden { 
@@ -408,6 +439,11 @@ body {
     font-size: 1.2rem;
     top: 15px;
   }
+  
+  /* Adjust image preview for mobile */
+  #capturedPreview {
+    max-height: 200px !important;
+  }
 }
 
 @media (max-width: 480px) {
@@ -428,6 +464,15 @@ body {
   
   .alert-box h2 {
     font-size: 1.3rem;
+  }
+  
+  /* Adjust image preview for small screens */
+  #capturedPreview {
+    max-height: 180px !important;
+  }
+  
+  #cameraOverlay video {
+    max-width: 280px;
   }
 }
 </style>
@@ -489,18 +534,18 @@ body {
           </div>
         </div>
         
-        <!-- Photo Upload -->
+        <!-- Photo Upload - FIXED: Remove onclick from container -->
         <div class="form-group">
           <label>Incident Photo</label>
           <div class="file-upload-wrapper">
-            <div class="file-input-container" onclick="document.getElementById('incidentPhoto').click()">
-              <label class="file-input-label">
+            <div class="file-input-container">
+              <label class="file-input-label" for="incidentPhoto">
                 <div class="file-input-icon">
                   <i class="fas fa-cloud-upload-alt"></i>
                 </div>
                 <div class="file-input-text">Upload or Take Photo</div>
                 <div class="file-input-hint">Click to select file or use camera</div>
-                <input type="file" id="incidentPhoto" accept="image/*">
+                <input type="file" id="incidentPhoto" accept="image/*" capture="environment">
               </label>
             </div>
             <div id="fileName"></div>
@@ -510,7 +555,7 @@ body {
           <img id="capturedPreview" class="hidden">
           
           <!-- Camera Button -->
-          <div style="margin-top: 15px;">
+          <div style="margin-top: 15px; text-align: center;">
             <button type="button" onclick="openCamera()" class="btn btn-secondary">
               <i class="fas fa-camera"></i> Open Camera
             </button>
@@ -586,13 +631,9 @@ body {
       }
       
       if (fileInput) {
+        // FIXED: Better file input handling with preview
         fileInput.addEventListener('change', function(e) {
-          if (e.target.files.length > 0) {
-            const file = e.target.files[0];
-            fileName.textContent = `Selected: ${file.name} (${(file.size/1024/1024).toFixed(2)} MB)`;
-          } else {
-            fileName.textContent = '';
-          }
+          handleFileSelect(e);
         });
       }
       
@@ -608,14 +649,99 @@ body {
       // Display the accident type when report form is shown
       updateEmergencyTypeDisplay();
     });
+    
+    // FIXED: Handle file selection with preview
+    function handleFileSelect(e) {
+      const fileInput = document.getElementById('incidentPhoto');
+      const fileName = document.getElementById('fileName');
+      const capturedPreview = document.getElementById('capturedPreview');
+      
+      if (e.target.files && e.target.files.length > 0) {
+        const file = e.target.files[0];
+        
+        // Check if file is an image
+        if (!file.type.match('image.*')) {
+          alert('Please select an image file (JPEG, PNG, etc.)');
+          fileInput.value = '';
+          return;
+        }
+        
+        // Check file size (limit to 10MB)
+        if (file.size > 10 * 1024 * 1024) {
+          alert('File size should be less than 10MB');
+          fileInput.value = '';
+          return;
+        }
+        
+        fileName.textContent = `Selected: ${file.name} (${(file.size/1024/1024).toFixed(2)} MB)`;
+        
+        // Preview the image
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          if (capturedPreview) {
+            capturedPreview.src = e.target.result;
+            capturedPreview.classList.remove("hidden");
+            capturedPreview.classList.add("show");
+            
+            // Resize very large images for better display
+            const img = new Image();
+            img.onload = function() {
+              if (img.width > 800 || img.height > 600) {
+                // Create canvas to resize
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                
+                // Calculate new dimensions
+                let width = img.width;
+                let height = img.height;
+                const MAX_WIDTH = 800;
+                const MAX_HEIGHT = 600;
+                
+                if (width > height) {
+                  if (width > MAX_WIDTH) {
+                    height *= MAX_WIDTH / width;
+                    width = MAX_WIDTH;
+                  }
+                } else {
+                  if (height > MAX_HEIGHT) {
+                    width *= MAX_HEIGHT / height;
+                    height = MAX_HEIGHT;
+                  }
+                }
+                
+                canvas.width = width;
+                canvas.height = height;
+                ctx.drawImage(img, 0, 0, width, height);
+                
+                // Update preview with resized image
+                capturedPreview.src = canvas.toDataURL('image/jpeg', 0.8);
+              }
+            };
+            img.src = e.target.result;
+          }
+          
+          // Clear any camera-captured image
+          capturedBase64 = null;
+        };
+        reader.readAsDataURL(file);
+      } else {
+        fileName.textContent = '';
+        if (capturedPreview) {
+          capturedPreview.src = '';
+          capturedPreview.classList.remove("show");
+          capturedPreview.classList.add("hidden");
+        }
+      }
+    }
   </script>
 
   <script>
     // Global variables
     let map = null;
-    let userLocation = null;
+    let currentUserLocation = null;  // User's current GPS location
+    let reportLocation = null;        // Location to use for reporting
     let userMarker = null;
-    let manualMarker = null;
+    let pinpointMarker = null;        // Marker for pinpointed location
     let capturedBase64 = null;
     let cameraStream = null;
 
@@ -629,7 +755,7 @@ body {
       map = L.map('map').setView([12.35, 122.0], 11);
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
       
-      // Start GPS tracking
+      // Start GPS tracking for user's current location
       startGeoTracking();
     }
 
@@ -648,7 +774,12 @@ body {
         navigator.geolocation.watchPosition(
           (pos) => {
             const { latitude, longitude } = pos.coords;
-            userLocation = { lat: latitude, lng: longitude };
+            currentUserLocation = { lat: latitude, lng: longitude };
+            
+            // Set initial report location to current location
+            if (!reportLocation) {
+              reportLocation = { lat: latitude, lng: longitude };
+            }
 
             if (!userMarker) {
               userMarker = L.marker([latitude, longitude], {
@@ -681,13 +812,29 @@ body {
         return;
       }
       
-      alert("Tap on map to set location.");
+      alert("Tap on map to set report location.");
       map.once("click", (e) => {
-        if (manualMarker) {
-          map.removeLayer(manualMarker);
+        // Remove previous pinpoint marker if exists
+        if (pinpointMarker) {
+          map.removeLayer(pinpointMarker);
         }
-        manualMarker = L.marker(e.latlng).addTo(map);
-        userLocation = e.latlng;
+        
+        // Create new pinpoint marker with custom style
+        pinpointMarker = L.marker(e.latlng, {
+          icon: L.divIcon({ 
+            html: '<div class="pinpoint-marker"></div>',
+            className: 'pinpoint-icon',
+            iconSize: [20, 35],
+            iconAnchor: [10, 35]
+          })
+        }).addTo(map);
+        
+        // Bind popup to pinpoint marker
+        pinpointMarker.bindPopup("Report will be submitted here").openPopup();
+        
+        // Set report location to the pinpointed location
+        reportLocation = e.latlng;
+        
         showPinConfirmPopup();
       });
     }
@@ -768,9 +915,33 @@ body {
       }
 
       const canvas = document.createElement("canvas");
-      canvas.width = cameraVideo.videoWidth;
-      canvas.height = cameraVideo.videoHeight;
-      canvas.getContext("2d").drawImage(cameraVideo, 0, 0);
+      
+      // Set maximum dimensions
+      const MAX_WIDTH = 800;
+      const MAX_HEIGHT = 600;
+      
+      let width = cameraVideo.videoWidth;
+      let height = cameraVideo.videoHeight;
+      
+      // Calculate new dimensions maintaining aspect ratio
+      if (width > height) {
+        if (width > MAX_WIDTH) {
+          height = height * (MAX_WIDTH / width);
+          width = MAX_WIDTH;
+        }
+      } else {
+        if (height > MAX_HEIGHT) {
+          width = width * (MAX_HEIGHT / height);
+          height = MAX_HEIGHT;
+        }
+      }
+      
+      canvas.width = width;
+      canvas.height = height;
+      
+      // Draw and scale the image
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(cameraVideo, 0, 0, width, height);
       
       // Reduce image quality to save bandwidth
       capturedBase64 = canvas.toDataURL("image/jpeg", 0.7);
@@ -788,6 +959,12 @@ body {
       const fileName = document.getElementById("fileName");
       if (fileName) {
         fileName.textContent = "Photo captured from camera";
+      }
+
+      // Clear any uploaded file
+      const fileInput = document.getElementById("incidentPhoto");
+      if (fileInput) {
+        fileInput.value = '';
       }
 
       reportPopup.classList.remove("hidden");
@@ -844,14 +1021,16 @@ body {
 
     /* ============================ SUBMIT REPORT ============================= */
     async function submitReport() {
-      if (!userLocation) {
-        alert("Please select a location first.");
+      // Check if we have a report location (either pinpointed or current)
+      if (!reportLocation) {
+        alert("Please select a location first. Use 'Pinpoint Location' or wait for GPS to get your current location.");
         return;
       }
 
       const fileInput = document.getElementById("incidentPhoto");
       let photoBase64 = capturedBase64;
 
+      // If no camera photo, check for uploaded file
       if (!photoBase64 && fileInput.files.length > 0) {
         const file = fileInput.files[0];
         photoBase64 = await toBase64(file);
@@ -865,10 +1044,15 @@ body {
         type: accidentType, // This will be "motor", "fire", "assault", etc.
         type_display: accidentDisplay, // This will be "Motor/Car Accident", "Fire Accident", etc.
         reporter: localStorage.getItem("profileName") || "Anonymous",
-        latitude: userLocation.lat,
-        longitude: userLocation.lng,
+        latitude: reportLocation.lat,
+        longitude: reportLocation.lng,
         timestamp: new Date().toISOString()
       };
+
+      // Show location info for debugging
+      console.log("Submitting report from location:", reportLocation);
+      console.log("Current user location:", currentUserLocation);
+      console.log("Using pinpoint location:", pinpointMarker ? "YES" : "NO");
 
       try {
         console.log("Submitting report...", report);
@@ -914,6 +1098,12 @@ body {
       const fileName = document.getElementById("fileName");
       if (fileName) {
         fileName.textContent = "";
+      }
+      
+      // Clear file input
+      const fileInput = document.getElementById("incidentPhoto");
+      if (fileInput) {
+        fileInput.value = '';
       }
     }
 
