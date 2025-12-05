@@ -56,6 +56,50 @@
     // Create Supabase client
     const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 
+    // --- REVERSE GEOCODING FUNCTION ---
+    async function reverseGeocode(lat, lng) {
+      try {
+        // Using OpenStreetMap Nominatim API (free, no API key required)
+        const response = await fetch(
+          `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`
+        );
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        if (data.error) {
+          console.warn("Reverse geocoding error:", data.error);
+          return null;
+        }
+        
+        // Extract address components
+        const address = data.address;
+        let locationName = '';
+        
+        // Build a readable location name
+        if (address.road) locationName += address.road;
+        if (address.suburb) locationName += (locationName ? ', ' : '') + address.suburb;
+        if (address.city || address.town || address.village) {
+          locationName += (locationName ? ', ' : '') + (address.city || address.town || address.village);
+        }
+        if (address.state) locationName += (locationName ? ', ' : '') + address.state;
+        if (address.country) locationName += (locationName ? ', ' : '') + address.country;
+        
+        // If we have a display name, use it as fallback
+        if (!locationName && data.display_name) {
+          locationName = data.display_name.split(',')[0]; // Get first part
+        }
+        
+        return locationName || "Unknown Location";
+      } catch (error) {
+        console.error("Reverse geocoding failed:", error);
+        return null;
+      }
+    }
+
     // --- LOAD REPORT FROM SUPABASE ---
     async function loadReport() {
       try {
@@ -94,8 +138,14 @@
           return;
         }
 
+        // Get location name from coordinates
+        const loadingDiv = document.getElementById('loading');
+        loadingDiv.innerHTML = "Loading location details...";
+        
+        const locationName = await reverseGeocode(report.latitude, report.longitude);
+        
         // Hide loading, show map
-        document.getElementById('loading').style.display = 'none';
+        loadingDiv.style.display = 'none';
         
         // Initialize map centered on report location
         const map = L.map("map").setView([report.latitude, report.longitude], 15);
@@ -116,7 +166,7 @@
               <p><strong>Reporter:</strong> ${report.reporter || 'Anonymous'}</p>
               <p><strong>Time Reported:</strong> ${new Date(report.created_at).toLocaleString()}</p>
               <p><strong>Coordinates:</strong> ${report.latitude?.toFixed(6)}, ${report.longitude?.toFixed(6)}</p>
-              ${report.location ? `<p><strong>Address:</strong> ${report.location}</p>` : ''}
+              <p><strong>Location:</strong> ${locationName || report.location || 'Location not available'}</p>
               ${report.description ? `<p><strong>Description:</strong> ${report.description}</p>` : ''}
               ${report.status ? `<p><strong>Status:</strong> ${report.status}</p>` : ''}
               ${report.priority ? `<p><strong>Priority:</strong> ${report.priority}</p>` : ''}
@@ -160,10 +210,13 @@
           radius: 100
         }).addTo(map);
 
-        // Add scale control only (Leaflet adds zoom control automatically)
+        // Add scale control
         L.control.scale({ imperial: false, position: 'bottomleft' }).addTo(map);
-        
-        // REMOVED: L.control.zoom() - Leaflet adds this automatically
+
+        // Update the page title with location if available
+        if (locationName) {
+          document.title = `Report at ${locationName.split(',')[0]}`;
+        }
 
       } catch (error) {
         console.error("Error loading report:", error);
