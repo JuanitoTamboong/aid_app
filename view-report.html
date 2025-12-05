@@ -46,8 +46,18 @@
 
   <script>
     // --- GET REPORT ID FROM URL ---
-    const urlParams = new URLSearchParams(window.location.search);
-    const reportID = urlParams.get("id");
+    function getReportIdFromURL() {
+      const urlParams = new URLSearchParams(window.location.search);
+      let reportID = urlParams.get("id");
+      
+      if (reportID) {
+        reportID = reportID.trim();
+      }
+      
+      return reportID;
+    }
+
+    const reportID = getReportIdFromURL();
 
     // --- SUPABASE CONFIG ---
     const supabaseUrl = 'https://gwvepxupoxyyydnisulb.supabase.co';
@@ -56,47 +66,71 @@
     // Create Supabase client
     const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 
-    // --- REVERSE GEOCODING FUNCTION ---
-    async function reverseGeocode(lat, lng) {
+    // --- REAL GEOCODING FUNCTION WITH OPENCAGE (CORS ENABLED) ---
+    async function getLocationName(lat, lng) {
       try {
-        // Using OpenStreetMap Nominatim API (free, no API key required)
-        const response = await fetch(
-          `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`
-        );
+        // OpenCage Data API - Supports CORS
+        // Using YOUR API key
+        const apiKey = '0a78fbd8bcd74be398f210b34682c77c';
+        const url = `https://api.opencagedata.com/geocode/v1/json?q=${lat}+${lng}&key=${apiKey}&language=en&pretty=1&no_annotations=1`;
+        
+        console.log("Geocoding coordinates:", lat, lng);
+        
+        const response = await fetch(url, {
+          method: 'GET',
+          headers: {
+            'Accept': 'application/json'
+          }
+        });
         
         if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
+          console.error("Geocoding API error:", response.status);
+          throw new Error(`Geocoding failed: ${response.status}`);
         }
         
         const data = await response.json();
         
-        if (data.error) {
-          console.warn("Reverse geocoding error:", data.error);
-          return null;
+        console.log("Geocoding API response:", data);
+        
+        if (data.results && data.results.length > 0) {
+          const result = data.results[0];
+          const components = result.components;
+          
+          // Build location name from most specific to general
+          let locationParts = [];
+          
+          // Add specific location parts (most specific first)
+          if (components.road) locationParts.push(components.road);
+          if (components.village) locationParts.push(components.village);
+          if (components.suburb) locationParts.push(components.suburb);
+          if (components.neighbourhood) locationParts.push(components.neighbourhood);
+          if (components.town) locationParts.push(components.town);
+          if (components.city) locationParts.push(components.city);
+          if (components.municipality) locationParts.push(components.municipality);
+          if (components.county) locationParts.push(components.county);
+          if (components.state) locationParts.push(components.state);
+          if (components.country) locationParts.push(components.country);
+          
+          // If we have specific location info
+          if (locationParts.length > 0) {
+            // Remove duplicates while preserving order
+            const uniqueParts = [...new Set(locationParts)];
+            return uniqueParts.join(', ');
+          }
+          
+          // Fallback to formatted address
+          if (result.formatted) {
+            return result.formatted;
+          }
         }
         
-        // Extract address components
-        const address = data.address;
-        let locationName = '';
+        // If no results, return coordinates
+        return `Coordinates: ${lat.toFixed(6)}, ${lng.toFixed(6)}`;
         
-        // Build a readable location name
-        if (address.road) locationName += address.road;
-        if (address.suburb) locationName += (locationName ? ', ' : '') + address.suburb;
-        if (address.city || address.town || address.village) {
-          locationName += (locationName ? ', ' : '') + (address.city || address.town || address.village);
-        }
-        if (address.state) locationName += (locationName ? ', ' : '') + address.state;
-        if (address.country) locationName += (locationName ? ', ' : '') + address.country;
-        
-        // If we have a display name, use it as fallback
-        if (!locationName && data.display_name) {
-          locationName = data.display_name.split(',')[0]; // Get first part
-        }
-        
-        return locationName || "Unknown Location";
       } catch (error) {
-        console.error("Reverse geocoding failed:", error);
-        return null;
+        console.error("Geocoding error:", error);
+        // Fallback to coordinates
+        return `Coordinates: ${lat.toFixed(6)}, ${lng.toFixed(6)}`;
       }
     }
 
@@ -138,11 +172,16 @@
           return;
         }
 
-        // Get location name from coordinates
+        // Get location name
         const loadingDiv = document.getElementById('loading');
-        loadingDiv.innerHTML = "Loading location details...";
+        loadingDiv.innerHTML = "Getting location name...";
         
-        const locationName = await reverseGeocode(report.latitude, report.longitude);
+        let displayLocation = report.location; // First priority: database location
+        
+        // If no location in database, get it from coordinates
+        if (!displayLocation || displayLocation.trim() === '') {
+          displayLocation = await getLocationName(report.latitude, report.longitude);
+        }
         
         // Hide loading, show map
         loadingDiv.style.display = 'none';
@@ -156,30 +195,59 @@
           attribution: "&copy; OpenStreetMap contributors"
         }).addTo(map);
 
+        // Format coordinates for display
+        const formattedCoords = `${report.latitude?.toFixed(6)}, ${report.longitude?.toFixed(6)}`;
+        
         // Create detailed popup content
         let popupContent = `
           <div style="text-align:center; padding: 10px; max-width: 300px;">
             <h3 style="font-weight: bold; font-size: 18px; color: #dc2626; margin-bottom: 8px;">
-              ${report.type?.toUpperCase() || 'EMERGENCY'}
+              ${(report.type?.toUpperCase() || 'EMERGENCY').replace(/[&<>"']/g, m => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+              }[m]))}
             </h3>
             <div style="text-align: left; font-size: 14px; color: #374151;">
-              <p><strong>Reporter:</strong> ${report.reporter || 'Anonymous'}</p>
+              <p><strong>Reporter:</strong> ${(report.reporter || 'Anonymous').replace(/[&<>"']/g, m => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+              }[m]))}</p>
               <p><strong>Time Reported:</strong> ${new Date(report.created_at).toLocaleString()}</p>
-              <p><strong>Coordinates:</strong> ${report.latitude?.toFixed(6)}, ${report.longitude?.toFixed(6)}</p>
-              <p><strong>Location:</strong> ${locationName || report.location || 'Location not available'}</p>
-              ${report.description ? `<p><strong>Description:</strong> ${report.description}</p>` : ''}
-              ${report.status ? `<p><strong>Status:</strong> ${report.status}</p>` : ''}
-              ${report.priority ? `<p><strong>Priority:</strong> ${report.priority}</p>` : ''}
-            </div>
+              <p><strong>Coordinates:</strong> ${formattedCoords}</p>
+              <p><strong>Location:</strong> ${displayLocation.replace(/[&<>"']/g, m => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+              }[m]))}</p>
         `;
+        
+        if (report.description) {
+          popupContent += `<p><strong>Description:</strong> ${report.description.replace(/[&<>"']/g, m => ({
+            '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+          }[m]))}</p>`;
+        }
+        
+        if (report.status) {
+          popupContent += `<p><strong>Status:</strong> ${report.status.replace(/[&<>"']/g, m => ({
+            '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+          }[m]))}</p>`;
+        }
+        
+        if (report.priority) {
+          popupContent += `<p><strong>Priority:</strong> ${report.priority.replace(/[&<>"']/g, m => ({
+            '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+          }[m]))}</p>`;
+        }
+        
+        popupContent += `</div>`;
 
         if (report.photo_url) {
+          const escapedPhotoUrl = report.photo_url.replace(/[&<>"']/g, m => ({
+            '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+          }[m]));
+          
           popupContent += `
             <div style="margin-top: 12px;">
-              <img src="${report.photo_url}" 
+              <img src="${escapedPhotoUrl}" 
                    class="popup-img" 
                    alt="Report photo"
-                   onclick="window.open('${report.photo_url}', '_blank')"
+                   onclick="window.open('${escapedPhotoUrl}', '_blank')"
                    title="Click to view full size">
               <p style="color: #6b7280; font-size: 11px; margin-top: 4px;">
                 Click image to view full size
@@ -213,16 +281,15 @@
         // Add scale control
         L.control.scale({ imperial: false, position: 'bottomleft' }).addTo(map);
 
-        // Update the page title with location if available
-        if (locationName) {
-          document.title = `Report at ${locationName.split(',')[0]}`;
-        }
+        // Update the page title
+        let titleLocation = displayLocation.split(',')[0];
+        document.title = `Report at ${titleLocation}`;
 
       } catch (error) {
         console.error("Error loading report:", error);
         document.getElementById('loading').innerHTML = 
-          '<div style="color: red;">Error: ' + error.message + 
-          '<br><br><button onclick="location.href=\'notif.html\'">Go Back</button></div>';
+          '<div style="color: red;">Error loading report. <br><br>' +
+          '<button onclick="location.href=\'notif.html\'">Go Back</button></div>';
       }
     }
 
