@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AidTracker Notifications</title>
+<title>AidTracker - My Reports</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <!-- Font Awesome -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -418,6 +418,42 @@ body {
   border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
+/* === User Info === */
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  color: #fcd34d;
+  margin-top: 5px;
+  padding: 10px;
+  background: rgba(30, 45, 90, 0.5);
+  border-radius: 8px;
+  border: 1px solid rgba(252, 211, 77, 0.3);
+}
+
+/* === Setup Account Button === */
+.setup-account-btn {
+  background: linear-gradient(to right, #8b5cf6, #a78bfa);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  padding: 12px 24px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 15px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+}
+
+.setup-account-btn:hover {
+  background: linear-gradient(to right, #7c3aed, #8b5cf6);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+}
+
 /* === Responsive === */
 @media (max-width: 768px) {
   .container {
@@ -479,21 +515,21 @@ body {
       <i class="fas fa-arrow-left"></i>
       <span>Back</span>
     </button>
-    <span><i class="fas fa-bell"></i> Emergency Reports</span>
+    <span id="headerTitle"><i class="fas fa-user-circle"></i> My Emergency Reports</span>
     <div style="width: 60px;"></div> <!-- Spacer for alignment -->
   </div>
 
   <!-- Main Content -->
   <div class="container">
     <!-- Loading/Status Message -->
-    <div id="status" class="mt-4">Loading emergency reports<span class="loading-dots"></span></div>
+    <div id="status" class="mt-4">Loading your emergency reports<span class="loading-dots"></span></div>
     
     <!-- Reports Container -->
     <div id="reportList" class="notif-container"></div>
     
     <!-- Realtime Indicator -->
     <div id="realtimeIndicator" class="refresh-indicator" style="display: none;">
-      <i class="fas fa-sync-alt fa-spin"></i> Realtime updates enabled • Live data
+      <i class="fas fa-sync-alt fa-spin"></i> Realtime updates enabled • Your live data
     </div>
   </div>
 
@@ -531,6 +567,48 @@ body {
 
     // Clear notification flag
     localStorage.removeItem("hasNewNotification");
+
+    // Get current user from account system (based on your account.html)
+    function getCurrentUser() {
+      // Get user data from localStorage (set by account.html)
+      const profileData = localStorage.getItem('profileData');
+      const reporterName = localStorage.getItem('reporterName');
+      
+      if (profileData) {
+        try {
+          const parsedData = JSON.parse(profileData);
+          if (parsedData.fullName || reporterName) {
+            return {
+              id: `user-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+              name: parsedData.fullName || reporterName || 'User',
+              email: `${parsedData.firstName || 'user'}.${parsedData.lastName || 'user'}@example.com`.toLowerCase(),
+              firstName: parsedData.firstName || '',
+              lastName: parsedData.lastName || '',
+              address: parsedData.address || '',
+              age: parsedData.age || '',
+              sex: parsedData.sex || '',
+              birthdate: parsedData.birthdate || ''
+            };
+          }
+        } catch (e) {
+          console.error("Error parsing profile data:", e);
+        }
+      }
+      
+      // Check if reporterName exists
+      if (reporterName) {
+        return {
+          id: `user-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+          name: reporterName,
+          email: `${reporterName.split(' ')[0] || 'user'}@example.com`.toLowerCase(),
+          firstName: reporterName.split(' ')[0] || '',
+          lastName: reporterName.split(' ').slice(1).join(' ') || ''
+        };
+      }
+      
+      // No user found
+      return null;
+    }
 
     // Get badge class based on emergency type
     function getBadgeClass(type) {
@@ -791,24 +869,96 @@ body {
       const container = document.getElementById("reportList");
       const realtimeIndicator = document.getElementById("realtimeIndicator");
       
-      statusEl.textContent = "Loading emergency reports...";
+      // Get current user
+      const currentUser = getCurrentUser();
+      
+      if (!currentUser) {
+        // No user logged in - show message and redirect to account setup
+        statusEl.style.display = 'none';
+        container.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-icon">
+              <i class="fas fa-user-plus"></i>
+            </div>
+            <div class="empty-title">Account Not Set Up</div>
+            <div class="empty-subtitle">
+              You need to set up your account information first to view your reports.
+              This ensures your reports are properly linked to you.
+            </div>
+            <button class="setup-account-btn" onclick="window.location.href='account.html'">
+              <i class="fas fa-user-cog"></i> Set Up Account
+            </button>
+            <button class="retry-btn" onclick="loadReports()" style="margin-top: 10px;">
+              <i class="fas fa-sync-alt"></i> Check Again
+            </button>
+            <p class="text-sm text-gray-400 mt-4">
+              <i class="fas fa-info-circle mr-1"></i>
+              Your account information is stored locally on your device.
+            </p>
+          </div>
+        `;
+        return;
+      }
+
+      // Update header with user info
+      const headerTitle = document.getElementById('headerTitle');
+      headerTitle.innerHTML = `<i class="fas fa-user-circle"></i> ${currentUser.name}'s Reports`;
+      
+      statusEl.textContent = "Loading your emergency reports...";
       realtimeIndicator.style.display = 'none';
 
       try {
-        console.log("Fetching reports from Supabase...");
+        console.log("Fetching reports for user:", currentUser);
         
-        // Fetch reports from Supabase
-        const { data: fetchedReports, error } = await supabase
-          .from('reports')
-          .select('*')
-          .order('created_at', { ascending: false });
+        // Fetch reports from Supabase - FILTER BY CURRENT USER'S NAME
+        // Since your reports are identified by reporter name, we filter by that
+        
+        let fetchedReports = null;
+        let error = null;
+        
+        // Strategy 1: Filter by reporter name (from localStorage)
+        try {
+          const result = await supabase
+            .from('reports')
+            .select('*')
+            .eq('reporter', currentUser.name)
+            .order('created_at', { ascending: false });
+            
+          fetchedReports = result.data;
+          error = result.error;
+          
+          console.log(`Found ${fetchedReports?.length || 0} reports for name: ${currentUser.name}`);
+        } catch (e) {
+          console.log("Error filtering by name:", e);
+        }
+        
+        // Strategy 2: If no results, try filtering by reporter (lowercase)
+        if (!fetchedReports || fetchedReports.length === 0) {
+          try {
+            // Get all reports and filter client-side
+            const result = await supabase
+              .from('reports')
+              .select('*')
+              .order('created_at', { ascending: false });
+              
+            if (result.data && result.data.length > 0) {
+              // Filter client-side by reporter name
+              fetchedReports = result.data.filter(report => {
+                return report.reporter === currentUser.name;
+              });
+              error = result.error;
+            }
+          } catch (e) {
+            console.log("Error with client-side filtering:", e);
+          }
+        }
 
         if (error) {
           console.error("Supabase error:", error);
           throw new Error(`Database error: ${error.message}`);
         }
 
-        console.log("Reports received:", fetchedReports);
+        console.log("User reports received:", fetchedReports);
         reports = fetchedReports || [];
 
         // Clear container and map
@@ -822,10 +972,19 @@ body {
               <div class="empty-icon">
                 <i class="fas fa-inbox"></i>
               </div>
-              <div class="empty-title">No Reports Yet</div>
+              <div class="empty-title">No Reports From You</div>
               <div class="empty-subtitle">
-                No emergency reports have been submitted. Be the first to report an emergency!
+                You haven't submitted any emergency reports yet. Click below to report an emergency.
               </div>
+              <div class="user-info">
+                <i class="fas fa-user"></i> Logged in as: ${currentUser.name} ${currentUser.address ? `• ${currentUser.address}` : ''}
+              </div>
+              <button class="retry-btn" onclick="goBack()" style="margin-top: 20px;">
+                <i class="fas fa-plus-circle"></i> Report Emergency
+              </button>
+              <button class="setup-account-btn" onclick="window.location.href='account.html'" style="margin-top: 10px;">
+                <i class="fas fa-user-edit"></i> Edit Account
+              </button>
             </div>
           `;
         } else {
@@ -839,10 +998,19 @@ body {
           
           // Initial sort
           sortAllReports();
+          
+          // Show user info at the top
+          const userInfo = document.createElement('div');
+          userInfo.className = 'user-info';
+          userInfo.innerHTML = `
+            <i class="fas fa-user"></i> 
+            <span><strong>${currentUser.name}</strong> ${currentUser.address ? `• ${currentUser.address}` : ''} • ${reports.length} report${reports.length !== 1 ? 's' : ''}</span>
+          `;
+          container.prepend(userInfo);
         }
 
-        // Setup realtime subscription
-        setupRealtimeSubscription();
+        // Setup realtime subscription - FILTERED FOR USER
+        setupRealtimeSubscription(currentUser);
         
         // Request notification permission
         requestNotificationPermission();
@@ -859,10 +1027,13 @@ body {
               <i class="fas fa-exclamation-circle"></i>
             </div>
             <div class="error-title">Connection Error</div>
-            <p>Failed to load emergency reports. Please check your connection.</p>
+            <p>Failed to load your emergency reports. Please check your connection.</p>
             <p style="margin-top: 10px; font-size: 0.9rem; color: #fca5a5;">${err.message}</p>
             <button class="retry-btn" onclick="loadReports()">
               <i class="fas fa-sync-alt"></i> Try Again
+            </button>
+            <button class="setup-account-btn" onclick="window.location.href='account.html'" style="margin-top: 10px;">
+              <i class="fas fa-user-cog"></i> Check Account Info
             </button>
           </div>
         `;
@@ -872,15 +1043,21 @@ body {
     }
 
     // Setup realtime subscription
-    function setupRealtimeSubscription() {
+    function setupRealtimeSubscription(currentUser) {
       // Remove existing subscription if any
       if (realtimeSubscription) {
         supabase.removeChannel(realtimeSubscription);
       }
 
-      console.log("Setting up realtime subscription...");
+      console.log("Setting up realtime subscription for user:", currentUser);
+      
+      if (!currentUser) {
+        console.warn("No user provided for subscription");
+        return;
+      }
       
       // Subscribe to changes in the reports table
+      // We'll subscribe to all changes and filter client-side
       realtimeSubscription = supabase
         .channel('reports-changes')
         .on('postgres_changes', 
@@ -892,12 +1069,23 @@ body {
           (payload) => {
             console.log('Realtime update received:', payload);
             
+            // Check if this report belongs to the current user
+            const report = payload.new || payload.old;
+            if (!report) return;
+            
+            const isUserReport = report.reporter === currentUser.name;
+            
+            if (!isUserReport) {
+              console.log('Ignoring report not from current user');
+              return;
+            }
+            
             if (payload.eventType === 'INSERT') {
-              // New report added
+              // New report added by this user
               updateReportCard(payload.new, true, false);
               updateConnectionStatus(true);
             } else if (payload.eventType === 'UPDATE') {
-              // Existing report updated
+              // Existing report updated by this user
               updateReportCard(payload.new, false, true);
               updateConnectionStatus(true);
             } else if (payload.eventType === 'DELETE') {
@@ -918,7 +1106,10 @@ body {
             setTimeout(() => {
               if (realtimeSubscription) {
                 realtimeSubscription.unsubscribe();
-                setupRealtimeSubscription();
+                const user = getCurrentUser();
+                if (user) {
+                  setupRealtimeSubscription(user);
+                }
               }
             }, 5000);
           }
@@ -952,12 +1143,20 @@ body {
     function handleVisibilityChange() {
       if (!document.hidden && realtimeSubscription) {
         // Page became visible, ensure subscription is active
-        setupRealtimeSubscription();
+        const currentUser = getCurrentUser();
+        if (currentUser) {
+          setupRealtimeSubscription(currentUser);
+        }
       }
     }
 
     // Initialize when page loads
     document.addEventListener('DOMContentLoaded', function() {
+      // Request notification permission immediately
+      if ("Notification" in window && Notification.permission === "default") {
+        Notification.requestPermission();
+      }
+      
       loadReports();
       
       // Listen for visibility changes
@@ -967,7 +1166,10 @@ body {
       window.addEventListener('online', () => {
         console.log('Browser is online');
         updateConnectionStatus(true);
-        setupRealtimeSubscription();
+        const currentUser = getCurrentUser();
+        if (currentUser) {
+          setupRealtimeSubscription(currentUser);
+        }
       });
       
       window.addEventListener('offline', () => {
