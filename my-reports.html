@@ -10,6 +10,169 @@
 <!--logo-->
 <link rel="website icon" href="assets/aid-tracker-logo.png">
 <style>
+/* === NEW: Notification Styles === */
+.notification-badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: #ef4444;
+  color: white;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  font-weight: bold;
+  z-index: 2;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+/* Toast Notifications */
+.toast-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.toast {
+  background: linear-gradient(145deg, rgba(30, 45, 90, 0.95), rgba(20, 35, 80, 0.95));
+  border-left: 4px solid #fcd34d;
+  border-radius: 10px;
+  padding: 15px 20px;
+  min-width: 300px;
+  max-width: 400px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(10px);
+  transform: translateX(400px);
+  transition: transform 0.3s ease;
+  animation: slideIn 0.5s ease forwards;
+  border: 1px solid rgba(252, 211, 77, 0.3);
+}
+
+@keyframes slideIn {
+  to { transform: translateX(0); }
+}
+
+.toast.responder-assigned {
+  border-left-color: #34d399;
+  border-color: rgba(52, 211, 153, 0.3);
+}
+
+.toast.status-updated {
+  border-left-color: #3b82f6;
+  border-color: rgba(59, 130, 246, 0.3);
+}
+
+.toast.resolved {
+  border-left-color: #10b981;
+  border-color: rgba(16, 185, 129, 0.3);
+}
+
+.toast-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.toast-title {
+  font-weight: 600;
+  color: #fcd34d;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.toast-close {
+  background: none;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  font-size: 1rem;
+  padding: 4px;
+}
+
+.toast-close:hover {
+  color: #fca5a5;
+}
+
+.toast-message {
+  color: #e2e8f0;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.toast-time {
+  color: #94a3b8;
+  font-size: 0.75rem;
+  margin-top: 8px;
+  text-align: right;
+}
+
+/* Report Card Updates */
+.responders-info {
+  margin-top: 8px;
+  padding: 8px 12px;
+  background: rgba(59, 130, 246, 0.1);
+  border-radius: 8px;
+  border-left: 3px solid #3b82f6;
+}
+
+.responders-info.has-responders {
+  background: rgba(34, 197, 94, 0.1);
+  border-left-color: #10b981;
+}
+
+.responders-info.new-assignment {
+  animation: highlight 1s ease;
+  background: rgba(252, 211, 77, 0.1);
+  border-left-color: #fcd34d;
+}
+
+.responders-label {
+  color: #93c5fd;
+  font-size: 0.8rem;
+  font-weight: 600;
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.responders-label i {
+  font-size: 0.9rem;
+}
+
+.responders-value {
+  color: #e2e8f0;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.new-badge {
+  display: inline-block;
+  background: #ef4444;
+  color: white;
+  font-size: 0.7rem;
+  padding: 2px 6px;
+  border-radius: 10px;
+  margin-left: 8px;
+  animation: pulse 1.5s infinite;
+}
+
+/* === EXISTING STYLES === */
 * {
   margin: 0;
   padding: 0;
@@ -487,6 +650,11 @@ body {
     font-size: 0.7rem;
     padding: 6px 12px;
   }
+  
+  .toast {
+    min-width: 280px;
+    max-width: 350px;
+  }
 }
 
 @media (max-width: 480px) {
@@ -504,11 +672,25 @@ body {
     height: 120px;
     margin-top: 10px;
   }
+  
+  .toast {
+    min-width: 250px;
+    max-width: 300px;
+    right: 10px;
+  }
 }
 </style>
 </head>
 
 <body>
+  <!-- Toast Container -->
+  <div id="toastContainer" class="toast-container"></div>
+  
+  <!-- Audio for notification sound -->
+  <audio id="notificationSound" preload="auto">
+    <source src="https://assets.mixkit.co/sfx/preview/mixkit-correct-answer-tone-2870.mp3" type="audio/mpeg">
+  </audio>
+
   <!-- Header -->
   <div class="header">
     <button class="back-btn" onclick="goBack()">
@@ -516,7 +698,7 @@ body {
       <span>Back</span>
     </button>
     <span id="headerTitle"><i class="fas fa-user-circle"></i> My Emergency Reports</span>
-    <div style="width: 60px;"></div> <!-- Spacer for alignment -->
+    <div style="width: 60px;"></div>
   </div>
 
   <!-- Main Content -->
@@ -529,7 +711,7 @@ body {
     
     <!-- Realtime Indicator -->
     <div id="realtimeIndicator" class="refresh-indicator" style="display: none;">
-      <i class="fas fa-sync-alt fa-spin"></i> Realtime updates enabled • Your live data
+      <i class="fas fa-sync-alt fa-spin"></i> Live updates enabled • You'll be notified of responses
     </div>
   </div>
 
@@ -560,17 +742,15 @@ body {
     let reports = [];
     let currentReports = new Map(); // Track current reports by ID
     let realtimeSubscription = null;
+    let currentUser = null;
+    let seenReports = new Set(); // Track which reports user has seen
 
     function goBack() {
       window.location.href = "index.html";
     }
 
-    // Clear notification flag
-    localStorage.removeItem("hasNewNotification");
-
-    // Get current user from account system (based on your account.html)
+    // Get current user
     function getCurrentUser() {
-      // Get user data from localStorage (set by account.html)
       const profileData = localStorage.getItem('profileData');
       const reporterName = localStorage.getItem('reporterName');
       
@@ -580,14 +760,7 @@ body {
           if (parsedData.fullName || reporterName) {
             return {
               id: `user-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-              name: parsedData.fullName || reporterName || 'User',
-              email: `${parsedData.firstName || 'user'}.${parsedData.lastName || 'user'}@example.com`.toLowerCase(),
-              firstName: parsedData.firstName || '',
-              lastName: parsedData.lastName || '',
-              address: parsedData.address || '',
-              age: parsedData.age || '',
-              sex: parsedData.sex || '',
-              birthdate: parsedData.birthdate || ''
+              name: parsedData.fullName || reporterName || 'User'
             };
           }
         } catch (e) {
@@ -595,19 +768,76 @@ body {
         }
       }
       
-      // Check if reporterName exists
       if (reporterName) {
         return {
           id: `user-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-          name: reporterName,
-          email: `${reporterName.split(' ')[0] || 'user'}@example.com`.toLowerCase(),
-          firstName: reporterName.split(' ')[0] || '',
-          lastName: reporterName.split(' ').slice(1).join(' ') || ''
+          name: reporterName
         };
       }
       
-      // No user found
       return null;
+    }
+
+    // Show toast notification
+    function showToast(type, title, message, reportId = null) {
+      const toastContainer = document.getElementById('toastContainer');
+      
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.id = `toast-${Date.now()}`;
+      
+      const now = new Date();
+      const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      
+      toast.innerHTML = `
+        <div class="toast-header">
+          <div class="toast-title">
+            <i class="fas fa-${type === 'responder-assigned' ? 'users' : type === 'status-updated' ? 'sync-alt' : 'check-circle'}"></i>
+            ${title}
+          </div>
+          <button class="toast-close" onclick="this.parentElement.parentElement.remove()">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="toast-message">${message}</div>
+        <div class="toast-time">${timeString}</div>
+      `;
+      
+      toastContainer.appendChild(toast);
+      
+      // Auto remove after 5 seconds
+      setTimeout(() => {
+        if (toast.parentNode) {
+          toast.parentNode.removeChild(toast);
+        }
+      }, 5000);
+      
+      // Play notification sound
+      playNotificationSound();
+    }
+
+    // Play notification sound
+    function playNotificationSound() {
+      try {
+        const sound = document.getElementById('notificationSound');
+        sound.currentTime = 0;
+        sound.play().catch(e => console.log('Audio play failed:', e));
+      } catch (e) {
+        console.log('Error playing sound:', e);
+      }
+    }
+
+    // Mark all notifications as read when entering this page
+    function markAllNotificationsAsRead() {
+      if (currentUser) {
+        // Store current time as last check time
+        localStorage.setItem(`lastNotificationCheck_${currentUser.name}`, new Date().toISOString());
+        
+        // Clear notification count in localStorage
+        localStorage.setItem('notificationCount', '0');
+        
+        console.log('All notifications marked as read for:', currentUser.name);
+      }
     }
 
     // Get badge class based on emergency type
@@ -640,8 +870,38 @@ body {
       }
     }
 
+    // Check if this update includes important changes
+    function hasImportantChanges(oldReport, newReport) {
+      if (!oldReport) return false;
+      
+      // Check if responders were just assigned
+      if ((!oldReport.assigned_responders || oldReport.assigned_responders.trim() === '') && 
+          newReport.assigned_responders && newReport.assigned_responders.trim() !== '') {
+        return 'responder-assigned';
+      }
+      
+      // Check if status changed to investigating
+      if ((oldReport.status === 'pending' || !oldReport.status) && 
+          newReport.status && newReport.status.toLowerCase() === 'investigating') {
+        return 'status-investigating';
+      }
+      
+      // Check if status changed to resolved
+      if (oldReport.status !== 'resolved' && newReport.status === 'resolved') {
+        return 'status-resolved';
+      }
+      
+      // Check if assigned_responders changed
+      if (oldReport.assigned_responders !== newReport.assigned_responders && 
+          newReport.assigned_responders) {
+        return 'responders-updated';
+      }
+      
+      return false;
+    }
+
     // Create a report card element
-    function createReportCard(report) {
+    function createReportCard(report, isNewAssignment = false) {
       const reportId = report.id;
       let status = report.status || "Pending";
       status = String(status).trim();
@@ -666,11 +926,14 @@ body {
       const reportTime = new Date(report.created_at);
       const timeString = reportTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
       const dateString = reportTime.toLocaleDateString();
+      
+      // Check for assigned responders
+      const hasResponders = report.assigned_responders && report.assigned_responders.trim() !== '';
 
       const div = document.createElement("div");
       div.className = "notif";
       div.dataset.id = reportId;
-      div.dataset.timestamp = reportTime.getTime(); // Store timestamp for sorting
+      div.dataset.timestamp = reportTime.getTime();
       
       div.innerHTML = `
         <div class="emergency-badge ${getBadgeClass(report.type)}">
@@ -706,6 +969,17 @@ body {
               </div>
             </div>
             
+            <!-- Responders Info -->
+            ${hasResponders ? `
+              <div class="responders-info has-responders">
+                <div class="responders-label">
+                  <i class="fas fa-user-shield"></i>
+                  Assigned Responders:
+                </div>
+                <div class="responders-value">${report.assigned_responders}</div>
+              </div>
+            ` : ''}
+            
             <div class="status-badge ${statusClass}">
               <i class="fas fa-circle"></i> ${status}
             </div>
@@ -720,9 +994,13 @@ body {
         </div>
       `;
       
-      // Click to view report on map
-      div.onclick = () => {
+      // Click to view report
+      div.onclick = (e) => {
+        // Don't trigger if clicking the close button
+        if (e.target.closest('.toast-close')) return;
+        
         localStorage.setItem("selectedReport", JSON.stringify(report));
+        
         window.location.href = `view-report.html?id=${reportId}`;
       };
       
@@ -730,80 +1008,66 @@ body {
     }
 
     // Update or add report card
-    function updateReportCard(report, isNew = false, isUpdate = false) {
+    function updateReportCard(report, isNewReport = false, oldReport = null) {
       const container = document.getElementById("reportList");
       const existingCard = document.querySelector(`.notif[data-id='${report.id}']`);
+      
+      // Check for important changes
+      const changeType = oldReport ? hasImportantChanges(oldReport, report) : false;
       
       // Create new card
       const newCard = createReportCard(report);
       
-      // Add animation classes
-      if (isUpdate) {
+      // Add animation for updates
+      if (oldReport && !isNewReport) {
         newCard.classList.add('updated-report');
         setTimeout(() => newCard.classList.remove('updated-report'), 1000);
       }
       
-      if (isNew) {
+      if (isNewReport) {
         newCard.classList.add('new-report');
         setTimeout(() => newCard.classList.remove('new-report'), 3000);
       }
       
       if (existingCard) {
-        // Update existing card - replace it
         existingCard.replaceWith(newCard);
-        console.log(`Updated report: ${report.id}`);
       } else {
-        // Add new card at the top temporarily
         container.prepend(newCard);
-        console.log(`Added new report: ${report.id}`);
-        
-        // Show notification if in background
-        if (document.hidden && isNew) {
-          showNotification(report);
-        }
       }
       
       // Update current reports map
       currentReports.set(report.id, report);
       
-      // RE-SORT ALL CARDS after any update
+      // Sort all reports
       sortAllReports();
     }
 
-    // Sort all reports by creation date (newest first)
+    // Sort all reports by creation date
     function sortAllReports() {
       const container = document.getElementById("reportList");
       const cards = Array.from(container.querySelectorAll('.notif'));
       
       if (cards.length <= 1) return;
       
-      // Get all reports from currentReports map and sort by created_at
       const reportsArray = Array.from(currentReports.values());
       
-      // Sort by created_at descending (newest first)
       reportsArray.sort((a, b) => {
         const timeA = new Date(a.created_at).getTime();
         const timeB = new Date(b.created_at).getTime();
-        return timeB - timeA; // Newest first
+        return timeB - timeA;
       });
       
-      // Clear container
       container.innerHTML = '';
       
-      // Re-add all cards in sorted order
       reportsArray.forEach(report => {
         const existingCard = document.querySelector(`.notif[data-id='${report.id}']`);
         if (existingCard) {
-          // Keep the existing card (preserves animations)
           container.appendChild(existingCard);
         } else {
-          // Create new card if it doesn't exist
           const card = createReportCard(report);
           container.appendChild(card);
         }
       });
-      
-      console.log(`Sorted ${reportsArray.length} reports`);
     }
 
     // Remove report card
@@ -812,34 +1076,6 @@ body {
       if (existingCard) {
         existingCard.remove();
         currentReports.delete(reportId);
-        console.log(`Removed report: ${reportId}`);
-      }
-    }
-
-    // Show browser notification
-    function showNotification(report) {
-      if (!("Notification" in window)) return;
-      
-      if (Notification.permission === "granted") {
-        const notification = new Notification(`New Emergency Report: ${getTypeDisplay(report.type)}`, {
-          body: `Reported by: ${report.reporter || "Anonymous"}`,
-          icon: 'assets/aid-tracker-logo.png',
-          tag: report.id
-        });
-        
-        notification.onclick = () => {
-          window.focus();
-          notification.close();
-        };
-      }
-    }
-
-    // Request notification permission
-    function requestNotificationPermission() {
-      if (!("Notification" in window)) return;
-      
-      if (Notification.permission === "default") {
-        Notification.requestPermission();
       }
     }
 
@@ -856,7 +1092,6 @@ body {
         statusEl.style.display = 'flex';
       }
       
-      // Hide after 3 seconds if connected
       if (connected) {
         setTimeout(() => {
           statusEl.style.display = 'none';
@@ -869,11 +1104,9 @@ body {
       const container = document.getElementById("reportList");
       const realtimeIndicator = document.getElementById("realtimeIndicator");
       
-      // Get current user
-      const currentUser = getCurrentUser();
+      currentUser = getCurrentUser();
       
       if (!currentUser) {
-        // No user logged in - show message and redirect to account setup
         statusEl.style.display = 'none';
         container.innerHTML = `
           <div class="empty-state">
@@ -883,7 +1116,6 @@ body {
             <div class="empty-title">Account Not Set Up</div>
             <div class="empty-subtitle">
               You need to set up your account information first to view your reports.
-              This ensures your reports are properly linked to you.
             </div>
             <button class="setup-account-btn" onclick="window.location.href='account.html'">
               <i class="fas fa-user-cog"></i> Set Up Account
@@ -891,16 +1123,15 @@ body {
             <button class="retry-btn" onclick="loadReports()" style="margin-top: 10px;">
               <i class="fas fa-sync-alt"></i> Check Again
             </button>
-            <p class="text-sm text-gray-400 mt-4">
-              <i class="fas fa-info-circle mr-1"></i>
-              Your account information is stored locally on your device.
-            </p>
           </div>
         `;
         return;
       }
 
-      // Update header with user info
+      // MARK ALL NOTIFICATIONS AS READ WHEN PAGE LOADS
+      markAllNotificationsAsRead();
+      
+      // Update header
       const headerTitle = document.getElementById('headerTitle');
       headerTitle.innerHTML = `<i class="fas fa-user-circle"></i> ${currentUser.name}'s Reports`;
       
@@ -908,62 +1139,19 @@ body {
       realtimeIndicator.style.display = 'none';
 
       try {
-        console.log("Fetching reports for user:", currentUser);
-        
-        // Fetch reports from Supabase - FILTER BY CURRENT USER'S NAME
-        // Since your reports are identified by reporter name, we filter by that
-        
-        let fetchedReports = null;
-        let error = null;
-        
-        // Strategy 1: Filter by reporter name (from localStorage)
-        try {
-          const result = await supabase
-            .from('reports')
-            .select('*')
-            .eq('reporter', currentUser.name)
-            .order('created_at', { ascending: false });
-            
-          fetchedReports = result.data;
-          error = result.error;
-          
-          console.log(`Found ${fetchedReports?.length || 0} reports for name: ${currentUser.name}`);
-        } catch (e) {
-          console.log("Error filtering by name:", e);
-        }
-        
-        // Strategy 2: If no results, try filtering by reporter (lowercase)
-        if (!fetchedReports || fetchedReports.length === 0) {
-          try {
-            // Get all reports and filter client-side
-            const result = await supabase
-              .from('reports')
-              .select('*')
-              .order('created_at', { ascending: false });
-              
-            if (result.data && result.data.length > 0) {
-              // Filter client-side by reporter name
-              fetchedReports = result.data.filter(report => {
-                return report.reporter === currentUser.name;
-              });
-              error = result.error;
-            }
-          } catch (e) {
-            console.log("Error with client-side filtering:", e);
-          }
-        }
+        // Fetch reports for current user
+        const { data: fetchedReports, error } = await supabase
+          .from('reports')
+          .select('*')
+          .or(`reporter.eq.${currentUser.name},reporter.ilike.%${currentUser.name}%`)
+          .order('created_at', { ascending: false });
 
-        if (error) {
-          console.error("Supabase error:", error);
-          throw new Error(`Database error: ${error.message}`);
-        }
+        if (error) throw error;
 
-        console.log("User reports received:", fetchedReports);
         reports = fetchedReports || [];
-
-        // Clear container and map
         container.innerHTML = "";
         currentReports.clear();
+        seenReports.clear();
 
         if (reports.length === 0) {
           statusEl.style.display = 'none';
@@ -974,16 +1162,13 @@ body {
               </div>
               <div class="empty-title">No Reports From You</div>
               <div class="empty-subtitle">
-                You haven't submitted any emergency reports yet. Click below to report an emergency.
+                You haven't submitted any emergency reports yet.
               </div>
               <div class="user-info">
-                <i class="fas fa-user"></i> Logged in as: ${currentUser.name} ${currentUser.address ? `• ${currentUser.address}` : ''}
+                <i class="fas fa-user"></i> Logged in as: ${currentUser.name}
               </div>
               <button class="retry-btn" onclick="goBack()" style="margin-top: 20px;">
                 <i class="fas fa-plus-circle"></i> Report Emergency
-              </button>
-              <button class="setup-account-btn" onclick="window.location.href='account.html'" style="margin-top: 10px;">
-                <i class="fas fa-user-edit"></i> Edit Account
               </button>
             </div>
           `;
@@ -996,26 +1181,19 @@ body {
             updateReportCard(report);
           });
           
-          // Initial sort
-          sortAllReports();
-          
-          // Show user info at the top
+          // Add user info
           const userInfo = document.createElement('div');
           userInfo.className = 'user-info';
           userInfo.innerHTML = `
             <i class="fas fa-user"></i> 
-            <span><strong>${currentUser.name}</strong> ${currentUser.address ? `• ${currentUser.address}` : ''} • ${reports.length} report${reports.length !== 1 ? 's' : ''}</span>
+            <span><strong>${currentUser.name}</strong> • ${reports.length} report${reports.length !== 1 ? 's' : ''}</span>
           `;
           container.prepend(userInfo);
         }
 
-        // Setup realtime subscription - FILTERED FOR USER
-        setupRealtimeSubscription(currentUser);
+        // Setup realtime subscription
+        setupRealtimeSubscription();
         
-        // Request notification permission
-        requestNotificationPermission();
-        
-        // Update connection status
         updateConnectionStatus(true);
 
       } catch (err) {
@@ -1027,37 +1205,22 @@ body {
               <i class="fas fa-exclamation-circle"></i>
             </div>
             <div class="error-title">Connection Error</div>
-            <p>Failed to load your emergency reports. Please check your connection.</p>
-            <p style="margin-top: 10px; font-size: 0.9rem; color: #fca5a5;">${err.message}</p>
+            <p>Failed to load your emergency reports.</p>
             <button class="retry-btn" onclick="loadReports()">
               <i class="fas fa-sync-alt"></i> Try Again
             </button>
-            <button class="setup-account-btn" onclick="window.location.href='account.html'" style="margin-top: 10px;">
-              <i class="fas fa-user-cog"></i> Check Account Info
-            </button>
           </div>
         `;
-        
         updateConnectionStatus(false);
       }
     }
 
     // Setup realtime subscription
-    function setupRealtimeSubscription(currentUser) {
-      // Remove existing subscription if any
+    function setupRealtimeSubscription() {
       if (realtimeSubscription) {
         supabase.removeChannel(realtimeSubscription);
       }
 
-      console.log("Setting up realtime subscription for user:", currentUser);
-      
-      if (!currentUser) {
-        console.warn("No user provided for subscription");
-        return;
-      }
-      
-      // Subscribe to changes in the reports table
-      // We'll subscribe to all changes and filter client-side
       realtimeSubscription = supabase
         .channel('reports-changes')
         .on('postgres_changes', 
@@ -1067,127 +1230,67 @@ body {
             table: 'reports' 
           }, 
           (payload) => {
-            console.log('Realtime update received:', payload);
-            
-            // Check if this report belongs to the current user
             const report = payload.new || payload.old;
             if (!report) return;
             
-            const isUserReport = report.reporter === currentUser.name;
-            
-            if (!isUserReport) {
-              console.log('Ignoring report not from current user');
-              return;
-            }
+            // Check if this report belongs to current user
+            const isUserReport = report.reporter === currentUser?.name;
+            if (!isUserReport) return;
             
             if (payload.eventType === 'INSERT') {
-              // New report added by this user
-              updateReportCard(payload.new, true, false);
+              updateReportCard(payload.new, true);
               updateConnectionStatus(true);
             } else if (payload.eventType === 'UPDATE') {
-              // Existing report updated by this user
-              updateReportCard(payload.new, false, true);
+              // Get previous state
+              const oldReport = currentReports.get(payload.new.id) || payload.old;
+              updateReportCard(payload.new, false, oldReport);
               updateConnectionStatus(true);
             } else if (payload.eventType === 'DELETE') {
-              // Report deleted
               removeReportCard(payload.old.id);
               updateConnectionStatus(true);
             }
           }
         )
         .subscribe((status) => {
-          console.log('Realtime subscription status:', status);
-          
           if (status === 'SUBSCRIBED') {
             updateConnectionStatus(true);
           } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
             updateConnectionStatus(false);
-            // Try to reconnect after 5 seconds
             setTimeout(() => {
               if (realtimeSubscription) {
-                realtimeSubscription.unsubscribe();
-                const user = getCurrentUser();
-                if (user) {
-                  setupRealtimeSubscription(user);
-                }
+                setupRealtimeSubscription();
               }
             }, 5000);
           }
         });
     }
 
-    // Function to update status in Supabase
-    async function updateReportStatus(reportId, statusText) {
-      try {
-        statusText = String(statusText).trim();
-        
-        const { data, error } = await supabase
-          .from('reports')
-          .update({ status: statusText })
-          .eq('id', reportId);
-        
-        if (error) {
-          console.error("Error updating status in Supabase:", error);
-          return false;
-        }
-        
-        console.log(`Status updated in Supabase for report ${reportId}: ${statusText}`);
-        return true;
-      } catch (err) {
-        console.error("Error updating status:", err);
-        return false;
-      }
-    }
-
-    // Handle visibility change
-    function handleVisibilityChange() {
-      if (!document.hidden && realtimeSubscription) {
-        // Page became visible, ensure subscription is active
-        const currentUser = getCurrentUser();
-        if (currentUser) {
-          setupRealtimeSubscription(currentUser);
-        }
-      }
-    }
-
-    // Initialize when page loads
+    // Initialize
     document.addEventListener('DOMContentLoaded', function() {
-      // Request notification permission immediately
-      if ("Notification" in window && Notification.permission === "default") {
-        Notification.requestPermission();
-      }
-      
+      // Clear notification count when viewing reports page
+      localStorage.setItem('notificationCount', '0');
+
       loadReports();
-      
-      // Listen for visibility changes
-      document.addEventListener('visibilitychange', handleVisibilityChange);
-      
-      // Listen for online/offline events
+
       window.addEventListener('online', () => {
-        console.log('Browser is online');
         updateConnectionStatus(true);
-        const currentUser = getCurrentUser();
-        if (currentUser) {
-          setupRealtimeSubscription(currentUser);
-        }
+        setupRealtimeSubscription();
       });
-      
+
       window.addEventListener('offline', () => {
-        console.log('Browser is offline');
         updateConnectionStatus(false);
       });
     });
 
-    // Cleanup on page unload
+    // Cleanup
     window.addEventListener('beforeunload', () => {
       if (realtimeSubscription) {
         supabase.removeChannel(realtimeSubscription);
       }
     });
 
-    // Make functions available globally
+    // Global functions
     window.loadReports = loadReports;
-    window.updateReportStatus = updateReportStatus;
   </script>
 </body>
 </html>

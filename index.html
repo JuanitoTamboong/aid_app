@@ -9,6 +9,8 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <!--logo-->
 <link rel="website icon" href="assets/aid-tracker-logo.png">
+<!-- Supabase -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 
 <style>
   /* Map animation */
@@ -28,22 +30,45 @@
   /* Notification Bell */
   .notification {
     position: absolute;
-    top: 10px;
+    top: 20px;
     right: 20px;
     font-size: 24px;
+    float: right;
     cursor: pointer;
     z-index: 1001;
+    background: rgba(10, 22, 54, 0.8);
+    border: 1px solid rgba(252, 211, 77, 0.3);
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
   }
+  .notification:hover {
+    background: rgba(20, 35, 80, 0.9);
+    border-color: #fcd34d;
+    transform: scale(1.1);
+  }
+  
   .notif-dot {
     position: absolute;
-    top: 0px;
-    right: 0px;
-    width: 10px;
-    height: 10px;
-    background-color: #FFD700;
+    top: 5px;
+    right: 5px;
+    width: 12px;
+    height: 12px;
+    background-color: #ef4444;
     border-radius: 50%;
-    border: 1px solid white;
+    border: 2px solid #0a1636;
     display: none;
+    animation: pulse 1.5s infinite;
+    box-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
+  }
+
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.2); }
   }
 
   /* Gradient Background */
@@ -181,6 +206,103 @@
   .hamburger.active .hamburger-line:nth-child(3) {
     transform: rotate(-45deg) translate(7px, -6px);
   }
+
+  /* Toast Notification */
+  .toast-notification {
+    position: fixed;
+    top: 20px;
+    right: 90px;
+    background: linear-gradient(145deg, rgba(30, 45, 90, 0.95), rgba(20, 35, 80, 0.95));
+    border: 1px solid rgba(252, 211, 77, 0.3);
+    border-radius: 10px;
+    padding: 15px 20px;
+    width: 300px;
+    z-index: 1000;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(10px);
+    transform: translateX(400px);
+    animation: slideIn 0.5s ease forwards;
+    border-left: 4px solid #fcd34d;
+  }
+
+  @keyframes slideIn {
+    to { transform: translateX(0); }
+  }
+
+  .toast-notification.responder {
+    border-left-color: #34d399;
+  }
+
+  .toast-notification.status {
+    border-left-color: #3b82f6;
+  }
+
+  .toast-notification.resolved {
+    border-left-color: #10b981;
+  }
+
+  .toast-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+
+  .toast-title {
+    font-weight: 600;
+    color: #fcd34d;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .toast-close {
+    background: none;
+    border: none;
+    color: #94a3b8;
+    cursor: pointer;
+    font-size: 1rem;
+    padding: 4px;
+  }
+
+  .toast-close:hover {
+    color: #fca5a5;
+  }
+
+  .toast-message {
+    color: #e2e8f0;
+    font-size: 0.9rem;
+    line-height: 1.4;
+  }
+
+  .toast-time {
+    color: #94a3b8;
+    font-size: 0.75rem;
+    margin-top: 8px;
+    text-align: right;
+  }
+
+  /* Notification Count Badge */
+  .notification-count {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: #ef4444;
+    color: white;
+    min-width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    font-weight: bold;
+    padding: 2px 5px;
+    border: 2px solid #0a1636;
+    z-index: 1002;
+    box-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
+  }
 </style>
 </head>
 
@@ -230,12 +352,15 @@
       <p>Help is here.</p>
     </div>
   </div>
+</div>
 
-  <!-- Notification Button -->
-  <div class="notification text-yellow-300 hover:text-white" onclick="togglePopup()">
-    <i class="fas fa-bell"></i>
-    <span class="notif-dot" id="notifDot"></span>
-  </div>
+<!-- Toast Container -->
+<div id="toastContainer"></div>
+
+<!-- Notification Button -->
+<div class="notification text-yellow-300 hover:text-white" onclick="handleNotificationClick()">
+  <i class="fas fa-bell"></i>
+  <span id="notificationCount" class="notification-count" style="display: none;">0</span>
 </div>
 
 <!-- MAIN CONTENT -->
@@ -308,6 +433,368 @@
 </div>
 
 <script>
+// --- FIXED SUPABASE INITIALIZATION ---
+const SUPABASE_URL = 'https://gwvepxupoxyyydnisulb.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_4baWNqraxymp0Gal3OKhxQ_Bl-IHHdt';
+
+// Safely initialize Supabase
+let supabase;
+try {
+  // Check if supabase object is available
+  if (window.supabase && window.supabase.createClient) {
+    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+      realtime: {
+        params: {
+          eventsPerSecond: 10
+        }
+      }
+    });
+    console.log('Supabase client initialized successfully');
+  } else {
+    console.warn('Supabase SDK not fully loaded, using fallback');
+    throw new Error('Supabase SDK not loaded');
+  }
+} catch (error) {
+  console.error('Failed to initialize Supabase:', error);
+  
+  // Create a mock supabase object to prevent errors
+  supabase = {
+    from: () => ({
+      select: () => Promise.resolve({ data: [], error: null }),
+      insert: () => Promise.resolve({ data: null, error: null }),
+      update: () => Promise.resolve({ data: null, error: null }),
+      eq: () => ({ select: () => Promise.resolve({ data: [], error: null }) }),
+      gt: () => ({ order: () => Promise.resolve({ data: [], error: null }) })
+    }),
+    channel: () => ({
+      on: () => ({ subscribe: () => ({}) })
+    }),
+    removeChannel: () => {}
+  };
+}
+
+// --- GLOBAL VARIABLES ---
+let realtimeSubscription = null;
+let currentUser = null;
+let notificationCount = 0;
+let unreadNotifications = new Set();
+
+// --- HELPER FUNCTIONS ---
+function getCurrentUser() {
+  const profileData = localStorage.getItem('profileData');
+  const reporterName = localStorage.getItem('reporterName');
+  
+  if (profileData) {
+    try {
+      const parsedData = JSON.parse(profileData);
+      if (parsedData.fullName || reporterName) {
+        return {
+          id: `user-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+          name: parsedData.fullName || reporterName || 'User'
+        };
+      }
+    } catch (e) {
+      console.error("Error parsing profile data:", e);
+    }
+  }
+  
+  if (reporterName) {
+    return {
+      id: `user-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      name: reporterName
+    };
+  }
+  
+  return null;
+}
+
+// Show toast notification
+function showToast(type, title, message, reportId = null) {
+  const toastContainer = document.getElementById('toastContainer');
+  
+  const toast = document.createElement('div');
+  toast.className = `toast-notification ${type}`;
+  toast.id = `toast-${Date.now()}`;
+  
+  const now = new Date();
+  const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  
+  toast.innerHTML = `
+    <div class="toast-header">
+      <div class="toast-title">
+        <i class="fas fa-${type === 'responder' ? 'users' : type === 'status' ? 'sync-alt' : 'check-circle'}"></i>
+        ${title}
+      </div>
+      <button class="toast-close" onclick="this.parentElement.parentElement.remove()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div class="toast-message">${message}</div>
+    <div class="toast-time">${timeString}</div>
+  `;
+  
+  toastContainer.appendChild(toast);
+  
+  // Auto remove after 5 seconds
+  setTimeout(() => {
+    if (toast.parentNode) {
+      toast.parentNode.removeChild(toast);
+    }
+  }, 5000);
+  
+  // Play notification sound
+  playNotificationSound();
+  
+  // Increment notification count
+  if (reportId) {
+    unreadNotifications.add(reportId);
+    updateNotificationCount();
+  }
+}
+
+// Play notification sound
+function playNotificationSound() {
+  try {
+    const audio = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-correct-answer-tone-2870.mp3');
+    audio.volume = 0.5;
+    audio.play().catch(e => console.log('Audio play failed:', e));
+  } catch (e) {
+    console.log('Error playing sound:', e);
+  }
+}
+
+// Update notification count display
+function updateNotificationCount() {
+  const countElement = document.getElementById('notificationCount');
+  notificationCount = unreadNotifications.size;
+  
+  if (notificationCount > 0) {
+    countElement.textContent = notificationCount > 99 ? '99+' : notificationCount;
+    countElement.style.display = 'flex';
+  } else {
+    countElement.style.display = 'none';
+  }
+  
+  // Save to localStorage
+  localStorage.setItem('notificationCount', notificationCount.toString());
+}
+
+// Clear all notifications
+function clearAllNotifications() {
+  // Clear local notifications
+  notificationCount = 0;
+  unreadNotifications.clear();
+  updateNotificationCount();
+  
+  // Clear from localStorage
+  localStorage.setItem('notificationCount', '0');
+  
+  // Mark as read for current user
+  if (currentUser) {
+    localStorage.setItem(`lastNotificationCheck_${currentUser.name}`, new Date().toISOString());
+  }
+}
+
+// Check for important changes in reports
+function hasImportantChanges(oldReport, newReport) {
+  if (!oldReport) return false;
+  
+  // Check if responders were just assigned
+  if ((!oldReport.assigned_responders || oldReport.assigned_responders.trim() === '') && 
+      newReport.assigned_responders && newReport.assigned_responders.trim() !== '') {
+    return 'responder-assigned';
+  }
+  
+  // Check if status changed to investigating
+  if ((oldReport.status === 'pending' || !oldReport.status) && 
+      newReport.status && newReport.status.toLowerCase() === 'investigating') {
+    return 'status-investigating';
+  }
+  
+  // Check if status changed to resolved
+  if (oldReport.status !== 'resolved' && newReport.status === 'resolved') {
+    return 'status-resolved';
+  }
+  
+  return false;
+}
+
+// Setup realtime subscription
+function setupRealtimeSubscription() {
+  if (!currentUser) {
+    console.log('No current user, cannot setup subscription');
+    return;
+  }
+  
+  // Remove existing subscription if any
+  if (realtimeSubscription) {
+    supabase.removeChannel(realtimeSubscription);
+  }
+
+  console.log('Setting up realtime subscription for user:', currentUser.name);
+
+  realtimeSubscription = supabase
+    .channel('reports-changes')
+    .on('postgres_changes', 
+      { 
+        event: '*', 
+        schema: 'public', 
+        table: 'reports' 
+      }, 
+      async (payload) => {
+        const report = payload.new || payload.old;
+        if (!report) return;
+        
+        // Check if this report belongs to current user
+        const isUserReport = report.reporter === currentUser.name;
+        if (!isUserReport) return;
+        
+        if (payload.eventType === 'UPDATE') {
+          // Get the previous state from database
+          const { data: oldReportData } = await supabase
+            .from('reports')
+            .select('*')
+            .eq('id', report.id)
+            .single()
+            .catch(() => ({ data: null }));
+          
+          const oldReport = oldReportData || payload.old;
+          
+          // Check for important changes
+          const changeType = hasImportantChanges(oldReport, report);
+          
+          if (changeType) {
+            let title = '';
+            let message = '';
+            let toastType = 'status';
+            
+            switch(changeType) {
+              case 'responder-assigned':
+                title = 'Responders Assigned!';
+                message = `Emergency response team has been assigned to your report.`;
+                toastType = 'responder';
+                break;
+                
+              case 'status-investigating':
+                title = 'Status Updated';
+                message = `Your report is now being investigated by emergency responders.`;
+                toastType = 'status';
+                break;
+                
+              case 'status-resolved':
+                title = 'Incident Resolved!';
+                message = `Your report has been marked as resolved.`;
+                toastType = 'resolved';
+                break;
+            }
+            
+            if (title && message) {
+              showToast(toastType, title, message, report.id);
+            }
+          }
+        }
+      }
+    )
+    .subscribe((status) => {
+      console.log('Realtime subscription status:', status);
+      
+      if (status === 'SUBSCRIBED') {
+        console.log('Successfully subscribed to realtime updates');
+      } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+        console.log('Realtime subscription error, retrying in 5 seconds...');
+        setTimeout(() => {
+          if (realtimeSubscription) {
+            setupRealtimeSubscription();
+          }
+        }, 5000);
+      }
+    });
+}
+
+// Check for existing notifications
+async function checkForNotifications() {
+  if (!currentUser) return;
+  
+  try {
+    // Get last notification check time
+    const lastCheck = localStorage.getItem(`lastNotificationCheck_${currentUser.name}`);
+    const lastCheckTime = lastCheck ? new Date(lastCheck) : new Date(0);
+    
+    // Get user's reports from the last 24 hours
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    
+    const { data: reports, error } = await supabase
+      .from('reports')
+      .select('id, reporter, status, assigned_responders, created_at, updated_at')
+      .or(`reporter.eq.${currentUser.name},reporter.ilike.%${currentUser.name}%`)
+      .gt('created_at', yesterday.toISOString())
+      .order('created_at', { ascending: false });
+    
+    if (error) throw error;
+    
+    // Clear existing notifications
+    unreadNotifications.clear();
+    
+    // Check each report for unread important changes
+    reports.forEach(report => {
+      // Check if report was updated after last check
+      const reportUpdated = new Date(report.updated_at || report.created_at);
+      const isNewOrUpdated = reportUpdated > lastCheckTime;
+      
+      if (isNewOrUpdated) {
+        // Check for assigned responders
+        if (report.assigned_responders && report.assigned_responders.trim() !== '') {
+          unreadNotifications.add(report.id);
+        }
+        
+        // Check for status changes
+        if (report.status === 'investigating' || report.status === 'resolved') {
+          unreadNotifications.add(report.id);
+        }
+      }
+    });
+    
+    updateNotificationCount();
+    
+  } catch (error) {
+    console.error('Error checking for notifications:', error);
+  }
+}
+
+// Handle notification click - FIXED VERSION
+function handleNotificationClick() {
+  // Clear all notifications
+  clearAllNotifications();
+  
+  // Navigate to notifications page
+  window.location.href = 'my-reports.html';
+}
+
+// --- MAIN FUNCTIONS ---
+function openMap(accidentType) {
+  const profileData = JSON.parse(localStorage.getItem('profileData') || '{}');
+  if (!profileData.fullName) {
+    alert("You must create an account to report emergencies.");
+    window.location.href = "account.html";
+    return;
+  }
+  localStorage.setItem('accidentType', accidentType);
+  localStorage.setItem('profileName', profileData.fullName);
+  window.location.href = "map.html";
+}
+
+function handleExit() {
+  if (confirm("Are you sure you want to exit AidTracker?")) {
+    if (window.history.length > 1) {
+      window.history.back();
+    } else {
+      window.close();
+    }
+  }
+  return false;
+}
+
 // Mobile Menu Functions
 const hamburger = document.getElementById('hamburger');
 const mobileMenu = document.getElementById('mobileMenu');
@@ -330,64 +817,69 @@ function closeMobileMenu() {
 hamburger.addEventListener('click', toggleMobileMenu);
 menuOverlay.addEventListener('click', closeMobileMenu);
 
+// Initialize when page loads
+document.addEventListener('DOMContentLoaded', function() {
+  // Get current user
+  currentUser = getCurrentUser();
+  
+  // Load saved notification count
+  const savedCount = localStorage.getItem('notificationCount');
+  if (savedCount) {
+    notificationCount = parseInt(savedCount) || 0;
+    if (notificationCount > 0) {
+      const countElement = document.getElementById('notificationCount');
+      countElement.textContent = notificationCount > 99 ? '99+' : notificationCount;
+      countElement.style.display = 'flex';
+    }
+  }
+  
+  if (currentUser) {
+    // Check for existing notifications
+    checkForNotifications();
+    
+    // Setup realtime subscription for live updates
+    setupRealtimeSubscription();
+  }
+  
+  // Request notification permission
+  if ("Notification" in window && Notification.permission === "default") {
+    Notification.requestPermission();
+  }
+  
+  // Clear notification count if coming back from my-reports page
+  if (document.referrer.includes('my-reports.html')) {
+    clearAllNotifications();
+  }
+});
+
+// Save notification count when leaving page
+window.addEventListener('beforeunload', () => {
+  if (realtimeSubscription) {
+    supabase.removeChannel(realtimeSubscription);
+  }
+});
+
+// Handle visibility change
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden && currentUser) {
+    // Page became visible, check for new notifications
+    checkForNotifications();
+  }
+});
+
+// Close mobile menu on resize to desktop
+window.addEventListener('resize', () => {
+  if (window.innerWidth >= 768 && mobileMenu.classList.contains('active')) {
+    closeMobileMenu();
+  }
+});
+
 // Close menu when clicking outside on mobile
 document.addEventListener('click', (e) => {
   if (window.innerWidth < 768 && 
       !mobileMenu.contains(e.target) && 
       !hamburger.contains(e.target) &&
       mobileMenu.classList.contains('active')) {
-    closeMobileMenu();
-  }
-});
-
-// Handle exit function
-function handleExit() {
-  if (confirm("Are you sure you want to exit AidTracker?")) {
-    if (window.history.length > 1) {
-      window.history.back();
-    } else {
-      window.close();
-    }
-  }
-  return false;
-}
-
-function openMap(accidentType) {
-  const profileData = JSON.parse(localStorage.getItem('profileData') || '{}');
-  if (!profileData.fullName) {
-    alert("You must create an account to report emergencies.");
-    window.location.href = "account.html";
-    return;
-  }
-  localStorage.setItem('accidentType', accidentType);
-  localStorage.setItem('profileName', profileData.fullName);
-  window.location.href = "map.html";
-}
-
-function updateRedDot() {
-  const dot = document.getElementById('notifDot');
-  if(localStorage.getItem('hasNewNotification') === 'true'){
-    dot.style.display = 'inline-block';
-  } else {
-    dot.style.display = 'none';
-  }
-}
-
-window.addEventListener('DOMContentLoaded', updateRedDot);
-window.addEventListener('pageshow', updateRedDot);
-
-function togglePopup() {
-  document.getElementById('notifDot').style.display = 'none';
-  localStorage.setItem('hasNewNotification', 'false');
-  if ('caches' in window) {
-    caches.keys().then(names => names.forEach(name => caches.delete(name)));
-  }
-  setTimeout(() => window.location.href = "notif.html", 200);
-}
-
-// Close mobile menu on resize to desktop
-window.addEventListener('resize', () => {
-  if (window.innerWidth >= 768 && mobileMenu.classList.contains('active')) {
     closeMobileMenu();
   }
 });

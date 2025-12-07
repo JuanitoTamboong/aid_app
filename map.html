@@ -611,130 +611,176 @@ body {
 
   <!-- Supabase Module -->
   <script type="module">
-    // Import only what you need
-    import { saveReportToSupabase } from "./notif-report.js";
+    // Import functions from notif-report.js
+    import { 
+        saveReportToSupabase, 
+        testSupabaseConnection,
+        getAllReports 
+    } from "./notif-report.js";
     
-    // Make it available globally
+    // Make functions available globally
     window.saveReportToSupabase = saveReportToSupabase;
+    window.testSupabaseConnection = testSupabaseConnection;
+    window.getAllReports = getAllReports;
     
     // Initialize form and camera button listeners
     document.addEventListener('DOMContentLoaded', function() {
-      const captureBtn = document.getElementById('captureBtn');
-      const closeCameraBtn = document.getElementById('closeCameraBtn');
-      const fileInput = document.getElementById('incidentPhoto');
-      const fileName = document.getElementById('fileName');
-      
-      if (captureBtn) {
-        captureBtn.onclick = capturePhoto;
-      }
-      
-      if (closeCameraBtn) {
-        closeCameraBtn.onclick = closeCamera;
-      }
-      
-      if (fileInput) {
-        // FIXED: Better file input handling with preview
-        fileInput.addEventListener('change', function(e) {
-          handleFileSelect(e);
-        });
-      }
-      
-      // Prevent form submission
-      const form = document.getElementById('emergencyForm');
-      if (form) {
-        form.addEventListener('submit', function(e) {
-          e.preventDefault();
-          submitReport();
-        });
-      }
-      
-      // Display the accident type when report form is shown
-      updateEmergencyTypeDisplay();
+        const captureBtn = document.getElementById('captureBtn');
+        const closeCameraBtn = document.getElementById('closeCameraBtn');
+        const fileInput = document.getElementById('incidentPhoto');
+        const fileName = document.getElementById('fileName');
+        
+        if (captureBtn) {
+            captureBtn.onclick = capturePhoto;
+        }
+        
+        if (closeCameraBtn) {
+            closeCameraBtn.onclick = closeCamera;
+        }
+        
+        if (fileInput) {
+            fileInput.addEventListener('change', function(e) {
+                handleFileSelect(e);
+            });
+        }
+        
+        // Prevent form submission
+        const form = document.getElementById('emergencyForm');
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                submitReport();
+            });
+        }
+        
+        // Display the accident type when report form is shown
+        updateEmergencyTypeDisplay();
+        
+        // Test Supabase connection on load
+        testConnection();
     });
+    
+    // Test Supabase connection
+    async function testConnection() {
+        try {
+            if (window.testSupabaseConnection) {
+                const result = await window.testSupabaseConnection();
+                console.log("Supabase connection test:", result);
+                
+                if (!result.connected) {
+                    console.warn("Supabase connection warning:", result.error);
+                    
+                    // Show warning if not connected
+                    if (result.error && !result.error.includes('42P01')) {
+                        console.warn("Supabase may not be properly configured.");
+                    }
+                } else {
+                    console.log("✓ Supabase connection successful");
+                }
+            }
+        } catch (error) {
+            console.error("Connection test error:", error);
+        }
+    }
     
     // FIXED: Handle file selection with preview
     function handleFileSelect(e) {
-      const fileInput = document.getElementById('incidentPhoto');
-      const fileName = document.getElementById('fileName');
-      const capturedPreview = document.getElementById('capturedPreview');
-      
-      if (e.target.files && e.target.files.length > 0) {
-        const file = e.target.files[0];
+        const fileInput = document.getElementById('incidentPhoto');
+        const fileName = document.getElementById('fileName');
+        const capturedPreview = document.getElementById('capturedPreview');
         
-        // Check if file is an image
-        if (!file.type.match('image.*')) {
-          alert('Please select an image file (JPEG, PNG, etc.)');
-          fileInput.value = '';
-          return;
-        }
-        
-        // Check file size (limit to 10MB)
-        if (file.size > 10 * 1024 * 1024) {
-          alert('File size should be less than 10MB');
-          fileInput.value = '';
-          return;
-        }
-        
-        fileName.textContent = `Selected: ${file.name} (${(file.size/1024/1024).toFixed(2)} MB)`;
-        
-        // Preview the image
-        const reader = new FileReader();
-        reader.onload = function(e) {
-          if (capturedPreview) {
-            capturedPreview.src = e.target.result;
-            capturedPreview.classList.remove("hidden");
-            capturedPreview.classList.add("show");
+        if (e.target.files && e.target.files.length > 0) {
+            const file = e.target.files[0];
             
-            // Resize very large images for better display
-            const img = new Image();
-            img.onload = function() {
-              if (img.width > 800 || img.height > 600) {
-                // Create canvas to resize
-                const canvas = document.createElement('canvas');
-                const ctx = canvas.getContext('2d');
-                
-                // Calculate new dimensions
-                let width = img.width;
-                let height = img.height;
-                const MAX_WIDTH = 800;
-                const MAX_HEIGHT = 600;
-                
-                if (width > height) {
-                  if (width > MAX_WIDTH) {
-                    height *= MAX_WIDTH / width;
-                    width = MAX_WIDTH;
-                  }
-                } else {
-                  if (height > MAX_HEIGHT) {
-                    width *= MAX_HEIGHT / height;
-                    height = MAX_HEIGHT;
-                  }
+            // Check if file is an image
+            if (!file.type.match('image.*')) {
+                alert('Please select an image file (JPEG, PNG, etc.)');
+                fileInput.value = '';
+                return;
+            }
+            
+            // Check file size (limit to 10MB)
+            if (file.size > 10 * 1024 * 1024) {
+                alert('File size should be less than 10MB');
+                fileInput.value = '';
+                return;
+            }
+            
+            fileName.textContent = `Selected: ${file.name} (${(file.size/1024/1024).toFixed(2)} MB)`;
+            
+            // Preview the image
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                if (capturedPreview) {
+                    capturedPreview.src = e.target.result;
+                    capturedPreview.classList.remove("hidden");
+                    capturedPreview.classList.add("show");
+                    
+                    // Resize very large images for better display
+                    const img = new Image();
+                    img.onload = function() {
+                        if (img.width > 800 || img.height > 600) {
+                            // Create canvas to resize
+                            const canvas = document.createElement('canvas');
+                            const ctx = canvas.getContext('2d');
+                            
+                            // Calculate new dimensions
+                            let width = img.width;
+                            let height = img.height;
+                            const MAX_WIDTH = 800;
+                            const MAX_HEIGHT = 600;
+                            
+                            if (width > height) {
+                                if (width > MAX_WIDTH) {
+                                    height *= MAX_WIDTH / width;
+                                    width = MAX_WIDTH;
+                                }
+                            } else {
+                                if (height > MAX_HEIGHT) {
+                                    width *= MAX_HEIGHT / height;
+                                    height = MAX_HEIGHT;
+                                }
+                            }
+                            
+                            canvas.width = width;
+                            canvas.height = height;
+                            ctx.drawImage(img, 0, 0, width, height);
+                            
+                            // Update preview with resized image
+                            capturedPreview.src = canvas.toDataURL('image/jpeg', 0.8);
+                        }
+                    };
+                    img.src = e.target.result;
                 }
                 
-                canvas.width = width;
-                canvas.height = height;
-                ctx.drawImage(img, 0, 0, width, height);
-                
-                // Update preview with resized image
-                capturedPreview.src = canvas.toDataURL('image/jpeg', 0.8);
-              }
+                // Clear any camera-captured image
+                capturedBase64 = null;
             };
-            img.src = e.target.result;
-          }
-          
-          // Clear any camera-captured image
-          capturedBase64 = null;
-        };
-        reader.readAsDataURL(file);
-      } else {
-        fileName.textContent = '';
-        if (capturedPreview) {
-          capturedPreview.src = '';
-          capturedPreview.classList.remove("show");
-          capturedPreview.classList.add("hidden");
+            reader.readAsDataURL(file);
+        } else {
+            fileName.textContent = '';
+            if (capturedPreview) {
+                capturedPreview.src = '';
+                capturedPreview.classList.remove("show");
+                capturedPreview.classList.add("hidden");
+            }
         }
-      }
     }
+    
+    // Quick test function - call this in browser console to debug
+    window.testSupabaseManually = async function() {
+        console.log("Testing Supabase connection manually...");
+        console.log("Window.saveReportToSupabase exists:", typeof window.saveReportToSupabase);
+        
+        if (typeof window.testSupabaseConnection === 'function') {
+            const result = await window.testSupabaseConnection();
+            console.log("Connection test result:", result);
+            return result;
+        } else {
+            console.error("testSupabaseConnection function not available");
+            return { connected: false, error: "Function not loaded" };
+        }
+    };
   </script>
 
   <script>
@@ -1035,7 +1081,7 @@ body {
         return;
       }
 
-      const fileInput = document.getElementById("incidentPhoto");
+      const fileInput = document.getElementById('incidentPhoto');
       let photoBase64 = capturedBase64;
 
       // If no camera photo, check for uploaded file
@@ -1048,14 +1094,17 @@ body {
       const accidentType = localStorage.getItem("accidentType") || window.currentAccidentType || "emergency";
       const accidentDisplay = window.currentAccidentDisplay || "Emergency";
       
+      // Get reporter name from localStorage - FIXED: Using reporterName from account page
+      const reporterName = localStorage.getItem("reporterName") || "Anonymous";
+      
       const report = {
-        type: accidentType, // This will be "motor", "fire", "assault", etc.
-        type_display: accidentDisplay, // This will be "Motor/Car Accident", "Fire Accident", etc.
-        reporter: localStorage.getItem("profileName") || "Anonymous",
+        type: accidentType,
+        type_display: accidentDisplay,
+        reporter: reporterName,
         latitude: reportLocation.lat,
         longitude: reportLocation.lng,
         timestamp: new Date().toISOString(),
-        status: "pending"  // ADDED: Automatic pending status
+        status: "pending"
       };
 
       // Show location info for debugging
@@ -1063,29 +1112,54 @@ body {
       console.log("Current user location:", currentUserLocation);
       console.log("Using pinpoint location:", pinpointMarker ? "YES" : "NO");
       console.log("Report status:", report.status);
+      console.log("Reporter name:", report.reporter);
 
       try {
         console.log("Submitting report...", report);
         
         // Check if function is available
         if (typeof window.saveReportToSupabase !== 'function') {
-          throw new Error("Save function not loaded. Please refresh the page.");
+          throw new Error("Save function not loaded. Please check the console for import errors.");
         }
         
-        await window.saveReportToSupabase(report, photoBase64);
-        hideReportPopup();
-        showAlert();
+        console.log("Calling saveReportToSupabase...");
+        const result = await window.saveReportToSupabase(report, photoBase64);
+        
+        console.log("Report submission result:", result);
+        
+        if (result && result.success) {
+          hideReportPopup();
+          showAlert();
+          
+          // Clear localStorage accident type after successful submission
+          localStorage.removeItem("accidentType");
+        } else {
+          throw new Error("Report submission failed without error");
+        }
+        
       } catch(err) {
         console.error("Report submission error:", err);
         
         // User-friendly error messages
-        if (err.message.includes("Database table 'reports' doesn't exist")) {
-          alert("Database setup required. Please create the 'reports' table in Supabase.");
-        } else if (err.message.includes("Storage permission denied")) {
-          alert("Storage permissions not set. Check Supabase storage policies.");
+        let errorMessage = "Failed to submit report: ";
+        
+        if (err.message.includes("Database table 'reports' not found")) {
+          errorMessage += "Database table not found. Please create the 'reports' table in Supabase.";
+        } else if (err.message.includes("Bucket not found")) {
+          errorMessage += "Storage bucket not found. Please create the 'aid-upload' bucket in Supabase Storage.";
+        } else if (err.message.includes("Supabase client not initialized")) {
+          errorMessage += "Connection failed. Please refresh the page and check your internet connection.";
+        } else if (err.message.includes("Invalid status value")) {
+          errorMessage += "Invalid report status. Please contact support.";
+        } else if (err.message.includes("row-level security policy")) {
+          errorMessage += "Permission denied. Check Supabase Row Level Security policies.";
+        } else if (err.message.includes("Could not find")) {
+          errorMessage += "Resource not found. Please check your Supabase setup.";
         } else {
-          alert("Failed to submit report: " + err.message);
+          errorMessage += err.message;
         }
+        
+        alert(errorMessage);
       }
     }
 
