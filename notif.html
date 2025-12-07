@@ -89,6 +89,12 @@ body {
   backdrop-filter: blur(10px);
   position: relative;
   overflow: hidden;
+  animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .notif:hover {
@@ -106,6 +112,26 @@ body {
   width: 4px;
   height: 100%;
   background: linear-gradient(to bottom, #fcd34d, #fbbf24);
+}
+
+.notif.new-report::before {
+  background: linear-gradient(to bottom, #10b981, #34d399);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+.notif.updated-report {
+  border-color: rgba(59, 130, 246, 0.5);
+  animation: highlight 1s ease;
+}
+
+@keyframes highlight {
+  0%, 100% { box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); }
+  50% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.5); }
 }
 
 /* Emergency Type Badge */
@@ -203,28 +229,28 @@ body {
   margin-top: 10px;
 }
 
-.status-active {
-  background: rgba(34, 197, 94, 0.2);
-  color: #86efac;
-  border: 1px solid rgba(34, 197, 94, 0.4);
-}
-
-.status-resolved {
-  background: rgba(59, 130, 246, 0.2);
-  color: #93c5fd;
-  border: 1px solid rgba(59, 130, 246, 0.4);
-}
-
-.status-inprogress {
+.status-pending {
   background: rgba(245, 158, 11, 0.2);
   color: #fcd34d;
   border: 1px solid rgba(245, 158, 11, 0.4);
 }
 
+.status-resolved {
+  background: rgba(34, 197, 94, 0.2);
+  color: #86efac;
+  border: 1px solid rgba(34, 197, 94, 0.4);
+}
+
+.status-investigating {
+  background: rgba(59, 130, 246, 0.2);
+  color: #93c5fd;
+  border: 1px solid rgba(59, 130, 246, 0.4);
+}
+
 .status-cancelled {
-  background: rgba(107, 114, 128, 0.2);
-  color: #d1d5db;
-  border: 1px solid rgba(107, 114, 128, 0.4);
+  background: rgba(239, 68, 68, 0.2);
+  color: #fca5a5;
+  border: 1px solid rgba(239, 68, 68, 0.4);
 }
 
 /* Photo Preview */
@@ -348,6 +374,40 @@ body {
   box-shadow: 0 4px 12px rgba(251, 191, 36, 0.3);
 }
 
+/* === Connection Status === */
+.connection-status {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  backdrop-filter: blur(10px);
+  animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+.connection-connected {
+  background: rgba(34, 197, 94, 0.2);
+  color: #86efac;
+  border: 1px solid rgba(34, 197, 94, 0.4);
+}
+
+.connection-disconnected {
+  background: rgba(239, 68, 68, 0.2);
+  color: #fca5a5;
+  border: 1px solid rgba(239, 68, 68, 0.4);
+}
+
 /* === Refresh Indicator === */
 .refresh-indicator {
   text-align: center;
@@ -383,6 +443,13 @@ body {
   
   .back-btn {
     padding: 8px 12px;
+  }
+  
+  .connection-status {
+    bottom: 10px;
+    right: 10px;
+    font-size: 0.7rem;
+    padding: 6px 12px;
   }
 }
 
@@ -424,10 +491,16 @@ body {
     <!-- Reports Container -->
     <div id="reportList" class="notif-container"></div>
     
-    <!-- Refresh Indicator -->
-    <div id="refreshIndicator" class="refresh-indicator" style="display: none;">
-      Auto-refresh enabled • Updates every 10 seconds
+    <!-- Realtime Indicator -->
+    <div id="realtimeIndicator" class="refresh-indicator" style="display: none;">
+      <i class="fas fa-sync-alt fa-spin"></i> Realtime updates enabled • Live data
     </div>
+  </div>
+
+  <!-- Connection Status Indicator -->
+  <div id="connectionStatus" class="connection-status" style="display: none;">
+    <i class="fas fa-circle"></i>
+    <span>Connected</span>
   </div>
 
   <!-- Load Supabase JS -->
@@ -438,8 +511,19 @@ body {
     const SUPABASE_URL = 'https://gwvepxupoxyyydnisulb.supabase.co';
     const SUPABASE_KEY = 'sb_publishable_4baWNqraxymp0Gal3OKhxQ_Bl-IHHdt';
 
-    // Initialize Supabase
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    // Initialize Supabase with Realtime
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+      realtime: {
+        params: {
+          eventsPerSecond: 10
+        }
+      }
+    });
+
+    // Global variables
+    let reports = [];
+    let currentReports = new Map(); // Track current reports by ID
+    let realtimeSubscription = null;
 
     function goBack() {
       window.location.href = "index.html";
@@ -478,20 +562,243 @@ body {
       }
     }
 
-    async function loadReports(retries = 3) {
+    // Create a report card element
+    function createReportCard(report) {
+      const reportId = report.id;
+      let status = report.status || "Pending";
+      status = String(status).trim();
+      
+      // Determine status class
+      let statusClass = 'status-pending';
+      if (status.toLowerCase() === 'resolved') {
+        statusClass = 'status-resolved';
+      } else if (status.toLowerCase() === 'investigating' || 
+                 status.toLowerCase() === 'in progress' ||
+                 status.toLowerCase() === 'inprogress') {
+        statusClass = 'status-investigating';
+      } else if (status.toLowerCase() === 'cancelled' || 
+                 status.toLowerCase() === 'canceled') {
+        statusClass = 'status-cancelled';
+      } else if (status.toLowerCase() === 'active') {
+        statusClass = 'status-pending';
+        status = 'Pending';
+      }
+
+      // Format time
+      const reportTime = new Date(report.created_at);
+      const timeString = reportTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      const dateString = reportTime.toLocaleDateString();
+
+      const div = document.createElement("div");
+      div.className = "notif";
+      div.dataset.id = reportId;
+      div.dataset.timestamp = reportTime.getTime(); // Store timestamp for sorting
+      
+      div.innerHTML = `
+        <div class="emergency-badge ${getBadgeClass(report.type)}">
+          <i class="${getTypeIcon(report.type)}"></i> ${getTypeDisplay(report.type)}
+        </div>
+        
+        <div class="notif-content">
+          <div class="text-content">
+            <div class="notif-title">
+              <i class="fas fa-user-circle"></i>
+              ${report.reporter || "Anonymous"}
+            </div>
+            
+            <div class="notif-details">
+              <div class="detail-item">
+                <span class="detail-label"><i class="far fa-clock"></i> Time:</span>
+                <span class="detail-value">${timeString}</span>
+              </div>
+              
+              <div class="detail-item">
+                <span class="detail-label"><i class="far fa-calendar"></i> Date:</span>
+                <span class="detail-value">${dateString}</span>
+              </div>
+              
+              <div class="detail-item">
+                <span class="detail-label"><i class="fas fa-map-marker-alt"></i> Location:</span>
+                <span class="detail-value">${report.latitude?.toFixed(4)}, ${report.longitude?.toFixed(4)}</span>
+              </div>
+              
+              <div class="detail-item">
+                <span class="detail-label"><i class="fas fa-info-circle"></i> ID:</span>
+                <span class="detail-value">${reportId.slice(0, 8)}...</span>
+              </div>
+            </div>
+            
+            <div class="status-badge ${statusClass}">
+              <i class="fas fa-circle"></i> ${status}
+            </div>
+          </div>
+          
+          <div class="photo-preview ${report.photo_url ? '' : 'no-photo'}">
+            ${report.photo_url ? 
+              `<img src="${report.photo_url}" alt="Incident photo">` : 
+              `<span><i class="fas fa-camera"></i> No photo</span>`
+            }
+          </div>
+        </div>
+      `;
+      
+      // Click to view report on map
+      div.onclick = () => {
+        localStorage.setItem("selectedReport", JSON.stringify(report));
+        window.location.href = `view-report.html?id=${reportId}`;
+      };
+      
+      return div;
+    }
+
+    // Update or add report card
+    function updateReportCard(report, isNew = false, isUpdate = false) {
+      const container = document.getElementById("reportList");
+      const existingCard = document.querySelector(`.notif[data-id='${report.id}']`);
+      
+      // Create new card
+      const newCard = createReportCard(report);
+      
+      // Add animation classes
+      if (isUpdate) {
+        newCard.classList.add('updated-report');
+        setTimeout(() => newCard.classList.remove('updated-report'), 1000);
+      }
+      
+      if (isNew) {
+        newCard.classList.add('new-report');
+        setTimeout(() => newCard.classList.remove('new-report'), 3000);
+      }
+      
+      if (existingCard) {
+        // Update existing card - replace it
+        existingCard.replaceWith(newCard);
+        console.log(`Updated report: ${report.id}`);
+      } else {
+        // Add new card at the top temporarily
+        container.prepend(newCard);
+        console.log(`Added new report: ${report.id}`);
+        
+        // Show notification if in background
+        if (document.hidden && isNew) {
+          showNotification(report);
+        }
+      }
+      
+      // Update current reports map
+      currentReports.set(report.id, report);
+      
+      // RE-SORT ALL CARDS after any update
+      sortAllReports();
+    }
+
+    // Sort all reports by creation date (newest first)
+    function sortAllReports() {
+      const container = document.getElementById("reportList");
+      const cards = Array.from(container.querySelectorAll('.notif'));
+      
+      if (cards.length <= 1) return;
+      
+      // Get all reports from currentReports map and sort by created_at
+      const reportsArray = Array.from(currentReports.values());
+      
+      // Sort by created_at descending (newest first)
+      reportsArray.sort((a, b) => {
+        const timeA = new Date(a.created_at).getTime();
+        const timeB = new Date(b.created_at).getTime();
+        return timeB - timeA; // Newest first
+      });
+      
+      // Clear container
+      container.innerHTML = '';
+      
+      // Re-add all cards in sorted order
+      reportsArray.forEach(report => {
+        const existingCard = document.querySelector(`.notif[data-id='${report.id}']`);
+        if (existingCard) {
+          // Keep the existing card (preserves animations)
+          container.appendChild(existingCard);
+        } else {
+          // Create new card if it doesn't exist
+          const card = createReportCard(report);
+          container.appendChild(card);
+        }
+      });
+      
+      console.log(`Sorted ${reportsArray.length} reports`);
+    }
+
+    // Remove report card
+    function removeReportCard(reportId) {
+      const existingCard = document.querySelector(`.notif[data-id='${reportId}']`);
+      if (existingCard) {
+        existingCard.remove();
+        currentReports.delete(reportId);
+        console.log(`Removed report: ${reportId}`);
+      }
+    }
+
+    // Show browser notification
+    function showNotification(report) {
+      if (!("Notification" in window)) return;
+      
+      if (Notification.permission === "granted") {
+        const notification = new Notification(`New Emergency Report: ${getTypeDisplay(report.type)}`, {
+          body: `Reported by: ${report.reporter || "Anonymous"}`,
+          icon: 'assets/aid-tracker-logo.png',
+          tag: report.id
+        });
+        
+        notification.onclick = () => {
+          window.focus();
+          notification.close();
+        };
+      }
+    }
+
+    // Request notification permission
+    function requestNotificationPermission() {
+      if (!("Notification" in window)) return;
+      
+      if (Notification.permission === "default") {
+        Notification.requestPermission();
+      }
+    }
+
+    // Update connection status
+    function updateConnectionStatus(connected) {
+      const statusEl = document.getElementById("connectionStatus");
+      if (connected) {
+        statusEl.innerHTML = '<i class="fas fa-circle"></i> Live';
+        statusEl.className = 'connection-status connection-connected';
+        statusEl.style.display = 'flex';
+      } else {
+        statusEl.innerHTML = '<i class="fas fa-circle"></i> Offline';
+        statusEl.className = 'connection-status connection-disconnected';
+        statusEl.style.display = 'flex';
+      }
+      
+      // Hide after 3 seconds if connected
+      if (connected) {
+        setTimeout(() => {
+          statusEl.style.display = 'none';
+        }, 3000);
+      }
+    }
+
+    async function loadReports() {
       const statusEl = document.getElementById("status");
       const container = document.getElementById("reportList");
-      const refreshIndicator = document.getElementById("refreshIndicator");
+      const realtimeIndicator = document.getElementById("realtimeIndicator");
       
-      statusEl.textContent = "Loading emergency reports" + (retries < 3 ? " (retrying)" : "") + "...";
-      container.innerHTML = "";
-      refreshIndicator.style.display = 'none';
+      statusEl.textContent = "Loading emergency reports...";
+      realtimeIndicator.style.display = 'none';
 
       try {
         console.log("Fetching reports from Supabase...");
         
         // Fetch reports from Supabase
-        const { data: reports, error } = await supabase
+        const { data: fetchedReports, error } = await supabase
           .from('reports')
           .select('*')
           .order('created_at', { ascending: false });
@@ -501,9 +808,14 @@ body {
           throw new Error(`Database error: ${error.message}`);
         }
 
-        console.log("Reports received:", reports);
+        console.log("Reports received:", fetchedReports);
+        reports = fetchedReports || [];
 
-        if (!reports || reports.length === 0) {
+        // Clear container and map
+        container.innerHTML = "";
+        currentReports.clear();
+
+        if (reports.length === 0) {
           statusEl.style.display = 'none';
           container.innerHTML = `
             <div class="empty-state">
@@ -516,183 +828,164 @@ body {
               </div>
             </div>
           `;
-          return;
+        } else {
+          statusEl.style.display = 'none';
+          realtimeIndicator.style.display = 'block';
+          
+          // Add all reports
+          reports.forEach(report => {
+            updateReportCard(report);
+          });
+          
+          // Initial sort
+          sortAllReports();
         }
 
-        statusEl.style.display = 'none';
-        refreshIndicator.style.display = 'block';
+        // Setup realtime subscription
+        setupRealtimeSubscription();
         
-        // Load statuses from localStorage
-        const statuses = JSON.parse(localStorage.getItem("reportStatuses") || "{}");
-
-        reports.forEach((report) => {
-          const reportId = report.id;
-          const status = statuses[reportId] || "Active";
-          
-          // Determine status class
-          let statusClass = 'status-active';
-          if (status === 'Resolved') statusClass = 'status-resolved';
-          if (status === 'In Progress') statusClass = 'status-inprogress';
-          if (status === 'Cancelled') statusClass = 'status-cancelled';
-
-          const div = document.createElement("div");
-          div.className = "notif";
-          div.dataset.id = reportId;
-          
-          // Format time
-          const reportTime = new Date(report.created_at);
-          const timeString = reportTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-          const dateString = reportTime.toLocaleDateString();
-          
-          div.innerHTML = `
-            <div class="emergency-badge ${getBadgeClass(report.type)}">
-              <i class="${getTypeIcon(report.type)}"></i> ${getTypeDisplay(report.type)}
-            </div>
-            
-            <div class="notif-content">
-              <div class="text-content">
-                <div class="notif-title">
-                  <i class="fas fa-user-circle"></i>
-                  ${report.reporter || "Anonymous"}
-                </div>
-                
-                <div class="notif-details">
-                  <div class="detail-item">
-                    <span class="detail-label"><i class="far fa-clock"></i> Time:</span>
-                    <span class="detail-value">${timeString}</span>
-                  </div>
-                  
-                  <div class="detail-item">
-                    <span class="detail-label"><i class="far fa-calendar"></i> Date:</span>
-                    <span class="detail-value">${dateString}</span>
-                  </div>
-                  
-                  <div class="detail-item">
-                    <span class="detail-label"><i class="fas fa-map-marker-alt"></i> Location:</span>
-                    <span class="detail-value">${report.latitude?.toFixed(4)}, ${report.longitude?.toFixed(4)}</span>
-                  </div>
-                  
-                  <div class="detail-item">
-                    <span class="detail-label"><i class="fas fa-info-circle"></i> ID:</span>
-                    <span class="detail-value">${reportId.slice(0, 8)}...</span>
-                  </div>
-                </div>
-                
-                <div class="status-badge ${statusClass}">
-                  <i class="fas fa-circle"></i> ${status}
-                </div>
-              </div>
-              
-              <div class="photo-preview ${report.photo_url ? '' : 'no-photo'}">
-                ${report.photo_url ? 
-                  `<img src="${report.photo_url}" alt="Incident photo">` : 
-                  `<span><i class="fas fa-camera"></i> No photo</span>`
-                }
-              </div>
-            </div>
-          `;
-          
-          // Click to view report on map
-          div.onclick = () => {
-            localStorage.setItem("selectedReport", JSON.stringify(report));
-            window.location.href = `view-report.html?id=${reportId}`;
-          };
-          
-          container.appendChild(div);
-        });
+        // Request notification permission
+        requestNotificationPermission();
+        
+        // Update connection status
+        updateConnectionStatus(true);
 
       } catch (err) {
         console.error("Error loading reports:", err);
-        
-        if (retries > 0) {
-          statusEl.textContent = `Connection issue. Retrying in 2 seconds... (${retries} attempts left)`;
-          setTimeout(() => loadReports(retries - 1), 2000);
-        } else {
-          statusEl.style.display = 'none';
-          container.innerHTML = `
-            <div class="error-state">
-              <div class="error-icon">
-                <i class="fas fa-exclamation-circle"></i>
-              </div>
-              <div class="error-title">Connection Error</div>
-              <p>Failed to load emergency reports. Please check your connection.</p>
-              <p style="margin-top: 10px; font-size: 0.9rem; color: #fca5a5;">${err.message}</p>
-              <button class="retry-btn" onclick="loadReports()">
-                <i class="fas fa-sync-alt"></i> Try Again
-              </button>
+        statusEl.style.display = 'none';
+        container.innerHTML = `
+          <div class="error-state">
+            <div class="error-icon">
+              <i class="fas fa-exclamation-circle"></i>
             </div>
-          `;
-        }
+            <div class="error-title">Connection Error</div>
+            <p>Failed to load emergency reports. Please check your connection.</p>
+            <p style="margin-top: 10px; font-size: 0.9rem; color: #fca5a5;">${err.message}</p>
+            <button class="retry-btn" onclick="loadReports()">
+              <i class="fas fa-sync-alt"></i> Try Again
+            </button>
+          </div>
+        `;
+        
+        updateConnectionStatus(false);
       }
     }
 
-    // Listen for status updates from other tabs
-    window.addEventListener("storage", (event) => {
-      if (event.key === "reportStatusUpdate") {
-        try {
-          const data = JSON.parse(event.newValue);
-          const notifDiv = document.querySelector(`.notif[data-id='${data.id}']`);
-          
-          if (notifDiv) {
-            // Update status badge
-            let statusClass = 'status-active';
-            if (data.statusText === 'Resolved') statusClass = 'status-resolved';
-            if (data.statusText === 'In Progress') statusClass = 'status-inprogress';
-            if (data.statusText === 'Cancelled') statusClass = 'status-cancelled';
+    // Setup realtime subscription
+    function setupRealtimeSubscription() {
+      // Remove existing subscription if any
+      if (realtimeSubscription) {
+        supabase.removeChannel(realtimeSubscription);
+      }
+
+      console.log("Setting up realtime subscription...");
+      
+      // Subscribe to changes in the reports table
+      realtimeSubscription = supabase
+        .channel('reports-changes')
+        .on('postgres_changes', 
+          { 
+            event: '*', 
+            schema: 'public', 
+            table: 'reports' 
+          }, 
+          (payload) => {
+            console.log('Realtime update received:', payload);
             
-            const statusBadge = notifDiv.querySelector('.status-badge');
-            statusBadge.className = `status-badge ${statusClass}`;
-            statusBadge.innerHTML = `<i class="fas fa-circle"></i> ${data.statusText}`;
-            
-            // Update localStorage
-            const statuses = JSON.parse(localStorage.getItem("reportStatuses") || "{}");
-            statuses[data.id] = data.statusText;
-            localStorage.setItem("reportStatuses", JSON.stringify(statuses));
-            
-            // Visual effect for dismissed reports
-            if (data.remove) {
-              notifDiv.style.opacity = "0.7";
-              notifDiv.style.filter = "grayscale(0.5)";
+            if (payload.eventType === 'INSERT') {
+              // New report added
+              updateReportCard(payload.new, true, false);
+              updateConnectionStatus(true);
+            } else if (payload.eventType === 'UPDATE') {
+              // Existing report updated
+              updateReportCard(payload.new, false, true);
+              updateConnectionStatus(true);
+            } else if (payload.eventType === 'DELETE') {
+              // Report deleted
+              removeReportCard(payload.old.id);
+              updateConnectionStatus(true);
             }
           }
-        } catch (e) {
-          console.error("Error processing storage event:", e);
-        }
-      }
-    });
-
-    // Auto-refresh every 10 seconds
-    let refreshInterval;
-    function startAutoRefresh(seconds = 10) {
-      if (refreshInterval) clearInterval(refreshInterval);
-      refreshInterval = setInterval(loadReports, seconds * 1000);
+        )
+        .subscribe((status) => {
+          console.log('Realtime subscription status:', status);
+          
+          if (status === 'SUBSCRIBED') {
+            updateConnectionStatus(true);
+          } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+            updateConnectionStatus(false);
+            // Try to reconnect after 5 seconds
+            setTimeout(() => {
+              if (realtimeSubscription) {
+                realtimeSubscription.unsubscribe();
+                setupRealtimeSubscription();
+              }
+            }, 5000);
+          }
+        });
     }
 
-    // Stop auto-refresh
-    function stopAutoRefresh() {
-      if (refreshInterval) {
-        clearInterval(refreshInterval);
-        refreshInterval = null;
+    // Function to update status in Supabase
+    async function updateReportStatus(reportId, statusText) {
+      try {
+        statusText = String(statusText).trim();
+        
+        const { data, error } = await supabase
+          .from('reports')
+          .update({ status: statusText })
+          .eq('id', reportId);
+        
+        if (error) {
+          console.error("Error updating status in Supabase:", error);
+          return false;
+        }
+        
+        console.log(`Status updated in Supabase for report ${reportId}: ${statusText}`);
+        return true;
+      } catch (err) {
+        console.error("Error updating status:", err);
+        return false;
+      }
+    }
+
+    // Handle visibility change
+    function handleVisibilityChange() {
+      if (!document.hidden && realtimeSubscription) {
+        // Page became visible, ensure subscription is active
+        setupRealtimeSubscription();
       }
     }
 
     // Initialize when page loads
     document.addEventListener('DOMContentLoaded', function() {
       loadReports();
-      startAutoRefresh(10);
       
-      // Stop auto-refresh when page is hidden
-      document.addEventListener('visibilitychange', function() {
-        if (document.hidden) {
-          stopAutoRefresh();
-        } else {
-          startAutoRefresh(10);
-        }
+      // Listen for visibility changes
+      document.addEventListener('visibilitychange', handleVisibilityChange);
+      
+      // Listen for online/offline events
+      window.addEventListener('online', () => {
+        console.log('Browser is online');
+        updateConnectionStatus(true);
+        setupRealtimeSubscription();
       });
+      
+      window.addEventListener('offline', () => {
+        console.log('Browser is offline');
+        updateConnectionStatus(false);
+      });
+    });
+
+    // Cleanup on page unload
+    window.addEventListener('beforeunload', () => {
+      if (realtimeSubscription) {
+        supabase.removeChannel(realtimeSubscription);
+      }
     });
 
     // Make functions available globally
     window.loadReports = loadReports;
+    window.updateReportStatus = updateReportStatus;
   </script>
 </body>
 </html>
