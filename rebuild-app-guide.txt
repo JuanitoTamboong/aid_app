@@ -1,0 +1,23 @@
+# Quick Commands to Update and Rebuild Android APK
+
+step how to update and rebuild apk
+
+1.Sync web changes to Android
+   ```
+   npx cap sync android
+   ```
+
+2.Build debug APK
+   ```
+   powershell -Command "cd android; .\gradlew.bat assembleDebug"
+   ```
+
+3. Find the APK
+   ```
+   android/app/build/outputs/apk/debug/app-debug.apk
+   ```
+
+For Release Build:
+```
+& { cd android; .\gradlew.bat assembleRelease }
+```

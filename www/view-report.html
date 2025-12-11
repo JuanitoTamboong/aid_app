@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>View Report Location</title>
+
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="website icon" href="assets/aid-tracker-logo.png">
+  <style>
+    html, body { height: 100%; margin: 0; padding: 0; }
+    #map { height: 100vh; width: 100%; }
+    
+    /* Back Button Styles - Mobile Responsive */
+    .back-button {
+      position: fixed;
+      top: 15px;
+      right: 15px;
+      z-index: 1000;
+      background: linear-gradient(135deg, #fcd34d, #fbbf24);
+      border: 2px solid #d97706;
+      color: #0a1636;
+      padding: 12px 24px;
+      border-radius: 50px;
+      font-weight: 600;
+      font-size: 16px;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(251, 191, 36, 0.3);
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      backdrop-filter: blur(5px);
+      -webkit-backdrop-filter: blur(5px);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    
+    .back-button:hover {
+      background: linear-gradient(135deg, #fbbf24, #f59e0b);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(251, 191, 36, 0.4);
+    }
+    
+    .back-button:active {
+      transform: translateY(0);
+      box-shadow: 0 2px 10px rgba(251, 191, 36, 0.3);
+    }
+    
+    .back-button::before {
+      content: "←";
+      font-size: 18px;
+      font-weight: bold;
+    }
+    
+    /* Mobile Responsive Adjustments */
+    @media (max-width: 768px) {
+      .back-button {
+        top: 10px;
+        right: 10px;
+        padding: 10px 20px;
+        font-size: 14px;
+        border-radius: 40px;
+      }
+      
+      .back-button span.text {
+        display: none; /* Hide "Go Back" text on small screens */
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .back-button {
+        top: 8px;
+        right: 8px;
+        padding: 8px 16px;
+        font-size: 12px;
+      }
+      
+      .back-button::before {
+        font-size: 16px;
+      }
+    }
+    
+    /* Tablet */
+    @media (min-width: 769px) and (max-width: 1024px) {
+      .back-button {
+        top: 12px;
+        right: 12px;
+        padding: 11px 22px;
+      }
+    }
+    
+    /* Desktop - Show text */
+    @media (min-width: 769px) {
+      .back-button span.text {
+        display: inline;
+      }
+      
+      .back-button::before {
+        margin-right: 4px;
+      }
+    }
+    
+    .popup-img {
+      width: 100%;
+      max-width: 250px;
+      border-radius: 8px;
+      margin-top: 8px;
+      cursor: pointer;
+      transition: transform 0.2s ease;
+    }
+    
+    .popup-img:hover {
+      transform: scale(1.02);
+      opacity: 0.9;
+    }
+    
+    #loading {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 18px;
+      color: #333;
+      background: white;
+      padding: 20px 30px;
+      border-radius: 10px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 15px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      border-left: 4px solid #f59e0b;
+    }
+    
+    /* Loading spinner */
+    .loading-spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #f59e0b;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    .responder-info {
+      background-color: #f0f9ff;
+      border-left: 4px solid #3b82f6;
+      padding: 12px;
+      margin: 12px 0;
+      border-radius: 6px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    
+    .no-responder {
+      background-color: #fef3c7;
+      border-left: 4px solid #f59e0b;
+      padding: 12px;
+      margin: 12px 0;
+      border-radius: 6px;
+      font-style: italic;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    
+    .responder-title {
+      font-weight: bold;
+      color: #1e40af;
+      margin-bottom: 8px;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .responder-title i {
+      font-style: normal;
+      font-size: 14px;
+      background: #3b82f6;
+      color: white;
+      padding: 2px 8px;
+      border-radius: 12px;
+    }
+    
+    .responder-details {
+      margin-left: 24px;
+    }
+    
+    .responder-detail {
+      margin: 4px 0;
+      color: #374151;
+    }
+    
+    .responder-detail strong {
+      color: #1e3a8a;
+      min-width: 80px;
+      display: inline-block;
+    }
+    
+    .contact-info {
+      color: #059669;
+      font-weight: bold;
+    }
+    
+    .contact-link {
+      color: #3b82f6;
+      text-decoration: none;
+      transition: color 0.2s ease;
+    }
+    
+    .contact-link:hover {
+      color: #1d4ed8;
+      text-decoration: underline;
+    }
+    
+    /* Map controls styling */
+    .leaflet-control-scale {
+      background: rgba(255, 255, 255, 0.9);
+      padding: 5px 10px;
+      border-radius: 4px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      font-size: 12px;
+      font-weight: 500;
+    }
+  </style>
+</head>
+<body>
+  <!-- Back Button -->
+  <button class="back-button" id="backBtn" title="Go back to previous page">
+    <span class="text">Go Back</span>
+  </button>
+  
+  <div id="loading">
+    <div class="loading-spinner"></div>
+    <div>Loading report location...</div>
+  </div>
+  
+  <div id="map"></div>
+
+  <!-- Load scripts -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+
+  <script>
+    // --- GLOBAL FUNCTIONS ---
+    
+    // Go Back Function - Always go back to my-reports.html
+    window.goBack = function() {
+      window.location.href = 'my-reports.html';
+    };
+
+    // Helper function for HTML escaping - Make it global too
+    window.escapeHTML = function(str) {
+      if (!str) return '';
+      return str.replace(/[&<>"']/g, m => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+      }[m]));
+    };
+
+    // --- GET REPORT ID FROM URL ---
+    function getReportIdFromURL() {
+      const urlParams = new URLSearchParams(window.location.search);
+      let reportID = urlParams.get("id");
+      
+      if (reportID) {
+        reportID = reportID.trim();
+      }
+      
+      return reportID;
+    }
+
+    const reportID = getReportIdFromURL();
+
+    // --- SUPABASE CONFIG ---
+    const supabaseUrl = 'https://gwvepxupoxyyydnisulb.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd3dmVweHVwb3h5eXlkbmlzdWxiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ4MDE4ODcsImV4cCI6MjA4MDM3Nzg4N30.Ku9SXTAKNMvHilgEpxj5HcVA-0TPt4ziuEq0Irao5Qc';
+    
+    // Create Supabase client
+    const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+    // --- REAL GEOCODING FUNCTION WITH OPENCAGE (CORS ENABLED) ---
+    async function getLocationName(lat, lng) {
+      try {
+        const apiKey = '0a78fbd8bcd74be398f210b34682c77c';
+        const url = `https://api.opencagedata.com/geocode/v1/json?q=${lat}+${lng}&key=${apiKey}&language=en&pretty=1&no_annotations=1`;
+        
+        console.log("Geocoding coordinates:", lat, lng);
+        
+        const response = await fetch(url, {
+          method: 'GET',
+          headers: {
+            'Accept': 'application/json'
+          }
+        });
+        
+        if (!response.ok) {
+          console.error("Geocoding API error:", response.status);
+          throw new Error(`Geocoding failed: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        console.log("Geocoding API response:", data);
+        
+        if (data.results && data.results.length > 0) {
+          const result = data.results[0];
+          const components = result.components;
+          
+          let locationParts = [];
+          
+          if (components.road) locationParts.push(components.road);
+          if (components.village) locationParts.push(components.village);
+          if (components.suburb) locationParts.push(components.suburb);
+          if (components.neighbourhood) locationParts.push(components.neighbourhood);
+          if (components.town) locationParts.push(components.town);
+          if (components.city) locationParts.push(components.city);
+          if (components.municipality) locationParts.push(components.municipality);
+          if (components.county) locationParts.push(components.county);
+          if (components.state) locationParts.push(components.state);
+          if (components.country) locationParts.push(components.country);
+          
+          if (locationParts.length > 0) {
+            const uniqueParts = [...new Set(locationParts)];
+            return uniqueParts.join(', ');
+          }
+          
+          if (result.formatted) {
+            return result.formatted;
+          }
+        }
+        
+        return `Coordinates: ${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+        
+      } catch (error) {
+        console.error("Geocoding error:", error);
+        return `Coordinates: ${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+      }
+    }
+
+    // --- EXTRACT RESPONDER INFO FROM SEPARATE COLUMNS ---
+    function extractResponderInfo(reportData) {
+      if (!reportData) return null;
+      
+      console.log("=== EXTRACTING RESPONDER INFO ===");
+      console.log("Full report data:", reportData);
+      
+      // Debug: List all available keys
+      console.log("All available keys in report data:");
+      Object.keys(reportData).forEach(key => {
+        console.log(`- ${key}:`, reportData[key], "(type:", typeof reportData[key], ")");
+      });
+      
+      // Extract data from separate columns 
+      // Check ALL possible column names to find where data is stored
+      const assignedResponders = reportData.assigned_responders || 
+                                reportData.assigned_resp || 
+                                reportData.responders ||
+                                null;
+      
+      const assignedUnit = reportData.assigned_unit || 
+                          reportData.assigned_units || 
+                          reportData.unit ||
+                          null;
+      
+      // Check for contact in ALL possible field names
+      let contactValue = null;
+      
+      // Try all possible contact field names
+      const contactFields = [
+        'contact',
+        'responder_contact', 
+        'contact_number', 
+        'phone', 
+        'mobile',
+        'phone_number',
+        'mobile_number',
+        'responder_phone'
+      ];
+      
+      for (const field of contactFields) {
+        if (reportData[field] !== undefined && reportData[field] !== null && reportData[field] !== '') {
+          contactValue = reportData[field];
+          console.log(`Found contact in field '${field}':`, contactValue);
+          break;
+        }
+      }
+      
+      console.log("=== EXTRACTION RESULTS ===");
+      console.log("assigned_responders:", assignedResponders, "(type:", typeof assignedResponders, ")");
+      console.log("assigned_unit:", assignedUnit, "(type:", typeof assignedUnit, ")");
+      console.log("contact:", contactValue, "(type:", typeof contactValue, ")");
+      
+      // Format contact value properly
+      let formattedContact = null;
+      if (contactValue !== null && contactValue !== undefined && contactValue !== '') {
+        // Convert to string and clean it
+        formattedContact = contactValue.toString().trim();
+        console.log("Formatted contact:", formattedContact);
+        
+        // If it's a number, format it nicely
+        if (/^\d+$/.test(formattedContact)) {
+          // Add dashes for phone numbers
+          if (formattedContact.length === 11) {
+            formattedContact = formattedContact.replace(/(\d{4})(\d{3})(\d{4})/, '$1-$2-$3');
+          } else if (formattedContact.length === 10) {
+            formattedContact = formattedContact.replace(/(\d{3})(\d{3})(\d{4})/, '$1-$2-$3');
+          }
+        }
+      }
+      
+      // Check if we have any responder data
+      const hasData = (assignedResponders && assignedResponders.toString().trim() !== '') ||
+                     (assignedUnit && assignedUnit.toString().trim() !== '') ||
+                     (formattedContact && formattedContact.trim() !== '');
+      
+      if (!hasData) {
+        console.log("No responder data found in any column");
+        return null;
+      }
+      
+      // Parse the assigned_responders string if it contains multiple responders
+      let responders = [];
+      if (assignedResponders) {
+        const responderString = assignedResponders.toString().trim();
+        if (responderString !== '') {
+          // Split by comma to get individual responder names
+          const responderList = responderString.split(',').map(r => r.trim()).filter(r => r !== '');
+          responders = responderList;
+          console.log("Parsed responders list:", responders);
+        }
+      }
+      
+      const responderInfo = {
+        names: responders,
+        unit: assignedUnit ? assignedUnit.toString().trim() : null,
+        contact: formattedContact,
+        hasResponders: responders.length > 0,
+        hasUnit: (assignedUnit && assignedUnit.toString().trim() !== ''),
+        hasContact: (formattedContact && formattedContact.trim() !== ''),
+        rawData: {
+          assignedResponders: assignedResponders,
+          assignedUnit: assignedUnit,
+          contactValue: contactValue
+        }
+      };
+      
+      console.log("=== FINAL RESPONDER INFO ===", responderInfo);
+      return responderInfo;
+    }
+
+    // --- LOAD REPORT FROM SUPABASE ---
+    async function loadReport() {
+      try {
+        if (!reportID) {
+          alert("Missing report ID! Please go back to your reports.");
+          window.location.href = "my-reports.html";
+          return;
+        }
+
+        console.log("Fetching report ID:", reportID);
+
+        const loadingDiv = document.getElementById('loading');
+        loadingDiv.innerHTML = `
+          <div class="loading-spinner"></div>
+          <div>Loading report information...</div>
+        `;
+
+        // Fetch report from Supabase with ALL columns including the separate responder columns
+        const { data: report, error } = await supabase
+          .from('reports')
+          .select('*')
+          .eq('id', reportID)
+          .single();
+
+        if (error) {
+          console.error("Supabase error:", error);
+          alert("Report not found or database error: " + error.message);
+          window.location.href = "my-reports.html";
+          return;
+        }
+
+        if (!report) {
+          alert("Report not found in database.");
+          window.location.href = "my-reports.html";
+          return;
+        }
+
+        console.log("=== FULL REPORT DATA FROM SUPABASE ===", report);
+
+        if (!report.latitude || !report.longitude) {
+          alert("Report is missing coordinates!");
+          return;
+        }
+
+        // Extract responder info from separate columns
+        const responderInfo = extractResponderInfo(report);
+        console.log("Responder info from separate columns:", responderInfo);
+
+        // Get location name
+        loadingDiv.innerHTML = `
+          <div class="loading-spinner"></div>
+          <div>Getting location name...</div>
+        `;
+        
+        let displayLocation = report.location || report.location_name || report.formatted_address;
+        
+        if (!displayLocation || displayLocation.trim() === '' || displayLocation === 'NULL') {
+          displayLocation = await getLocationName(report.latitude, report.longitude);
+        }
+        
+        // Hide loading, show map
+        loadingDiv.style.display = 'none';
+        
+        // Initialize map
+        const map = L.map("map").setView([report.latitude, report.longitude], 15);
+
+        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+          maxZoom: 19,
+          attribution: "&copy; OpenStreetMap contributors"
+        }).addTo(map);
+
+        const formattedCoords = `${report.latitude?.toFixed(6)}, ${report.longitude?.toFixed(6)}`;
+        
+        // Create popup content with responder info from separate columns
+        let popupContent = `
+          <div style="text-align:center; padding: 10px; max-width: 320px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+            <h3 style="font-weight: bold; font-size: 18px; color: #dc2626; margin-bottom: 8px; border-bottom: 2px solid #f3f4f6; padding-bottom: 8px;">
+              ${escapeHTML(report.type_display || report.type?.toUpperCase() || 'EMERGENCY')}
+            </h3>
+            <div style="text-align: left; font-size: 14px; color: #374151; line-height: 1.5;">
+              <p><strong>Report ID:</strong> ${escapeHTML(report.id?.substring(0, 8) + '...' || 'N/A')}</p>
+              <p><strong>Reporter:</strong> ${escapeHTML(report.reporter || 'Anonymous')}</p>
+              <p><strong>Time Reported:</strong> ${new Date(report.created_at || report.timestamp).toLocaleString()}</p>
+              <p><strong>Coordinates:</strong> <code style="background: #f3f4f6; padding: 2px 4px; border-radius: 3px;">${formattedCoords}</code></p>
+              <p><strong>Location:</strong> ${escapeHTML(displayLocation)}</p>
+        `;
+        
+        // Add responder information section from separate columns
+        if (responderInfo) {
+          // Check if we have any data to display
+          const hasAnyData = responderInfo.hasResponders || responderInfo.hasUnit || responderInfo.hasContact;
+          
+          if (hasAnyData) {
+            popupContent += `
+              <div class="responder-info">
+                <div class="responder-title">
+                  <span>🚑 Assigned Responders</span>
+                  ${responderInfo.hasUnit ? '<i>TEAM</i>' : ''}
+                </div>
+                <div class="responder-details">
+            `;
+            
+            // Show unit if available
+            if (responderInfo.hasUnit) {
+              popupContent += `<div class="responder-detail"><strong>Unit:</strong> ${escapeHTML(responderInfo.unit)}</div>`;
+            }
+            
+            // Show responder names
+            if (responderInfo.hasResponders) {
+              popupContent += `<div class="responder-detail"><strong>Responders:</strong> ${escapeHTML(responderInfo.names.join(', '))}</div>`;
+            }
+            
+            // Show contact if available
+            if (responderInfo.hasContact) {
+              const telLink = `tel:${responderInfo.contact.replace(/\D/g, '')}`;
+              popupContent += `
+                <div class="responder-detail">
+                  <strong>Contact:</strong> 
+                  <span class="contact-info">
+                    <a href="${telLink}" class="contact-link" title="Click to call">${escapeHTML(responderInfo.contact)}</a>
+                  </span>
+                </div>`;
+            }
+            
+            popupContent += `</div></div>`;
+          } else {
+            popupContent += `
+              <div class="no-responder">
+                <div style="font-weight: bold; color: #92400e; margin-bottom: 4px;">⚠ No Responder Assigned</div>
+                <div style="font-size: 12px; color: #92400e;">This report has not been assigned to a responder yet.</div>
+              </div>
+            `;
+          }
+        } else {
+          popupContent += `
+            <div class="no-responder">
+              <div style="font-weight: bold; color: #92400e; margin-bottom: 4px;">⚠ No Responder Assigned</div>
+              <div style="font-size: 12px; color: #92400e;">This report has not been assigned to a responder yet.</div>
+            </div>
+          `;
+        }
+        
+        if (report.description) {
+          popupContent += `<p><strong>Description:</strong> ${escapeHTML(report.description)}</p>`;
+        }
+        
+        if (report.status) {
+          const status = report.status.toLowerCase();
+          const statusColor = status === 'investigating' ? '#d97706' : 
+                            status === 'resolved' ? '#059669' : 
+                            status === 'pending' ? '#dc2626' : '#374151';
+          popupContent += `<p><strong>Status:</strong> <span style="color: ${statusColor}; font-weight: bold;">${escapeHTML(report.status.toUpperCase())}</span></p>`;
+        }
+        
+        if (report.priority) {
+          const priority = report.priority.toLowerCase();
+          const priorityColor = priority === 'high' ? '#dc2626' : 
+                              priority === 'medium' ? '#d97706' : 
+                              priority === 'low' ? '#059669' : '#374151';
+          popupContent += `<p><strong>Priority:</strong> <span style="color: ${priorityColor}; font-weight: bold;">${escapeHTML(report.priority.toUpperCase())}</span></p>`;
+        }
+        
+        popupContent += `</div>`;
+
+        if (report.photo_url) {
+          const escapedPhotoUrl = escapeHTML(report.photo_url);
+          
+          popupContent += `
+            <div style="margin-top: 12px;">
+              <img src="${escapedPhotoUrl}" 
+                   class="popup-img" 
+                   alt="Report photo"
+                   onclick="window.open('${escapedPhotoUrl}', '_blank')"
+                   title="Click to view full size"
+                   onerror="this.style.display='none'; this.parentElement.innerHTML='<p style=\"color:#6b7280;font-size:12px;\">(Image unavailable or failed to load)</p>';">
+              <p style="color: #6b7280; font-size: 11px; margin-top: 4px; text-align: center;">
+                Click image to view full size
+              </p>
+            </div>
+          `;
+        }
+        
+        popupContent += `</div>`;
+
+        // Add main report marker with custom icon
+        const customIcon = L.divIcon({
+          className: 'custom-marker',
+          html: `
+            <div style="background: #dc2626; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; border: 3px solid white; box-shadow: 0 2px 8px rgba(0,0,0,0.3);">
+              <span style="font-size: 12px;">🚨</span>
+            </div>
+          `,
+          iconSize: [32, 32],
+          iconAnchor: [16, 32]
+        });
+
+        const marker = L.marker([report.latitude, report.longitude], {
+          icon: customIcon
+        }).addTo(map);
+        
+        marker.bindPopup(popupContent).openPopup();
+
+        // Add circle around report
+        L.circle([report.latitude, report.longitude], {
+          color: '#dc2626',
+          fillColor: '#fca5a5',
+          fillOpacity: 0.2,
+          radius: 100,
+          weight: 2
+        }).addTo(map);
+
+        // Add scale control
+        L.control.scale({ imperial: false, position: 'bottomleft' }).addTo(map);
+
+        // Update page title
+        let titleLocation = displayLocation.split(',')[0];
+        if (titleLocation.length > 20) {
+          titleLocation = titleLocation.substring(0, 20) + '...';
+        }
+        document.title = `Report: ${escapeHTML(report.type_display || report.type || 'Emergency')} at ${titleLocation}`;
+
+      } catch (error) {
+        console.error("Error loading report:", error);
+        document.getElementById('loading').innerHTML = 
+          '<div style="color: red; text-align: center; padding: 20px; max-width: 300px;">' +
+          '<h3 style="margin-bottom: 10px; color: #dc2626;">⚠ Error loading report</h3>' +
+          '<p style="margin-bottom: 15px; color: #6b7280;">' + error.message + '</p>' +
+          '<button onclick="goBack()" style="padding: 10px 20px; background: linear-gradient(135deg, #fcd34d, #fbbf24); color: #0a1636; border: 2px solid #d97706; border-radius: 6px; cursor: pointer; font-weight: 600; transition: transform 0.2s;">Go Back</button>' +
+          '</div>';
+      }
+    }
+
+    // --- INITIALIZE PAGE ---
+    document.addEventListener('DOMContentLoaded', function() {
+      // Add event listener to back button
+      const backBtn = document.getElementById('backBtn');
+      if (backBtn) {
+        backBtn.addEventListener('click', goBack);
+      }
+      
+      // Also set onclick as fallback
+      backBtn.onclick = goBack;
+      
+      // Load the report
+      loadReport();
+    });
+  </script>
+</body>
+</html>
