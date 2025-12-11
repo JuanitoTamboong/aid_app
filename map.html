@@ -223,7 +223,7 @@ body {
   text-align: left;
 }
 
-/* File Upload Styling - FIXED */
+/* File Upload Styling - FIXED: Updated for optional photo */
 .file-upload-wrapper {
   width: 100%;
   margin-bottom: 20px;
@@ -369,7 +369,7 @@ body {
   display: none !important; 
 }
 
-/* Camera Overlay */
+/* Camera Overlay - FIXED: Proper centering */
 #cameraOverlay {
   display: none;
   position: fixed;
@@ -378,25 +378,41 @@ body {
   width: 100%; 
   height: 100%;
   background-color: rgba(10,22,54,0.98);
+  z-index: 3000;
+}
+
+.camera-wrapper {
+  display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
-  flex-direction: column;
-  z-index: 3000;
+  width: 100%;
+  height: 100%;
   padding: 20px;
+  box-sizing: border-box;
 }
-#cameraOverlay video { 
-  width: 100%; 
-  max-width: 350px; 
-  border-radius: 10px; 
+
+#cameraFeed {
+  width: 100%;
+  max-width: 350px;
+  max-height: 60vh;
+  border-radius: 10px;
   border: 2px solid #fcd34d;
+  background-color: #000;
+  object-fit: cover;
+  display: block;
 }
+
 .camera-controls {
   display: flex;
   gap: 15px;
   margin-top: 20px;
   flex-wrap: wrap;
   justify-content: center;
+  width: 100%;
+  max-width: 350px;
 }
+
 .camera-btn {
   padding: 12px 25px;
   border-radius: 8px;
@@ -446,6 +462,11 @@ body {
   #capturedPreview {
     max-height: 200px !important;
   }
+  
+  /* Camera adjustments for mobile */
+  #cameraFeed {
+    max-width: 300px;
+  }
 }
 
 @media (max-width: 480px) {
@@ -473,7 +494,13 @@ body {
     max-height: 180px !important;
   }
   
-  #cameraOverlay video {
+  /* Camera adjustments for small screens */
+  #cameraFeed {
+    max-width: 280px;
+    max-height: 50vh;
+  }
+  
+  .camera-controls {
     max-width: 280px;
   }
 }
@@ -493,7 +520,7 @@ body {
 
   <!-- FIXED: Button Container for better mobile layout -->
   <div class="button-container">
-    <button id="reportBtn" class="map-button" onclick="showPenaltyPopup()">
+    <button id="reportBtn" class="map-button" onclick="openReportForm()">
       <i class="fas fa-exclamation-triangle"></i> Report Emergency
     </button>
     
@@ -502,18 +529,7 @@ body {
     </button>
   </div>
 
-  <!-- Popups -->
-  <div class="alert-overlay hidden" id="penaltyPopup">
-    <div class="alert-box">
-      <h2>Fake Reporting Warning</h2>
-      <p>Please ensure that all information is accurate. False reporting may result in penalties.</p>
-      <div class="button-group">
-        <button onclick="hidePenaltyPopup()" class="btn btn-danger">Cancel</button>
-        <button onclick="continueToReport()" class="btn btn-primary">Continue</button>
-      </div>
-    </div>
-  </div>
-
+  <!-- Report Form Popup (No penalty warning) -->
   <div class="alert-overlay hidden" id="reportPopup">
     <div class="alert-box">
       <h2>Submit Emergency Report</h2>
@@ -536,9 +552,14 @@ body {
           </div>
         </div>
         
-        <!-- Photo Upload - FIXED: Remove onclick from container -->
+        <!-- Photo Upload - UPDATED: Now optional with clear label -->
         <div class="form-group">
-          <label>Incident Photo</label>
+          <label>
+            <span>Incident Photo</span>
+            <span style="color: #94a3b8; font-size: 0.85rem; font-weight: normal; margin-left: 5px;">
+              (Optional - Add visual evidence if available)
+            </span>
+          </label>
           <div class="file-upload-wrapper">
             <div class="file-input-container">
               <label class="file-input-label" for="incidentPhoto">
@@ -546,7 +567,7 @@ body {
                   <i class="fas fa-cloud-upload-alt"></i>
                 </div>
                 <div class="file-input-text">Upload or Take Photo</div>
-                <div class="file-input-hint">Click to select file or use camera</div>
+                <div class="file-input-hint">Optional - JPEG, PNG up to 10MB</div>
                 <input type="file" id="incidentPhoto" accept="image/*">
               </label>
             </div>
@@ -596,16 +617,18 @@ body {
     </div>
   </div>
 
-  <!-- Camera -->
+  <!-- Camera - FIXED: Proper centering -->
   <div id="cameraOverlay">
-    <video id="cameraFeed" autoplay playsinline></video>
-    <div class="camera-controls">
-      <button id="captureBtn" class="camera-btn" style="background:#fcd34d;color:#0a1636;">
-        <i class="fas fa-camera"></i> Capture
-      </button>
-      <button id="closeCameraBtn" class="camera-btn" style="background:#e63946;color:white;">
-        <i class="fas fa-times"></i> Cancel
-      </button>
+    <div class="camera-wrapper">
+      <video id="cameraFeed" autoplay playsinline></video>
+      <div class="camera-controls">
+        <button id="captureBtn" class="camera-btn" style="background:#fcd34d;color:#0a1636;">
+          <i class="fas fa-camera"></i> Capture
+        </button>
+        <button id="closeCameraBtn" class="camera-btn" style="background:#e63946;color:white;">
+          <i class="fas fa-times"></i> Cancel
+        </button>
+      </div>
     </div>
   </div>
 
@@ -819,11 +842,12 @@ body {
     /* ============================ GPS TRACKING ============================= */
     function startGeoTracking() {
       if (navigator.geolocation) {
+        // First try with faster, lower accuracy settings
         navigator.geolocation.watchPosition(
           (pos) => {
             const { latitude, longitude } = pos.coords;
             currentUserLocation = { lat: latitude, lng: longitude };
-            
+
             // Set initial report location to current location
             if (!reportLocation) {
               reportLocation = { lat: latitude, lng: longitude };
@@ -839,13 +863,42 @@ body {
             }
           },
           (error) => {
-            console.error("Geolocation error:", error);
-            alert("Unable to get your location. Please enable GPS.");
+            console.warn("Fast geolocation failed, trying with high accuracy:", error);
+
+            // Fallback to high accuracy if fast mode fails
+            navigator.geolocation.watchPosition(
+              (pos) => {
+                const { latitude, longitude } = pos.coords;
+                currentUserLocation = { lat: latitude, lng: longitude };
+
+                if (!reportLocation) {
+                  reportLocation = { lat: latitude, lng: longitude };
+                }
+
+                if (!userMarker) {
+                  userMarker = L.marker([latitude, longitude], {
+                    icon: L.divIcon({ html: '<div class="pulse"></div>' })
+                  }).addTo(map);
+                  map.setView([latitude, longitude], 14);
+                } else {
+                  userMarker.setLatLng([latitude, longitude]);
+                }
+              },
+              (fallbackError) => {
+                console.error("Geolocation error:", fallbackError);
+                alert("Unable to get your location. Please enable GPS and try refreshing the page.");
+              },
+              {
+                enableHighAccuracy: true,
+                maximumAge: 30000, // Increased cache time
+                timeout: 10000 // Increased timeout for high accuracy
+              }
+            );
           },
           {
-            enableHighAccuracy: true,
-            maximumAge: 10000,
-            timeout: 5000
+            enableHighAccuracy: false, // Start with low accuracy for speed
+            maximumAge: 30000, // Use cached location for 30 seconds
+            timeout: 2000 // Much shorter timeout for faster response
           }
         );
       } else {
@@ -888,21 +941,14 @@ body {
     }
 
     /* ============================ POPUP MANAGEMENT ============================= */
-    const penaltyPopup = document.getElementById("penaltyPopup");
     const reportPopup = document.getElementById("reportPopup");
     const pinConfirmPopup = document.getElementById("pinConfirmPopup");
     const alertOverlay = document.getElementById("alertOverlay");
 
-    function showPenaltyPopup() { 
-      hideAll(); 
-      penaltyPopup.classList.remove("hidden"); 
-    }
-
-    function hidePenaltyPopup() { 
-      penaltyPopup.classList.add("hidden"); 
-    }
-
-    function continueToReport() { 
+    // REMOVED: showPenaltyPopup function and penaltyPopup references
+    
+    // UPDATED: Directly open report form
+    function openReportForm() { 
       hideAll(); 
       reportPopup.classList.remove("hidden"); 
     }
@@ -918,7 +964,7 @@ body {
 
     function continueFromPin() { 
       hidePinConfirmPopup(); 
-      showPenaltyPopup(); 
+      openReportForm(); 
     }
 
     function showAlert() { 
@@ -947,13 +993,22 @@ body {
 
     async function openCamera() {
       hideAll();
-      cameraOverlay.style.display = "flex";
+      cameraOverlay.style.display = "block";
 
       try {
         cameraStream = await navigator.mediaDevices.getUserMedia({ 
-          video: { facingMode: 'environment' } 
+          video: { 
+            facingMode: 'environment',
+            width: { ideal: 1280 },
+            height: { ideal: 720 }
+          } 
         });
         cameraVideo.srcObject = cameraStream;
+        
+        // Wait for video to be ready
+        cameraVideo.onloadedmetadata = () => {
+          console.log("Camera ready, video dimensions:", cameraVideo.videoWidth, "x", cameraVideo.videoHeight);
+        };
       } catch (error) {
         console.error("Camera error:", error);
         alert("Unable to access camera. Please check permissions.");

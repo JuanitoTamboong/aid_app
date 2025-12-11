@@ -1,0 +1,4 @@
+- [x] Update server.js to serve "index.html" instead of "home.html" for the root route
+- [x] Update view-report.html to use Supabase for loading reports instead of Firebase 
+- [x] Update map.html to import and call saveReportToSupabase instead of saveReportToFirebase
+- [x] Ensure notif-report.js exports saveReportToSupabase function correctly
