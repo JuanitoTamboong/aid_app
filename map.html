@@ -1,0 +1,1259 @@
+<!DOCTYPE html> 
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AidTracker Map</title>
+
+<!-- Leaflet -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<!-- Font Awesome for icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<!--logo-->
+<link rel="website icon" href="assets/aid-tracker-logo.png">
+
+<style>
+html,body { 
+  height:100%; 
+  margin:0; 
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+  overflow: hidden;
+}
+body {
+  background: linear-gradient(135deg, #0a1636 70%, #d4af37 30%);
+  color: white;
+}
+#map { 
+  height:100vh; 
+  width:100%; 
+}
+
+/* Pulsing user marker */
+.pulse {
+  width:16px; 
+  height:16px; 
+  background:#4d67fc; 
+  border:2px solid #fff; 
+  border-radius:50%;
+  box-shadow:0 0 12px rgba(77, 115, 252, 0.8); 
+  position:relative;
+}
+.pulse::after {
+  content:""; 
+  position:absolute; 
+  top:50%; 
+  left:50%; 
+  width:24px; 
+  height:24px; 
+  border-radius:50%;
+  background:rgba(252,211,77,0.3); 
+  transform:translate(-50%,-50%);
+  animation:pulse 1.5s infinite ease-out;
+}
+@keyframes pulse {
+  0%{transform:translate(-50%,-50%) scale(0.8);opacity:0.8;}
+  70%{transform:translate(-50%,-50%) scale(2);opacity:0;}
+  100%{transform:translate(-50%,-50%) scale(0.8);opacity:0;}
+}
+
+/* Custom marker for pinpointed location */
+.pinpoint-marker {
+  background-color: #fcd34d;
+  width: 20px;
+  height: 20px;
+  border: 3px solid #0a1636;
+  border-radius: 50%;
+  box-shadow: 0 0 15px rgba(252, 211, 77, 0.8);
+  position: relative;
+}
+.pinpoint-marker::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 2px;
+  height: 15px;
+  background-color: #0a1636;
+}
+
+/* FIXED: Button container for better mobile layout */
+.button-container {
+  position: fixed;
+  bottom: 20px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  padding: 0 15px;
+  z-index: 1000;
+  flex-wrap: wrap;
+}
+
+.map-button {
+  padding: 14px 20px;
+  background: #0a1636;
+  color: #fcd34d;
+  border: none;
+  border-radius: 30px;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.4);
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  flex: 1;
+  min-width: 140px;
+  max-width: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.map-button:hover { 
+  background: #16224d; 
+  color: #ffe066; 
+  transform: translateY(-2px);
+}
+
+/* Header */
+.header { 
+  position: absolute; 
+  top: 15px; 
+  left: 50px; 
+  z-index: 1000; 
+}
+.header button { 
+  background: rgba(10, 22, 54, 0.85); 
+  color: #fcd34d; 
+  border: none; 
+  border-radius: 50%; 
+  width: 40px; 
+  height: 40px; 
+  font-size: 18px; 
+  cursor: pointer; 
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3); 
+  transition: all 0.3s ease;
+}
+.header button:hover {
+  background: rgba(10, 22, 54, 1);
+  transform: scale(1.05);
+}
+
+/* Page Title */
+.page-title {
+  position: absolute;
+  top: 20px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  z-index: 999;
+  margin: 0;
+  font-size: 1.4rem;
+  text-shadow: 1px 1px 3px rgba(0,0,0,0.7);
+  color: #fcd34d;
+  pointer-events: none;
+}
+
+/* Popups - FIXED: Proper centering */
+.alert-overlay {
+  position: fixed; 
+  top: 0; 
+  left: 0; 
+  width: 100%; 
+  height: 100%;
+  background-color: rgba(10,22,54,0.95);
+  display: flex; 
+  justify-content: center; 
+  align-items: center;
+  z-index: 2000;
+  padding: 20px;
+  box-sizing: border-box;
+}
+.alert-box {
+  background: rgba(20, 35, 80, 0.95); 
+  color: #fff;
+  padding: 30px;
+  border-radius: 16px;
+  text-align: center;
+  width: 100%;
+  max-width: 420px;
+  border: 1px solid rgba(252,211,77,0.3);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+  animation: slideIn 0.3s ease-out;
+}
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.alert-box h2 {
+  margin-top: 0;
+  margin-bottom: 20px;
+  color: #fcd34d;
+  font-size: 1.5rem;
+}
+.alert-box p {
+  margin-bottom: 25px;
+  line-height: 1.5;
+}
+
+/* Improved Form Alignment */
+.report-form {
+  width: 100%;
+  text-align: left;
+}
+
+.form-group {
+  margin-bottom: 20px;
+  width: 100%;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: #f0f0f0;
+  text-align: left;
+}
+
+/* File Upload Styling - FIXED: Updated for optional photo */
+.file-upload-wrapper {
+  width: 100%;
+  margin-bottom: 20px;
+  overflow: hidden;
+}
+
+.file-input-container {
+  border: 2px dashed rgba(252, 211, 77, 0.4);
+  border-radius: 10px;
+  padding: 20px;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.05);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+.file-input-container:hover {
+  border-color: #fcd34d;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.file-input-label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  width: 100%;
+  height: 100%;
+}
+
+.file-input-icon {
+  font-size: 2rem;
+  color: #fcd34d;
+  margin-bottom: 8px;
+}
+
+.file-input-text {
+  font-size: 0.9rem;
+  color: #e0e0e0;
+  margin-bottom: 5px;
+}
+
+.file-input-hint {
+  font-size: 0.8rem;
+  color: #aaa;
+}
+
+#incidentPhoto {
+  display: none;
+}
+
+#fileName {
+  margin-top: 10px;
+  font-size: 0.85rem;
+  color: #fcd34d;
+  font-style: italic;
+  word-break: break-word;
+  text-align: center;
+}
+
+/* Button Styling */
+.button-group {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.btn {
+  padding: 12px 20px;
+  border-radius: 8px;
+  border: none;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.95rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-width: 120px;
+  flex: 1;
+}
+
+.btn-primary {
+  background: linear-gradient(to right, #fcd34d, #fbbf24);
+  color: #0a1636;
+}
+
+.btn-primary:hover {
+  background: linear-gradient(to right, #fbbf24, #f59e0b);
+  transform: translateY(-2px);
+}
+
+.btn-secondary {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.btn-danger {
+  background: #e63946;
+  color: white;
+}
+
+.btn-danger:hover {
+  background: #d62839;
+}
+
+/* Form Action Buttons */
+.form-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 25px;
+  justify-content: center;
+}
+
+/* Image Preview - FIXED: Proper constraints */
+#capturedPreview {
+  max-width: 100% !important;
+  max-height: 250px !important;
+  width: auto !important;
+  height: auto !important;
+  border-radius: 8px;
+  margin: 15px auto !important;
+  border: 2px solid rgba(252, 211, 77, 0.5);
+  display: none;
+  object-fit: contain !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+#capturedPreview.show {
+  display: block !important;
+}
+
+.hidden { 
+  display: none !important; 
+}
+
+/* Camera Overlay - FIXED: Proper centering */
+#cameraOverlay {
+  display: none;
+  position: fixed;
+  top: 0; 
+  left: 0;
+  width: 100%; 
+  height: 100%;
+  background-color: rgba(10,22,54,0.98);
+  z-index: 3000;
+}
+
+.camera-wrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+#cameraFeed {
+  width: 100%;
+  max-width: 350px;
+  max-height: 60vh;
+  border-radius: 10px;
+  border: 2px solid #fcd34d;
+  background-color: #000;
+  object-fit: cover;
+  display: block;
+}
+
+.camera-controls {
+  display: flex;
+  gap: 15px;
+  margin-top: 20px;
+  flex-wrap: wrap;
+  justify-content: center;
+  width: 100%;
+  max-width: 350px;
+}
+
+.camera-btn {
+  padding: 12px 25px;
+  border-radius: 8px;
+  border: none;
+  font-weight: bold;
+  cursor: pointer;
+  min-width: 120px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .button-container {
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .map-button {
+    max-width: 100%;
+    width: 90%;
+  }
+  
+  .alert-box {
+    padding: 20px;
+    max-width: 90%;
+  }
+  
+  .btn {
+    min-width: 100px;
+    padding: 10px 15px;
+  }
+  
+  .form-actions {
+    flex-direction: column;
+  }
+  
+  .button-group {
+    flex-direction: column;
+  }
+  
+  .page-title {
+    font-size: 1.2rem;
+    top: 15px;
+  }
+  
+  /* Adjust image preview for mobile */
+  #capturedPreview {
+    max-height: 200px !important;
+  }
+  
+  /* Camera adjustments for mobile */
+  #cameraFeed {
+    max-width: 300px;
+  }
+}
+
+@media (max-width: 480px) {
+  .button-container {
+    bottom: 10px;
+    padding: 0 10px;
+  }
+  
+  .map-button {
+    padding: 12px 15px;
+    font-size: 0.9rem;
+  }
+  
+  .alert-box {
+    padding: 15px;
+    max-width: 95%;
+  }
+  
+  .alert-box h2 {
+    font-size: 1.3rem;
+  }
+  
+  /* Adjust image preview for small screens */
+  #capturedPreview {
+    max-height: 180px !important;
+  }
+  
+  /* Camera adjustments for small screens */
+  #cameraFeed {
+    max-width: 280px;
+    max-height: 50vh;
+  }
+  
+  .camera-controls {
+    max-width: 280px;
+  }
+}
+</style>
+</head>
+
+<body>
+  <div class="header">
+    <button onclick="goBack()">
+      <i class="fas fa-arrow-left"></i>
+    </button>
+  </div>
+  
+  <h1 class="page-title">AidTracker Map</h1>
+  
+  <div id="map"></div>
+
+  <!-- FIXED: Button Container for better mobile layout -->
+  <div class="button-container">
+    <button id="reportBtn" class="map-button" onclick="openReportForm()">
+      <i class="fas fa-exclamation-triangle"></i> Report Emergency
+    </button>
+    
+    <button id="pinpointBtn" class="map-button" onclick="startPinpoint()">
+      <i class="fas fa-map-marker-alt"></i> Pinpoint Location
+    </button>
+  </div>
+
+  <!-- Report Form Popup (No penalty warning) -->
+  <div class="alert-overlay hidden" id="reportPopup">
+    <div class="alert-box">
+      <h2>Submit Emergency Report</h2>
+      
+      <form class="report-form" id="emergencyForm">
+        <!-- Show accident type -->
+        <div class="form-group">
+          <label>Emergency Type</label>
+          <div style="
+            background: rgba(252, 211, 77, 0.1);
+            border: 1px solid rgba(252, 211, 77, 0.3);
+            border-radius: 8px;
+            padding: 12px 15px;
+            font-weight: 600;
+            color: #fcd34d;
+            text-align: center;
+            margin-bottom: 20px;
+          " id="emergencyTypeDisplay">
+            Loading type...
+          </div>
+        </div>
+        
+        <!-- Photo Upload - UPDATED: Now optional with clear label -->
+        <div class="form-group">
+          <label>
+            <span>Incident Photo</span>
+            <span style="color: #94a3b8; font-size: 0.85rem; font-weight: normal; margin-left: 5px;">
+              (Optional - Add visual evidence if available)
+            </span>
+          </label>
+          <div class="file-upload-wrapper">
+            <div class="file-input-container">
+              <label class="file-input-label" for="incidentPhoto">
+                <div class="file-input-icon">
+                  <i class="fas fa-cloud-upload-alt"></i>
+                </div>
+                <div class="file-input-text">Upload or Take Photo</div>
+                <div class="file-input-hint">Optional - JPEG, PNG up to 10MB</div>
+                <input type="file" id="incidentPhoto" accept="image/*">
+              </label>
+            </div>
+            <div id="fileName"></div>
+          </div>
+          
+          <!-- Image Preview -->
+          <img id="capturedPreview" class="hidden">
+          
+          <!-- Camera Button -->
+          <div style="margin-top: 15px; text-align: center;">
+            <button type="button" onclick="openCamera()" class="btn btn-secondary">
+              <i class="fas fa-camera"></i> Open Camera
+            </button>
+          </div>
+        </div>
+        
+        <!-- Form Actions -->
+        <div class="form-actions">
+          <button type="button" onclick="submitReport()" class="btn btn-primary">
+            <i class="fas fa-paper-plane"></i> Submit Report
+          </button>
+          <button type="button" onclick="hideReportPopup()" class="btn btn-danger">
+            <i class="fas fa-times"></i> Cancel
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="alert-overlay hidden" id="pinConfirmPopup">
+    <div class="alert-box">
+      <h2>Location Selected</h2>
+      <p>Continue to report?</p>
+      <div class="button-group">
+        <button onclick="hidePinConfirmPopup()" class="btn btn-danger">Cancel</button>
+        <button onclick="continueFromPin()" class="btn btn-primary">Continue</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="alert-overlay hidden" id="alertOverlay">
+    <div class="alert-box">
+      <h2>Report Submitted</h2>
+      <p id="successMessage">Emergency services have been notified.</p>
+      <button onclick="goBackToIndex()" class="btn btn-primary">OK</button>
+    </div>
+  </div>
+
+  <!-- Camera - FIXED: Proper centering -->
+  <div id="cameraOverlay">
+    <div class="camera-wrapper">
+      <video id="cameraFeed" autoplay playsinline></video>
+      <div class="camera-controls">
+        <button id="captureBtn" class="camera-btn" style="background:#fcd34d;color:#0a1636;">
+          <i class="fas fa-camera"></i> Capture
+        </button>
+        <button id="closeCameraBtn" class="camera-btn" style="background:#e63946;color:white;">
+          <i class="fas fa-times"></i> Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Supabase Module -->
+  <script type="module">
+    // Import functions from notif-report.js
+    import { 
+        saveReportToSupabase, 
+        testSupabaseConnection,
+        getAllReports 
+    } from "./notif-report.js";
+    
+    // Make functions available globally
+    window.saveReportToSupabase = saveReportToSupabase;
+    window.testSupabaseConnection = testSupabaseConnection;
+    window.getAllReports = getAllReports;
+    
+    // Initialize form and camera button listeners
+    document.addEventListener('DOMContentLoaded', function() {
+        const captureBtn = document.getElementById('captureBtn');
+        const closeCameraBtn = document.getElementById('closeCameraBtn');
+        const fileInput = document.getElementById('incidentPhoto');
+        const fileName = document.getElementById('fileName');
+        
+        if (captureBtn) {
+            captureBtn.onclick = capturePhoto;
+        }
+        
+        if (closeCameraBtn) {
+            closeCameraBtn.onclick = closeCamera;
+        }
+        
+        if (fileInput) {
+            fileInput.addEventListener('change', function(e) {
+                handleFileSelect(e);
+            });
+        }
+        
+        // Prevent form submission
+        const form = document.getElementById('emergencyForm');
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                submitReport();
+            });
+        }
+        
+        // Display the accident type when report form is shown
+        updateEmergencyTypeDisplay();
+        
+        // Test Supabase connection on load
+        testConnection();
+    });
+    
+    // Test Supabase connection
+    async function testConnection() {
+        try {
+            if (window.testSupabaseConnection) {
+                const result = await window.testSupabaseConnection();
+                console.log("Supabase connection test:", result);
+                
+                if (!result.connected) {
+                    console.warn("Supabase connection warning:", result.error);
+                    
+                    // Show warning if not connected
+                    if (result.error && !result.error.includes('42P01')) {
+                        console.warn("Supabase may not be properly configured.");
+                    }
+                } else {
+                    console.log("✓ Supabase connection successful");
+                }
+            }
+        } catch (error) {
+            console.error("Connection test error:", error);
+        }
+    }
+    
+    // FIXED: Handle file selection with preview
+    function handleFileSelect(e) {
+        const fileInput = document.getElementById('incidentPhoto');
+        const fileName = document.getElementById('fileName');
+        const capturedPreview = document.getElementById('capturedPreview');
+        
+        if (e.target.files && e.target.files.length > 0) {
+            const file = e.target.files[0];
+            
+            // Check if file is an image
+            if (!file.type.match('image.*')) {
+                alert('Please select an image file (JPEG, PNG, etc.)');
+                fileInput.value = '';
+                return;
+            }
+            
+            // Check file size (limit to 10MB)
+            if (file.size > 10 * 1024 * 1024) {
+                alert('File size should be less than 10MB');
+                fileInput.value = '';
+                return;
+            }
+            
+            fileName.textContent = `Selected: ${file.name} (${(file.size/1024/1024).toFixed(2)} MB)`;
+            
+            // Preview the image
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                if (capturedPreview) {
+                    capturedPreview.src = e.target.result;
+                    capturedPreview.classList.remove("hidden");
+                    capturedPreview.classList.add("show");
+                    
+                    // Resize very large images for better display
+                    const img = new Image();
+                    img.onload = function() {
+                        if (img.width > 800 || img.height > 600) {
+                            // Create canvas to resize
+                            const canvas = document.createElement('canvas');
+                            const ctx = canvas.getContext('2d');
+                            
+                            // Calculate new dimensions
+                            let width = img.width;
+                            let height = img.height;
+                            const MAX_WIDTH = 800;
+                            const MAX_HEIGHT = 600;
+                            
+                            if (width > height) {
+                                if (width > MAX_WIDTH) {
+                                    height *= MAX_WIDTH / width;
+                                    width = MAX_WIDTH;
+                                }
+                            } else {
+                                if (height > MAX_HEIGHT) {
+                                    width *= MAX_HEIGHT / height;
+                                    height = MAX_HEIGHT;
+                                }
+                            }
+                            
+                            canvas.width = width;
+                            canvas.height = height;
+                            ctx.drawImage(img, 0, 0, width, height);
+                            
+                            // Update preview with resized image
+                            capturedPreview.src = canvas.toDataURL('image/jpeg', 0.8);
+                        }
+                    };
+                    img.src = e.target.result;
+                }
+                
+                // Clear any camera-captured image
+                capturedBase64 = null;
+            };
+            reader.readAsDataURL(file);
+        } else {
+            fileName.textContent = '';
+            if (capturedPreview) {
+                capturedPreview.src = '';
+                capturedPreview.classList.remove("show");
+                capturedPreview.classList.add("hidden");
+            }
+        }
+    }
+    
+    // Quick test function - call this in browser console to debug
+    window.testSupabaseManually = async function() {
+        console.log("Testing Supabase connection manually...");
+        console.log("Window.saveReportToSupabase exists:", typeof window.saveReportToSupabase);
+        
+        if (typeof window.testSupabaseConnection === 'function') {
+            const result = await window.testSupabaseConnection();
+            console.log("Connection test result:", result);
+            return result;
+        } else {
+            console.error("testSupabaseConnection function not available");
+            return { connected: false, error: "Function not loaded" };
+        }
+    };
+  </script>
+
+  <script>
+    // Global variables
+    let map = null;
+    let currentUserLocation = null;  // User's current GPS location
+    let reportLocation = null;        // Location to use for reporting
+    let userMarker = null;
+    let pinpointMarker = null;        // Marker for pinpointed location
+    let capturedBase64 = null;
+    let cameraStream = null;
+
+    // Initialize when DOM loads
+    document.addEventListener('DOMContentLoaded', function() {
+      initializeMap();
+    });
+
+    /* ============================ MAP INITIALIZATION ============================= */
+    function initializeMap() {
+      map = L.map('map').setView([12.35, 122.0], 11);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+      
+      // Start GPS tracking for user's current location
+      startGeoTracking();
+    }
+
+    function goBack() { 
+      window.location = "index.html"; 
+    }
+    
+    // NEW: Function to go back to index after report submission
+    function goBackToIndex() {
+      window.location.href = "index.html";
+    }
+
+    /* ============================ GPS TRACKING ============================= */
+    function startGeoTracking() {
+      if (navigator.geolocation) {
+        // First try with faster, lower accuracy settings
+        navigator.geolocation.watchPosition(
+          (pos) => {
+            const { latitude, longitude } = pos.coords;
+            currentUserLocation = { lat: latitude, lng: longitude };
+
+            // Set initial report location to current location
+            if (!reportLocation) {
+              reportLocation = { lat: latitude, lng: longitude };
+            }
+
+            if (!userMarker) {
+              userMarker = L.marker([latitude, longitude], {
+                icon: L.divIcon({ html: '<div class="pulse"></div>' })
+              }).addTo(map);
+              map.setView([latitude, longitude], 14);
+            } else {
+              userMarker.setLatLng([latitude, longitude]);
+            }
+          },
+          (error) => {
+            console.warn("Fast geolocation failed, trying with high accuracy:", error);
+
+            // Fallback to high accuracy if fast mode fails
+            navigator.geolocation.watchPosition(
+              (pos) => {
+                const { latitude, longitude } = pos.coords;
+                currentUserLocation = { lat: latitude, lng: longitude };
+
+                if (!reportLocation) {
+                  reportLocation = { lat: latitude, lng: longitude };
+                }
+
+                if (!userMarker) {
+                  userMarker = L.marker([latitude, longitude], {
+                    icon: L.divIcon({ html: '<div class="pulse"></div>' })
+                  }).addTo(map);
+                  map.setView([latitude, longitude], 14);
+                } else {
+                  userMarker.setLatLng([latitude, longitude]);
+                }
+              },
+              (fallbackError) => {
+                console.error("Geolocation error:", fallbackError);
+                alert("Unable to get your location. Please enable GPS and try refreshing the page.");
+              },
+              {
+                enableHighAccuracy: true,
+                maximumAge: 30000, // Increased cache time
+                timeout: 10000 // Increased timeout for high accuracy
+              }
+            );
+          },
+          {
+            enableHighAccuracy: false, // Start with low accuracy for speed
+            maximumAge: 30000, // Use cached location for 30 seconds
+            timeout: 2000 // Much shorter timeout for faster response
+          }
+        );
+      } else {
+        alert("Geolocation is not supported by your browser.");
+      }
+    }
+
+    /* ============================ PINPOINT ============================= */
+    function startPinpoint() {
+      if (!map) {
+        alert("Map not loaded yet. Please wait.");
+        return;
+      }
+      
+      alert("Tap on map to set report location.");
+      map.once("click", (e) => {
+        // Remove previous pinpoint marker if exists
+        if (pinpointMarker) {
+          map.removeLayer(pinpointMarker);
+        }
+        
+        // Create new pinpoint marker with custom style
+        pinpointMarker = L.marker(e.latlng, {
+          icon: L.divIcon({ 
+            html: '<div class="pinpoint-marker"></div>',
+            className: 'pinpoint-icon',
+            iconSize: [20, 35],
+            iconAnchor: [10, 35]
+          })
+        }).addTo(map);
+        
+        // Bind popup to pinpoint marker
+        pinpointMarker.bindPopup("Report will be submitted here").openPopup();
+        
+        // Set report location to the pinpointed location
+        reportLocation = e.latlng;
+        
+        showPinConfirmPopup();
+      });
+    }
+
+    /* ============================ POPUP MANAGEMENT ============================= */
+    const reportPopup = document.getElementById("reportPopup");
+    const pinConfirmPopup = document.getElementById("pinConfirmPopup");
+    const alertOverlay = document.getElementById("alertOverlay");
+
+    // REMOVED: showPenaltyPopup function and penaltyPopup references
+    
+    // UPDATED: Directly open report form
+    function openReportForm() { 
+      hideAll(); 
+      reportPopup.classList.remove("hidden"); 
+    }
+
+    function showPinConfirmPopup() { 
+      hideAll(); 
+      pinConfirmPopup.classList.remove("hidden"); 
+    }
+
+    function hidePinConfirmPopup() { 
+      pinConfirmPopup.classList.add("hidden"); 
+    }
+
+    function continueFromPin() { 
+      hidePinConfirmPopup(); 
+      openReportForm(); 
+    }
+
+    function showAlert() { 
+      hideAll(); 
+      alertOverlay.classList.remove("hidden"); 
+      
+      // Update the success message with status
+      const successMsg = document.getElementById("successMessage");
+      if (successMsg) {
+        successMsg.textContent = "Emergency report submitted successfully. Status: Pending - Awaiting response from emergency services.";
+      }
+    }
+
+    function hideAlert() { 
+      alertOverlay.classList.add("hidden"); 
+    }
+
+    function hideAll() {
+      document.querySelectorAll(".alert-overlay").forEach(x => x.classList.add("hidden"));
+    }
+
+    /* ============================ CAMERA FUNCTIONS ============================= */
+    const cameraOverlay = document.getElementById("cameraOverlay");
+    const cameraVideo = document.getElementById("cameraFeed");
+    const capturedPreview = document.getElementById("capturedPreview");
+
+    async function openCamera() {
+      hideAll();
+      cameraOverlay.style.display = "block";
+
+      try {
+        cameraStream = await navigator.mediaDevices.getUserMedia({ 
+          video: { 
+            facingMode: 'environment',
+            width: { ideal: 1280 },
+            height: { ideal: 720 }
+          } 
+        });
+        cameraVideo.srcObject = cameraStream;
+        
+        // Wait for video to be ready
+        cameraVideo.onloadedmetadata = () => {
+          console.log("Camera ready, video dimensions:", cameraVideo.videoWidth, "x", cameraVideo.videoHeight);
+        };
+      } catch (error) {
+        console.error("Camera error:", error);
+        alert("Unable to access camera. Please check permissions.");
+        cameraOverlay.style.display = "none";
+        reportPopup.classList.remove("hidden");
+      }
+    }
+
+    function capturePhoto() {
+      if (!cameraVideo || !cameraVideo.videoWidth) {
+        alert("Camera not ready. Please try again.");
+        return;
+      }
+
+      const canvas = document.createElement("canvas");
+      
+      // Set maximum dimensions
+      const MAX_WIDTH = 800;
+      const MAX_HEIGHT = 600;
+      
+      let width = cameraVideo.videoWidth;
+      let height = cameraVideo.videoHeight;
+      
+      // Calculate new dimensions maintaining aspect ratio
+      if (width > height) {
+        if (width > MAX_WIDTH) {
+          height = height * (MAX_WIDTH / width);
+          width = MAX_WIDTH;
+        }
+      } else {
+        if (height > MAX_HEIGHT) {
+          width = width * (MAX_HEIGHT / height);
+          height = MAX_HEIGHT;
+        }
+      }
+      
+      canvas.width = width;
+      canvas.height = height;
+      
+      // Draw and scale the image
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(cameraVideo, 0, 0, width, height);
+      
+      // Reduce image quality to save bandwidth
+      capturedBase64 = canvas.toDataURL("image/jpeg", 0.7);
+
+      stopCamera();
+      cameraOverlay.style.display = "none";
+      
+      if (capturedPreview) {
+        capturedPreview.src = capturedBase64;
+        capturedPreview.classList.remove("hidden");
+        capturedPreview.classList.add("show");
+      }
+
+      // Update file input display
+      const fileName = document.getElementById("fileName");
+      if (fileName) {
+        fileName.textContent = "Photo captured from camera";
+      }
+
+      // Clear any uploaded file
+      const fileInput = document.getElementById("incidentPhoto");
+      if (fileInput) {
+        fileInput.value = '';
+      }
+
+      reportPopup.classList.remove("hidden");
+    }
+
+    function closeCamera() {
+      stopCamera();
+      cameraOverlay.style.display = "none";
+      reportPopup.classList.remove("hidden");
+    }
+
+    function stopCamera() {
+      if (cameraStream) {
+        cameraStream.getTracks().forEach(track => track.stop());
+        cameraStream = null;
+      }
+    }
+
+    /* ============================ UPDATE EMERGENCY TYPE DISPLAY ============================= */
+    function updateEmergencyTypeDisplay() {
+      const accidentType = localStorage.getItem("accidentType") || "emergency";
+      let displayText = "Emergency";
+      let typeValue = "emergency";
+      
+      // Map the accident type to display text and value
+      switch(accidentType) {
+        case "motor":
+          displayText = "Motor/Car Accident";
+          typeValue = "motor";
+          break;
+        case "fire":
+          displayText = "Fire Accident";
+          typeValue = "fire";
+          break;
+        case "assault":
+          displayText = "Assault Crime";
+          typeValue = "assault";
+          break;
+        default:
+          displayText = "Emergency";
+          typeValue = "emergency";
+      }
+      
+      // Update the display
+      const displayElement = document.getElementById("emergencyTypeDisplay");
+      if (displayElement) {
+        displayElement.textContent = displayText;
+      }
+      
+      // Store the actual type value for submission
+      window.currentAccidentType = typeValue;
+      window.currentAccidentDisplay = displayText;
+    }
+
+    /* ============================ SUBMIT REPORT ============================= */
+    async function submitReport() {
+      // Check if we have a report location (either pinpointed or current)
+      if (!reportLocation) {
+        alert("Please select a location first. Use 'Pinpoint Location' or wait for GPS to get your current location.");
+        return;
+      }
+
+      const fileInput = document.getElementById('incidentPhoto');
+      let photoBase64 = capturedBase64;
+
+      // If no camera photo, check for uploaded file
+      if (!photoBase64 && fileInput.files.length > 0) {
+        const file = fileInput.files[0];
+        photoBase64 = await toBase64(file);
+      }
+
+      // Get the accident type from localStorage or use the current one
+      const accidentType = localStorage.getItem("accidentType") || window.currentAccidentType || "emergency";
+      const accidentDisplay = window.currentAccidentDisplay || "Emergency";
+      
+      // Get reporter name from localStorage - FIXED: Using reporterName from account page
+      const reporterName = localStorage.getItem("reporterName") || "Anonymous";
+      
+      const report = {
+        type: accidentType,
+        type_display: accidentDisplay,
+        reporter: reporterName,
+        latitude: reportLocation.lat,
+        longitude: reportLocation.lng,
+        timestamp: new Date().toISOString(),
+        status: "pending"
+      };
+
+      // Show location info for debugging
+      console.log("Submitting report from location:", reportLocation);
+      console.log("Current user location:", currentUserLocation);
+      console.log("Using pinpoint location:", pinpointMarker ? "YES" : "NO");
+      console.log("Report status:", report.status);
+      console.log("Reporter name:", report.reporter);
+
+      try {
+        console.log("Submitting report...", report);
+        
+        // Check if function is available
+        if (typeof window.saveReportToSupabase !== 'function') {
+          throw new Error("Save function not loaded. Please check the console for import errors.");
+        }
+        
+        console.log("Calling saveReportToSupabase...");
+        const result = await window.saveReportToSupabase(report, photoBase64);
+        
+        console.log("Report submission result:", result);
+        
+        if (result && result.success) {
+          hideReportPopup();
+          showAlert();
+          
+          // Clear localStorage accident type after successful submission
+          localStorage.removeItem("accidentType");
+        } else {
+          throw new Error("Report submission failed without error");
+        }
+        
+      } catch(err) {
+        console.error("Report submission error:", err);
+        
+        // User-friendly error messages
+        let errorMessage = "Failed to submit report: ";
+        
+        if (err.message.includes("Database table 'reports' not found")) {
+          errorMessage += "Database table not found. Please create the 'reports' table in Supabase.";
+        } else if (err.message.includes("Bucket not found")) {
+          errorMessage += "Storage bucket not found. Please create the 'aid-upload' bucket in Supabase Storage.";
+        } else if (err.message.includes("Supabase client not initialized")) {
+          errorMessage += "Connection failed. Please refresh the page and check your internet connection.";
+        } else if (err.message.includes("Invalid status value")) {
+          errorMessage += "Invalid report status. Please contact support.";
+        } else if (err.message.includes("row-level security policy")) {
+          errorMessage += "Permission denied. Check Supabase Row Level Security policies.";
+        } else if (err.message.includes("Could not find")) {
+          errorMessage += "Resource not found. Please check your Supabase setup.";
+        } else {
+          errorMessage += err.message;
+        }
+        
+        alert(errorMessage);
+      }
+    }
+
+    function hideReportPopup() {
+      reportPopup.classList.add("hidden");
+      capturedBase64 = null;
+      
+      if (capturedPreview) {
+        capturedPreview.src = "";
+        capturedPreview.classList.add("hidden");
+        capturedPreview.classList.remove("show");
+      }
+      
+      // Reset form
+      const form = document.getElementById("emergencyForm");
+      if (form) {
+        form.reset();
+      }
+      
+      const fileName = document.getElementById("fileName");
+      if (fileName) {
+        fileName.textContent = "";
+      }
+      
+      // Clear file input
+      const fileInput = document.getElementById("incidentPhoto");
+      if (fileInput) {
+        fileInput.value = '';
+      }
+    }
+
+    function toBase64(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+  </script>
+</body>
+</html>
