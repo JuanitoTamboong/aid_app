@@ -325,6 +325,21 @@
       </button>
     </div>
 
+    <!-- Guest Mode Create Account Button -->
+    <div id="guestCreateAccount" class="account-card" style="display: none;">
+      <h2 class="card-title">
+        <i class="fas fa-user-plus"></i>
+        Create Your Account
+      </h2>
+      <p style="color: #e2e8f0; margin-bottom: 20px;">
+        You're currently using AidTracker as a guest. Create an account to unlock full features like report tracking, history, and personalized notifications.
+      </p>
+      <button class="action-btn btn-primary" onclick="createAccount()">
+        <i class="fas fa-user-plus"></i>
+        Create Account
+      </button>
+    </div>
+
     <!-- Account Information Display -->
     <div class="account-card">
       <h2 class="card-title">
@@ -424,6 +439,7 @@
     function loadAccountData() {
       try {
         const accountData = JSON.parse(localStorage.getItem('accountData') || '{}');
+        const isGuestMode = localStorage.getItem('isGuestMode') === 'true';
 
         if (Object.keys(accountData).length > 0) {
           // Show account information
@@ -431,6 +447,11 @@
         } else {
           // Show no account info message
           document.getElementById('noAccountInfo').style.display = 'block';
+
+          // Show "Create Account" button if in guest mode
+          if (isGuestMode) {
+            document.getElementById('guestCreateAccount').style.display = 'block';
+          }
         }
       } catch (error) {
         console.error('Error loading account data:', error);
@@ -556,7 +577,7 @@
     }
 
     function deleteAccount() {
-      if (confirm('Are you sure you want to delete your account information? This will remove all saved data.')) {
+      if (confirm('Are you sure you want to delete your account information? This will remove all saved data and revert to guest mode.')) {
         // Get current account data to clear user-specific notification data
         const accountData = JSON.parse(localStorage.getItem('accountData') || '{}');
 
@@ -580,16 +601,17 @@
           }
         });
 
-        // Hide account info display
+        // Revert to guest mode
+        localStorage.setItem('isGuestMode', 'true');
+        localStorage.setItem('profileName', 'Guest User');
+        localStorage.setItem('guestJoinDate', new Date().toISOString());
+
+        // Hide account info display and show guest create account button
         document.getElementById('accountInfo').style.display = 'none';
         document.getElementById('noAccountInfo').style.display = 'block';
+        document.getElementById('guestCreateAccount').style.display = 'block';
 
-        showToast('Account information deleted', 'success');
-
-        // Redirect to user choices after deletion
-        setTimeout(() => {
-          window.location.href = 'user-choices.html';
-        }, 1500);
+        showToast('Account information deleted. Reverted to guest mode.', 'success');
       }
     }
 
@@ -641,6 +663,11 @@
       setTimeout(() => {
         toast.classList.remove('show');
       }, 3000);
+    }
+
+    // ===== CREATE ACCOUNT FUNCTION =====
+    function createAccount() {
+      window.location.href = 'user-choices.html';
     }
 
     // ===== FONT AWESOME =====
