@@ -762,9 +762,13 @@ span#headerTitle {
       // Check for guest mode FIRST - prioritize guest over account data
       const isGuestMode = localStorage.getItem('isGuestMode') === 'true';
       if (isGuestMode) {
+        // Use persistent unique guest ID for privacy
+        const guestId = localStorage.getItem('guestId') || `guest-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+        localStorage.setItem('guestId', guestId);
         return {
-          id: `guest-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+          id: guestId,
           name: 'Guest User',
+          reporter: guestId, // Use unique ID for database queries
           isGuest: true
         };
       }
@@ -1172,7 +1176,7 @@ span#headerTitle {
       // Update header - show guest mode properly
       const headerTitle = document.getElementById('headerTitle');
       if (currentUser.isGuest) {
-        headerTitle.innerHTML = `<i class="fas fa-bell"></i> Guest Report Notifications`;
+        headerTitle.innerHTML = `Guest Report Notifications`;
       } else {
         headerTitle.innerHTML = `<i class="fas fa-user-circle"></i> ${currentUser.name}'s Reports`;
       }

@@ -191,7 +191,10 @@ export async function saveReportToSupabase(report, base64Image) {
     // Check if in guest mode
     const isGuestMode = localStorage.getItem('isGuestMode') === 'true';
     if (isGuestMode) {
-      reporterName = 'Guest User';
+      // Use persistent unique guest ID for privacy
+      const guestId = localStorage.getItem('guestId') || `guest-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      localStorage.setItem('guestId', guestId);
+      reporterName = guestId; // Use unique ID for database queries
     }
 
     const reportData = {

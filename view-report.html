@@ -357,6 +357,52 @@
       return responderInfo;
     }
 
+    // --- GET CURRENT USER ---
+    function getCurrentUser() {
+      // Check for guest mode FIRST - prioritize guest over account data
+      const isGuestMode = localStorage.getItem('isGuestMode') === 'true';
+      if (isGuestMode) {
+        // Use persistent unique guest ID for privacy
+        const guestId = localStorage.getItem('guestId') || `guest-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+        localStorage.setItem('guestId', guestId);
+        return {
+          id: guestId,
+          name: 'Guest User',
+          reporter: guestId, // Use unique ID for database queries
+          isGuest: true
+        };
+      }
+
+      // Try to get from accountData (your created account)
+      const accountData = localStorage.getItem('accountData');
+      if (accountData) {
+        try {
+          const parsedData = JSON.parse(accountData);
+          if (parsedData.fullName && parsedData.fullName.trim() !== '') {
+            return {
+              id: `user-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+              name: parsedData.fullName,
+              isGuest: false
+            };
+          }
+        } catch (e) {
+          console.error("Error parsing account data:", e);
+        }
+      }
+
+      // Try reporterName (from guest reporting)
+      const reporterName = localStorage.getItem('reporterName');
+      if (reporterName && reporterName.trim() !== '') {
+        return {
+          id: `user-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+          name: reporterName,
+          isGuest: false
+        };
+      }
+
+      return null;
+    }
+
     // --- LOAD REPORT FROM SUPABASE ---
     async function loadReport() {
       try {
@@ -370,6 +416,14 @@
 
         const loadingDiv = document.getElementById('loading');
         loadingDiv.innerHTML = "Loading report information...";
+
+        // Get current user to check ownership
+        const currentUser = getCurrentUser();
+        if (!currentUser) {
+          alert("Please log in or create an account to view reports.");
+          window.location.href = "user-choices.html";
+          return;
+        }
 
         // Fetch report from Supabase with ALL columns including the separate responder columns
         // Using wildcard * to get ALL columns including any custom columns
@@ -388,6 +442,13 @@
 
         if (!report) {
           alert("Report not found in database.");
+          window.location.href = "notifications.html";
+          return;
+        }
+
+        // Check if the current user owns this report
+        if (report.reporter !== currentUser.reporter && report.reporter !== currentUser.name) {
+          alert("You can only view your own reports. Access denied.");
           window.location.href = "notifications.html";
           return;
         }
