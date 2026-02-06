@@ -300,7 +300,7 @@ export async function getUnreadNotificationCount(userName) {
     const { data: reports, error } = await supabase
       .from('reports')
       .select('id, reporter, status, assigned_responders, created_at, updated_at')
-      .ilike('reporter', `%${userName}%`)
+      .eq('reporter', userName)
       .gt('created_at', yesterday.toISOString())
       .order('created_at', { ascending: false });
     

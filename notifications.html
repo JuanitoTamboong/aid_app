@@ -767,8 +767,8 @@ span#headerTitle {
         localStorage.setItem('guestId', guestId);
         return {
           id: guestId,
-          name: 'Guest User',
-          reporter: guestId, // Use unique ID for database queries
+          name: guestId, // Use unique ID for database queries
+          displayName: 'Guest User', // For UI display
           isGuest: true
         };
       }
