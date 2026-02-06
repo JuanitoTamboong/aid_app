@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Privacy Policy - AidTracker</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  :root {
+    --dark-blue: #0a1636;
+    --warning-yellow: #fcd34d;
+  }
+
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    background: linear-gradient(135deg, #0a1636 0%, #1e293b 100%);
+    color: white;
+    min-height: 100vh;
+    line-height: 1.6;
+  }
+
+  .container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+
+  .header {
+    text-align: center;
+    margin-bottom: 40px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid rgba(252, 211, 77, 0.2);
+  }
+
+  .header h1 {
+    font-size: 2.2rem;
+    font-weight: 900;
+    color: #fcd34d;
+    margin-bottom: 10px;
+  }
+
+  .header p {
+    color: #94a3b8;
+    font-size: 1.1rem;
+  }
+
+  .content-section {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 16px;
+    padding: 30px;
+    margin-bottom: 25px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .section-title {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #fcd34d;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .section-content {
+    color: #e2e8f0;
+  }
+
+  .section-content p {
+    margin-bottom: 15px;
+  }
+
+  .section-content ul {
+    padding-left: 20px;
+    margin-bottom: 15px;
+  }
+
+  .section-content li {
+    margin-bottom: 8px;
+    position: relative;
+    padding-left: 10px;
+  }
+
+  .section-content li::before {
+    content: "•";
+    color: #fcd34d;
+    position: absolute;
+    left: -10px;
+  }
+
+  .highlight-box {
+    background: rgba(252, 211, 77, 0.1);
+    border-left: 4px solid #fcd34d;
+    border-radius: 8px;
+    padding: 20px;
+    margin: 20px 0;
+  }
+
+  .highlight-title {
+    color: #fcd34d;
+    font-weight: 600;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .action-buttons {
+    display: flex;
+    gap: 15px;
+    margin-top: 40px;
+    flex-wrap: wrap;
+  }
+
+  .action-btn {
+    flex: 1;
+    min-width: 200px;
+    padding: 15px 25px;
+    border-radius: 12px;
+    border: none;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+
+  .btn-primary {
+    background: linear-gradient(to right, #fcd34d, #fbbf24);
+    color: #0a1636;
+  }
+
+  .btn-primary:hover {
+    background: linear-gradient(to right, #fbbf24, #f59e0b);
+    transform: translateY(-2px);
+  }
+
+  .btn-secondary {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  .btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateY(-2px);
+  }
+
+  @media (max-width: 768px) {
+    .container {
+      padding: 15px;
+    }
+
+    .header h1 {
+      font-size: 1.8rem;
+    }
+
+    .content-section {
+      padding: 20px;
+    }
+
+    .action-buttons {
+      flex-direction: column;
+    }
+
+    .action-btn {
+      width: 100%;
+    }
+  }
+</style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <h1>
+        <i class="fas fa-user-shield"></i>
+        Privacy Policy
+      </h1>
+      <p>Your privacy and safety are our top priorities</p>
+      <p class="text-sm mt-2 text-gray-400">Last updated: January 2024</p>
+    </div>
+
+    <!-- Introduction -->
+    <div class="content-section">
+      <h2 class="section-title">
+        <i class="fas fa-info-circle"></i>
+        Introduction
+      </h2>
+      <div class="section-content">
+        <p>AidTracker is designed to help you report emergencies quickly and efficiently while protecting your privacy. This policy explains how we collect, use, and protect your information.</p>
+        
+        <div class="highlight-box">
+          <div class="highlight-title">
+            <i class="fas fa-exclamation-circle"></i>
+            Key Principle: No Login Required for Emergency Reporting
+          </div>
+          <p>You can report emergencies immediately without creating an account or providing personal information. Your ability to get help should never be delayed by registration processes.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Data We Collect -->
+    <div class="content-section">
+      <h2 class="section-title">
+        <i class="fas fa-database"></i>
+        Data We Collect
+      </h2>
+      <div class="section-content">
+        <p>We collect only the minimum data necessary to provide emergency services:</p>
+        
+        <ul>
+          <li><strong>Location Data:</strong> GPS coordinates, approximate location from Wi-Fi/cell towers, or manually entered location</li>
+          <li><strong>Emergency Details:</strong> Type of emergency, severity level (optional), number of people involved (optional)</li>
+          <li><strong>Optional Information:</strong> Additional notes, photos (if you choose to provide them)</li>
+          <li><strong>Account Information:</strong> Only if you choose to create an account (name, phone number, emergency contacts)</li>
+          <li><strong>Technical Data:</strong> Device type, app version (for troubleshooting only)</li>
+        </ul>
+        
+        <p><strong>We never collect:</strong> Your contacts, messages, call history, browsing history, or any other personal information unrelated to emergency reporting.</p>
+      </div>
+    </div>
+
+    <!-- How We Use Your Data -->
+    <div class="content-section">
+      <h2 class="section-title">
+        <i class="fas fa-cogs"></i>
+        How We Use Your Data
+      </h2>
+      <div class="section-content">
+        <p>Your data is used exclusively for:</p>
+        
+        <ul>
+          <li><strong>Emergency Response:</strong> Sharing your location and emergency details with authorized responders</li>
+          <li><strong>Report Updates:</strong> Keeping you informed about your report status (if you provide contact info)</li>
+          <li><strong>Service Improvement:</strong> Anonymous, aggregated data to improve the app (never tied to you personally)</li>
+          <li><strong>Legal Compliance:</strong> When required by law or to prevent abuse of emergency services</li>
+        </ul>
+        
+        <div class="highlight-box">
+          <div class="highlight-title">
+            <i class="fas fa-ban"></i>
+            What We Don't Do
+          </div>
+          <p>We <strong>never</strong> sell your data to advertisers. We <strong>never</strong> use your data for marketing. We <strong>never</strong> share your data with third parties except emergency responders.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Data Retention -->
+    <div class="content-section">
+      <h2 class="section-title">
+        <i class="fas fa-clock"></i>
+        Data Retention
+      </h2>
+      <div class="section-content">
+        <p>We keep your data only as long as necessary:</p>
+        
+        <ul>
+          <li><strong>Anonymous Reports:</strong> Automatically deleted after 30 days</li>
+          <li><strong>Account-linked Reports:</strong> Retained for 2 years for follow-up and historical reference</li>
+          <li><strong>Photos/Voice Notes:</strong> Deleted immediately after emergency response is complete</li>
+          <li><strong>Account Data:</strong> Retained until you delete your account</li>
+        </ul>
+        
+        <p>You can request deletion of your data at any time by contacting us.</p>
+      </div>
+    </div>
+
+    <!-- Your Rights -->
+    <div class="content-section">
+      <h2 class="section-title">
+        <i class="fas fa-user-check"></i>
+        Your Rights
+      </h2>
+      <div class="section-content">
+        <p>You have the right to:</p>
+        
+        <ul>
+          <li>Access all data we have about you</li>
+          <li>Correct inaccurate data</li>
+          <li>Request deletion of your data</li>
+          <li>Export your data in a machine-readable format</li>
+          <li>Opt out of non-emergency communications</li>
+          <li>Report privacy concerns</li>
+        </ul>
+        
+        <p>To exercise any of these rights, contact us at <strong>privacy@aidtracker.org</strong></p>
+      </div>
+    </div>
+
+    <!-- Security -->
+    <div class="content-section">
+      <h2 class="section-title">
+        <i class="fas fa-shield-alt"></i>
+        Security
+      </h2>
+      <div class="section-content">
+        <p>We implement industry-standard security measures to protect your data:</p>
+        
+        <ul>
+          <li><strong>Encryption:</strong> All data is encrypted in transit and at rest</li>
+          <li><strong>Access Controls:</strong> Strict access controls limit who can see your data</li>
+          <li><strong>Regular Audits:</strong> Security audits and penetration testing</li>
+          <li><strong>Employee Training:</strong> All staff are trained in data privacy</li>
+          <li><strong>Incident Response:</strong> 24/7 monitoring and rapid incident response</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Contact -->
+    <div class="content-section">
+      <h2 class="section-title">
+        <i class="fas fa-envelope"></i>
+        Contact Us
+      </h2>
+      <div class="section-content">
+        <p>For privacy concerns or questions about this policy:</p>
+        
+        <ul>
+          <li><strong>Email:</strong> privacy@aidtracker.org</li>
+          <li><strong>Mail:</strong> AidTracker Privacy Office, 123 Safety Street, City, State 12345</li>
+          <li><strong>Emergency Issues:</strong> For immediate concerns about misuse, contact local law enforcement</li>
+        </ul>
+        
+        <p class="mt-4 text-sm text-gray-400">
+          This policy may be updated periodically. We will notify users of significant changes through the app.
+        </p>
+      </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+      <button class="action-btn btn-primary" onclick="window.location.href='index.html'">
+        <i class="fas fa-home"></i>
+        Back to Home
+      </button>
+      
+      <button class="action-btn btn-secondary" onclick="window.location.href='account.html'">
+        <i class="fas fa-user-cog"></i>
+        Account Settings
+      </button>
+    </div>
+  </div>
+
+  <script>
+    // Add Font Awesome
+    const faScript = document.createElement('script');
+    faScript.src = 'https://kit.fontawesome.com/your-fontawesome-kit.js';
+    faScript.crossOrigin = 'anonymous';
+    document.head.appendChild(faScript);
+  </script>
+</body>
+</html>

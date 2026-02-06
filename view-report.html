@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>View Report Location</title>
+
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <!-- Google Fonts for better readability -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="website icon" href="assets/aid-tracker-logo.png">
+  <style>
+    * {
+      font-family: 'Poppins', 'Roboto', sans-serif;
+    }
+
+    html, body { height: 100%; margin: 0; }
+
+    /* === Header === */
+    .header {
+      background: linear-gradient(135deg, #0a1636 0%, #1e3a8a 100%);
+      color: #fcd34d;
+      padding: 15px 20px;
+      font-size: 1.3rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 2px solid rgba(212, 175, 55, 0.5);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(10px);
+    }
+
+    .back-btn {
+      background: rgba(252, 211, 77, 0.9);
+      color: #0a1636;
+      border: none;
+      border-radius: 8px;
+      padding: 8px 16px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+      font-size: 0.95rem;
+    }
+
+    .back-btn:hover {
+      background: #fcd34d;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(252, 211, 77, 0.3);
+    }
+
+    #map { height: calc(100vh - 70px); width: 100%; }
+    .popup-img {
+      width: 100%;
+      max-width: 250px;
+      border-radius: 8px;
+      margin-top: 8px;
+      cursor: pointer;
+    }
+    .popup-img:hover {
+      opacity: 0.9;
+    }
+    #loading {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 18px;
+      color: #f8fafc;
+      background: linear-gradient(145deg, rgba(25, 40, 85, 0.98), rgba(15, 27, 59, 0.98));
+      padding: 30px 40px;
+      border-radius: 16px;
+      border: 2px solid rgba(252, 211, 77, 0.3);
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+      z-index: 1000;
+      text-align: center;
+      backdrop-filter: blur(15px);
+    }
+    .responder-info {
+      background-color: #f0f9ff;
+      border-left: 4px solid #3b82f6;
+      padding: 12px;
+      margin: 12px 0;
+      border-radius: 6px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    .no-responder {
+      background-color: #fef3c7;
+      border-left: 4px solid #f59e0b;
+      padding: 12px;
+      margin: 12px 0;
+      border-radius: 6px;
+      font-style: italic;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    .responder-title {
+      font-weight: bold;
+      color: #1e40af;
+      margin-bottom: 8px;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .responder-title i {
+      font-style: normal;
+      font-size: 14px;
+      background: #3b82f6;
+      color: white;
+      padding: 2px 8px;
+      border-radius: 12px;
+    }
+    .responder-details {
+      margin-left: 24px;
+    }
+    .responder-detail {
+      margin: 4px 0;
+      color: #374151;
+    }
+    .responder-detail strong {
+      color: #1e3a8a;
+      min-width: 80px;
+      display: inline-block;
+    }
+    .contact-info {
+      color: #059669;
+      font-weight: bold;
+    }
+    .contact-link {
+      color: #3b82f6;
+      text-decoration: none;
+    }
+    .contact-link:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <div class="header">
+    <button class="back-btn" onclick="goBack()">
+      <i class="fas fa-arrow-left"></i>
+      <span>Back</span>
+    </button>
+    <span id="headerTitle"><i class="fas fa-map-marker-alt"></i> Report Location</span>
+    <div style="width: 60px;"></div>
+  </div>
+
+  <div id="loading">Loading report location...</div>
+  <div id="map"></div>
+
+  <!-- Load scripts -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+
+  <script>
+    // --- GET REPORT ID FROM URL ---
+    function getReportIdFromURL() {
+      const urlParams = new URLSearchParams(window.location.search);
+      let reportID = urlParams.get("id");
+      
+      if (reportID) {
+        reportID = reportID.trim();
+      }
+      
+      return reportID;
+    }
+
+    const reportID = getReportIdFromURL();
+
+    // --- BACK BUTTON FUNCTION ---
+    function goBack() {
+      window.location.href = "notifications.html";
+    }
+
+    // --- SUPABASE CONFIG ---
+    const supabaseUrl = 'https://gwvepxupoxyyydnisulb.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd3dmVweHVwb3h5eXlkbmlzdWxiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ4MDE4ODcsImV4cCI6MjA4MDM3Nzg4N30.Ku9SXTAKNMvHilgEpxj5HcVA-0TPt4ziuEq0Irao5Qc';
+    
+    // Create Supabase client
+    const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+    // --- REAL GEOCODING FUNCTION WITH OPENCAGE (CORS ENABLED) ---
+    async function getLocationName(lat, lng) {
+      try {
+        const apiKey = '0a78fbd8bcd74be398f210b34682c77c';
+        const url = `https://api.opencagedata.com/geocode/v1/json?q=${lat}+${lng}&key=${apiKey}&language=en&pretty=1&no_annotations=1`;
+        
+        console.log("Geocoding coordinates:", lat, lng);
+        
+        const response = await fetch(url, {
+          method: 'GET',
+          headers: {
+            'Accept': 'application/json'
+          }
+        });
+        
+        if (!response.ok) {
+          console.error("Geocoding API error:", response.status);
+          throw new Error(`Geocoding failed: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        console.log("Geocoding API response:", data);
+        
+        if (data.results && data.results.length > 0) {
+          const result = data.results[0];
+          const components = result.components;
+          
+          let locationParts = [];
+          
+          if (components.road) locationParts.push(components.road);
+          if (components.village) locationParts.push(components.village);
+          if (components.suburb) locationParts.push(components.suburb);
+          if (components.neighbourhood) locationParts.push(components.neighbourhood);
+          if (components.town) locationParts.push(components.town);
+          if (components.city) locationParts.push(components.city);
+          if (components.municipality) locationParts.push(components.municipality);
+          if (components.county) locationParts.push(components.county);
+          if (components.state) locationParts.push(components.state);
+          if (components.country) locationParts.push(components.country);
+          
+          if (locationParts.length > 0) {
+            const uniqueParts = [...new Set(locationParts)];
+            return uniqueParts.join(', ');
+          }
+          
+          if (result.formatted) {
+            return result.formatted;
+          }
+        }
+        
+        return `Coordinates: ${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+        
+      } catch (error) {
+        console.error("Geocoding error:", error);
+        return `Coordinates: ${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+      }
+    }
+
+    // --- EXTRACT RESPONDER INFO FROM SEPARATE COLUMNS ---
+    function extractResponderInfo(reportData) {
+      if (!reportData) return null;
+      
+      console.log("=== EXTRACTING RESPONDER INFO ===");
+      console.log("Full report data:", reportData);
+      
+      // Debug: List all available keys
+      console.log("All available keys in report data:");
+      Object.keys(reportData).forEach(key => {
+        console.log(`- ${key}:`, reportData[key], "(type:", typeof reportData[key], ")");
+      });
+      
+      // Extract data from separate columns 
+      // Check ALL possible column names to find where data is stored
+      const assignedResponders = reportData.assigned_responders || 
+                                reportData.assigned_resp || 
+                                reportData.responders ||
+                                null;
+      
+      const assignedUnit = reportData.assigned_unit || 
+                          reportData.assigned_units || 
+                          reportData.unit ||
+                          null;
+      
+      // Check for contact in ALL possible field names
+      let contactValue = null;
+      
+      // Try all possible contact field names
+      const contactFields = [
+        'contact',
+        'responder_contact', 
+        'contact_number', 
+        'phone', 
+        'mobile',
+        'phone_number',
+        'mobile_number',
+        'responder_phone'
+      ];
+      
+      for (const field of contactFields) {
+        if (reportData[field] !== undefined && reportData[field] !== null && reportData[field] !== '') {
+          contactValue = reportData[field];
+          console.log(`Found contact in field '${field}':`, contactValue);
+          break;
+        }
+      }
+      
+      console.log("=== EXTRACTION RESULTS ===");
+      console.log("assigned_responders:", assignedResponders, "(type:", typeof assignedResponders, ")");
+      console.log("assigned_unit:", assignedUnit, "(type:", typeof assignedUnit, ")");
+      console.log("contact:", contactValue, "(type:", typeof contactValue, ")");
+      
+      // Format contact value properly
+      let formattedContact = null;
+      if (contactValue !== null && contactValue !== undefined && contactValue !== '') {
+        // Convert to string and clean it
+        formattedContact = contactValue.toString().trim();
+        console.log("Formatted contact:", formattedContact);
+        
+        // If it's a number, format it nicely
+        if (/^\d+$/.test(formattedContact)) {
+          // Add dashes for phone numbers
+          if (formattedContact.length === 11) {
+            formattedContact = formattedContact.replace(/(\d{4})(\d{3})(\d{4})/, '$1-$2-$3');
+          } else if (formattedContact.length === 10) {
+            formattedContact = formattedContact.replace(/(\d{3})(\d{3})(\d{4})/, '$1-$2-$3');
+          }
+        }
+      }
+      
+      // Check if we have any responder data
+      const hasData = (assignedResponders && assignedResponders.toString().trim() !== '') ||
+                     (assignedUnit && assignedUnit.toString().trim() !== '') ||
+                     (formattedContact && formattedContact.trim() !== '');
+      
+      if (!hasData) {
+        console.log("No responder data found in any column");
+        return null;
+      }
+      
+      // Parse the assigned_responders string if it contains multiple responders
+      let responders = [];
+      if (assignedResponders) {
+        const responderString = assignedResponders.toString().trim();
+        if (responderString !== '') {
+          // Split by comma to get individual responder names
+          const responderList = responderString.split(',').map(r => r.trim()).filter(r => r !== '');
+          responders = responderList;
+          console.log("Parsed responders list:", responders);
+        }
+      }
+      
+      const responderInfo = {
+        names: responders,
+        unit: assignedUnit ? assignedUnit.toString().trim() : null,
+        contact: formattedContact,
+        hasResponders: responders.length > 0,
+        hasUnit: (assignedUnit && assignedUnit.toString().trim() !== ''),
+        hasContact: (formattedContact && formattedContact.trim() !== ''),
+        rawData: {
+          assignedResponders: assignedResponders,
+          assignedUnit: assignedUnit,
+          contactValue: contactValue
+        }
+      };
+      
+      console.log("=== FINAL RESPONDER INFO ===", responderInfo);
+      return responderInfo;
+    }
+
+    // --- LOAD REPORT FROM SUPABASE ---
+    async function loadReport() {
+      try {
+        if (!reportID) {
+          alert("Missing report ID! Please go back to notifications.");
+          window.location.href = "notifications.html";
+          return;
+        }
+
+        console.log("Fetching report ID:", reportID);
+
+        const loadingDiv = document.getElementById('loading');
+        loadingDiv.innerHTML = "Loading report information...";
+
+        // Fetch report from Supabase with ALL columns including the separate responder columns
+        // Using wildcard * to get ALL columns including any custom columns
+        const { data: report, error } = await supabaseClient
+          .from('reports')
+          .select('*')  // Get ALL columns to see what's actually available
+          .eq('id', reportID)
+          .single();
+
+        if (error) {
+          console.error("Supabase error:", error);
+          alert("Report not found or database error: " + error.message);
+          window.location.href = "notifications.html";
+          return;
+        }
+
+        if (!report) {
+          alert("Report not found in database.");
+          window.location.href = "notifications.html";
+          return;
+        }
+
+        console.log("=== FULL REPORT DATA FROM SUPABASE ===", report);
+
+        if (!report.latitude || !report.longitude) {
+          alert("Report is missing coordinates!");
+          return;
+        }
+
+        // Extract responder info from separate columns
+        const responderInfo = extractResponderInfo(report);
+        console.log("Responder info from separate columns:", responderInfo);
+
+        // Get location name
+        loadingDiv.innerHTML = "Getting location name...";
+        
+        let displayLocation = report.location || report.location_name || report.formatted_address;
+        
+        if (!displayLocation || displayLocation.trim() === '' || displayLocation === 'NULL') {
+          displayLocation = await getLocationName(report.latitude, report.longitude);
+        }
+        
+        // Hide loading, show map
+        loadingDiv.style.display = 'none';
+        
+        // Initialize map
+        const map = L.map("map").setView([report.latitude, report.longitude], 15);
+
+        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+          maxZoom: 19,
+          attribution: "&copy; OpenStreetMap contributors"
+        }).addTo(map);
+
+        const formattedCoords = `${report.latitude?.toFixed(6)}, ${report.longitude?.toFixed(6)}`;
+        
+        // Create popup content with responder info from separate columns
+        let popupContent = `
+          <div style="text-align:center; padding: 10px; max-width: 320px;">
+            <h3 style="font-weight: bold; font-size: 18px; color: #dc2626; margin-bottom: 8px;">
+              ${escapeHTML(report.type_display || report.type?.toUpperCase() || 'EMERGENCY')}
+            </h3>
+            <div style="text-align: left; font-size: 14px; color: #374151;">
+              <p><strong>Report ID:</strong> ${escapeHTML(report.id?.substring(0, 8) + '...' || 'N/A')}</p>
+              <p><strong>Reporter:</strong> ${escapeHTML(report.reporter || 'Anonymous')}</p>
+              <p><strong>Time Reported:</strong> ${new Date(report.created_at || report.timestamp).toLocaleString()}</p>
+              <p><strong>Coordinates:</strong> ${formattedCoords}</p>
+              <p><strong>Location:</strong> ${escapeHTML(displayLocation)}</p>
+        `;
+        
+        // Add responder information section from separate columns
+        if (responderInfo) {
+          // Check if we have any data to display
+          const hasAnyData = responderInfo.hasResponders || responderInfo.hasUnit || responderInfo.hasContact;
+          
+          if (hasAnyData) {
+            popupContent += `
+              <div class="responder-info">
+                <div class="responder-title">
+                  <span>🚑 Assigned Responders</span>
+                  ${responderInfo.hasUnit ? '<i>TEAM</i>' : ''}
+                </div>
+                <div class="responder-details">
+            `;
+            
+            // Show unit if available
+            if (responderInfo.hasUnit) {
+              popupContent += `<div class="responder-detail"><strong>Unit:</strong> ${escapeHTML(responderInfo.unit)}</div>`;
+            }
+            
+            // Show responder names
+            if (responderInfo.hasResponders) {
+              popupContent += `<div class="responder-detail"><strong>Responders:</strong> ${escapeHTML(responderInfo.names.join(', '))}</div>`;
+            }
+            
+            // Show contact if available - FIXED HERE
+            if (responderInfo.hasContact) {
+              const telLink = `tel:${responderInfo.contact.replace(/\D/g, '')}`;
+              popupContent += `
+                <div class="responder-detail">
+                  <strong>Contact:</strong> 
+                  <span class="contact-info">
+                    <a href="${telLink}" class="contact-link" title="Click to call">${escapeHTML(responderInfo.contact)}</a>
+                  </span>
+                </div>`;
+            }
+            
+            popupContent += `</div></div>`;
+          } else {
+            popupContent += `
+              <div class="no-responder">
+                <div style="font-weight: bold; color: #92400e; margin-bottom: 4px;">⚠ No Responder Assigned</div>
+                <div style="font-size: 12px; color: #92400e;">This report has not been assigned to a responder yet.</div>
+              </div>
+            `;
+          }
+        } else {
+          popupContent += `
+            <div class="no-responder">
+              <div style="font-weight: bold; color: #92400e; margin-bottom: 4px;">⚠ No Responder Assigned</div>
+              <div style="font-size: 12px; color: #92400e;">This report has not been assigned to a responder yet.</div>
+            </div>
+          `;
+        }
+        
+        if (report.description) {
+          popupContent += `<p><strong>Description:</strong> ${escapeHTML(report.description)}</p>`;
+        }
+        
+        if (report.status) {
+          const status = report.status.toLowerCase();
+          const statusColor = status === 'investigating' ? '#d97706' : 
+                            status === 'resolved' ? '#059669' : 
+                            status === 'pending' ? '#dc2626' : '#374151';
+          popupContent += `<p><strong>Status:</strong> <span style="color: ${statusColor}; font-weight: bold;">${escapeHTML(report.status.toUpperCase())}</span></p>`;
+        }
+        
+        if (report.priority) {
+          const priority = report.priority.toLowerCase();
+          const priorityColor = priority === 'high' ? '#dc2626' : 
+                              priority === 'medium' ? '#d97706' : 
+                              priority === 'low' ? '#059669' : '#374151';
+          popupContent += `<p><strong>Priority:</strong> <span style="color: ${priorityColor}; font-weight: bold;">${escapeHTML(report.priority.toUpperCase())}</span></p>`;
+        }
+        
+        popupContent += `</div>`;
+
+        if (report.photo_url) {
+          const escapedPhotoUrl = escapeHTML(report.photo_url);
+          
+          popupContent += `
+            <div style="margin-top: 12px;">
+              <img src="${escapedPhotoUrl}" 
+                   class="popup-img" 
+                   alt="Report photo"
+                   onclick="window.open('${escapedPhotoUrl}', '_blank')"
+                   title="Click to view full size"
+                   onerror="this.style.display='none'; this.parentElement.innerHTML='<p style=\"color:#6b7280;font-size:12px;\">(Image unavailable or failed to load)</p>';">
+              <p style="color: #6b7280; font-size: 11px; margin-top: 4px;">
+                Click image to view full size
+              </p>
+            </div>
+          `;
+        }
+        
+        popupContent += `</div>`;
+
+        // Add main report marker
+        const marker = L.marker([report.latitude, report.longitude], {
+          icon: L.icon({
+            iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+            popupAnchor: [1, -34]
+          })
+        }).addTo(map);
+        
+        marker.bindPopup(popupContent).openPopup();
+
+        // Add circle around report
+        L.circle([report.latitude, report.longitude], {
+          color: 'red',
+          fillColor: '#f03',
+          fillOpacity: 0.1,
+          radius: 100
+        }).addTo(map);
+
+        // Add scale control
+        L.control.scale({ imperial: false, position: 'bottomleft' }).addTo(map);
+
+        // Update page title
+        let titleLocation = displayLocation.split(',')[0];
+        if (titleLocation.length > 20) {
+          titleLocation = titleLocation.substring(0, 20) + '...';
+        }
+        document.title = `Report: ${escapeHTML(report.type_display || report.type || 'Emergency')} at ${titleLocation}`;
+
+      } catch (error) {
+        console.error("Error loading report:", error);
+        document.getElementById('loading').innerHTML = 
+          '<div style="color: red; text-align: center; padding: 20px;">' +
+          '<h3 style="margin-bottom: 10px;">Error loading report</h3>' +
+          '<p style="margin-bottom: 15px;">' + error.message + '</p>' +
+          '<button onclick="location.href=\'notif.html\'" style="padding: 8px 16px; background: #dc2626; color: white; border: none; border-radius: 4px; cursor: pointer;">Go Back to Notifications</button>' +
+          '</div>';
+      }
+    }
+
+    // Helper function for HTML escaping
+    function escapeHTML(str) {
+      if (!str) return '';
+      return str.replace(/[&<>"']/g, m => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+      }[m]));
+    }
+
+    // Load when page is ready
+    document.addEventListener('DOMContentLoaded', loadReport);
+  </script>
+</body>
+</html>

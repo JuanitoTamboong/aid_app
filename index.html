@@ -7,6 +7,8 @@
 <script src="https://cdn.tailwindcss.com"></script>
 <!-- Font Awesome for icons -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<!-- Google Fonts for better readability -->
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
 <!--logo-->
 <link rel="website icon" href="assets/aid-tracker-logo.png">
 <!-- Supabase -->
@@ -16,6 +18,10 @@
 <script src="https://unpkg.com/@capacitor/app@7/dist/plugin.js"></script>
 
 <style>
+  * {
+    font-family: 'Poppins', 'Roboto', sans-serif;
+  }
+  
   /* Map animation */
   #mapContainer {
     display: none;
@@ -39,7 +45,7 @@
     float: right;
     cursor: pointer;
     z-index: 1001;
-    background: rgba(10, 22, 54, 0.8);
+    background: rgba(10, 22, 54, 0.9);
     border: 1px solid rgba(252, 211, 77, 0.3);
     border-radius: 50%;
     width: 50px;
@@ -50,7 +56,7 @@
     transition: all 0.3s ease;
   }
   .notification:hover {
-    background: rgba(20, 35, 80, 0.9);
+    background: rgba(20, 35, 80, 0.95);
     border-color: #fcd34d;
     transform: scale(1.1);
   }
@@ -76,32 +82,43 @@
 
   /* Gradient Background */
   body {
-    background: linear-gradient(135deg, #0a1636 70%, #d4af37 30%);
-    color: white;
+    background: linear-gradient(135deg, #0a1636 70%, #1a2c5a 30%);
+    color: #f8fafc;
     min-height: 100vh;
+    font-weight: 400;
+    line-height: 1.6;
   }
 
   /* Card styling */
   .card {
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(212, 175, 55, 0.8);
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(212, 175, 55, 0.5);
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
     transition: transform 0.2s, box-shadow 0.2s;
+    backdrop-filter: blur(10px);
+    border-radius: 16px;
   }
   .card:hover {
-    transform: scale(1.05);
-    box-shadow: 0 6px 20px rgba(212, 175, 55, 0.4);
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(212, 175, 55, 0.3);
+    background: rgba(255, 255, 255, 0.12);
   }
 
   .btn {
-    background-color: #d4af37;
+    background: linear-gradient(135deg, #fcd34d 0%, #fbbf24 100%);
     color: #0a1636;
-    font-weight: bold;
-    transition: background-color 0.2s, transform 0.2s;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    border: none;
+    border-radius: 12px;
+    padding: 12px 24px;
+    font-size: 1rem;
+    letter-spacing: 0.3px;
   }
   .btn:hover {
-    background-color: #f2cb61;
-    transform: scale(1.05);
+    background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(251, 191, 36, 0.4);
   }
 
   a:hover {
@@ -113,15 +130,14 @@
     position: fixed;
     top: 0;
     left: -100%;
-    width: 250px;
+    width: 280px;
     height: 100%;
     background: linear-gradient(135deg, #0a1636 0%, #1a2c5a 100%);
-    -webkit-backdrop-filter: blur(10px);
-    backdrop-filter: blur(10px);
+    backdrop-filter: blur(20px);
     z-index: 2000;
     transition: left 0.3s ease-in-out;
-    box-shadow: 5px 0 20px rgba(0, 0, 0, 0.3);
-    padding-top: 60px;
+    box-shadow: 5px 0 30px rgba(0, 0, 0, 0.4);
+    padding-top: 80px;
   }
 
   #mobileMenu.active {
@@ -130,25 +146,28 @@
 
   .mobile-menu-item {
     display: block;
-    padding: 15px 20px;
-    color: #fcd34d;
+    padding: 18px 25px;
+    color: #f8fafc;
     text-decoration: none;
     font-size: 1.1rem;
     font-weight: 500;
     border-bottom: 1px solid rgba(252, 211, 77, 0.2);
-    transition: all 0.2s ease;
+    transition: all 0.3s ease;
+    letter-spacing: 0.3px;
   }
 
   .mobile-menu-item:hover {
-    background: rgba(252, 211, 77, 0.1);
-    color: #ffffff;
-    padding-left: 25px;
+    background: rgba(252, 211, 77, 0.15);
+    color: #fcd34d;
+    padding-left: 30px;
+    border-left: 4px solid #fcd34d;
   }
 
   .mobile-menu-item i {
-    margin-right: 10px;
-    width: 20px;
+    margin-right: 12px;
+    width: 24px;
     text-align: center;
+    font-size: 1.2rem;
   }
 
   .menu-overlay {
@@ -157,9 +176,10 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.5);
+    background: rgba(0, 0, 0, 0.7);
     z-index: 1999;
     display: none;
+    backdrop-filter: blur(3px);
   }
 
   .menu-overlay.active {
@@ -172,11 +192,11 @@
     top: 15px;
     left: 15px;
     z-index: 2001;
-    background: rgba(10, 22, 54, 0.8);
+    background: rgba(10, 22, 54, 0.9);
     border: 1px solid rgba(252, 211, 77, 0.3);
-    border-radius: 8px;
-    width: 44px;
-    height: 44px;
+    border-radius: 12px;
+    width: 50px;
+    height: 50px;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -186,21 +206,22 @@
   }
 
   .hamburger:hover {
-    background: rgba(20, 35, 80, 0.9);
+    background: rgba(20, 35, 80, 0.95);
     border-color: #fcd34d;
+    transform: scale(1.05);
   }
 
   .hamburger-line {
-    width: 22px;
+    width: 24px;
     height: 2px;
     background: #fcd34d;
-    margin: 3px 0;
+    margin: 4px 0;
     transition: all 0.3s ease;
-    border-radius: 1px;
+    border-radius: 2px;
   }
 
   .hamburger.active .hamburger-line:nth-child(1) {
-    transform: rotate(45deg) translate(5px, 5px);
+    transform: rotate(45deg) translate(6px, 6px);
   }
 
   .hamburger.active .hamburger-line:nth-child(2) {
@@ -208,7 +229,7 @@
   }
 
   .hamburger.active .hamburger-line:nth-child(3) {
-    transform: rotate(-45deg) translate(7px, -6px);
+    transform: rotate(-45deg) translate(8px, -7px);
   }
 
   /* Toast Notification */
@@ -216,18 +237,18 @@
     position: fixed;
     top: 20px;
     right: 90px;
-    background: linear-gradient(145deg, rgba(30, 45, 90, 0.95), rgba(20, 35, 80, 0.95));
+    background: linear-gradient(145deg, rgba(30, 45, 90, 0.97), rgba(20, 35, 80, 0.97));
     border: 1px solid rgba(252, 211, 77, 0.3);
-    border-radius: 10px;
-    padding: 15px 20px;
-    width: 300px;
+    border-radius: 14px;
+    padding: 18px 22px;
+    width: 320px;
     z-index: 1000;
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
-    -webkit-backdrop-filter: blur(10px);
-    backdrop-filter: blur(10px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(20px);
     transform: translateX(400px);
     animation: slideIn 0.5s ease forwards;
     border-left: 4px solid #fcd34d;
+    font-size: 0.95rem;
   }
 
   @keyframes slideIn {
@@ -250,16 +271,16 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 8px;
+    margin-bottom: 10px;
   }
 
   .toast-title {
     font-weight: 600;
     color: #fcd34d;
-    font-size: 1rem;
+    font-size: 1.05rem;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
   }
 
   .toast-close {
@@ -267,8 +288,9 @@
     border: none;
     color: #94a3b8;
     cursor: pointer;
-    font-size: 1rem;
-    padding: 4px;
+    font-size: 1.1rem;
+    padding: 5px;
+    transition: color 0.2s;
   }
 
   .toast-close:hover {
@@ -277,14 +299,14 @@
 
   .toast-message {
     color: #e2e8f0;
-    font-size: 0.9rem;
-    line-height: 1.4;
+    font-size: 0.95rem;
+    line-height: 1.5;
   }
 
   .toast-time {
     color: #94a3b8;
-    font-size: 0.75rem;
-    margin-top: 8px;
+    font-size: 0.8rem;
+    margin-top: 10px;
     text-align: right;
   }
   
@@ -296,28 +318,255 @@
     right: -5px;
     background: #ef4444;
     color: white;
-    min-width: 20px;
-    height: 20px;
+    min-width: 22px;
+    height: 22px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.7rem;
+    font-size: 0.75rem;
     font-weight: bold;
-    padding: 2px 5px;
+    padding: 2px 6px;
     border: 2px solid #0a1636;
     z-index: 1002;
-    box-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
+    box-shadow: 0 0 12px rgba(239, 68, 68, 0.6);
   }
 
-  /* IMPROVED: Legal Notice Popup - BETTER UI */
+  /* Emergency Hotline Button */
+  .emergency-hotline {
+    position: fixed;
+    bottom: 30px;
+    right: 20px;
+    z-index: 1001;
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 70px;
+    height: 70px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 6px 25px rgba(239, 68, 68, 0.5);
+    font-size: 1.8rem;
+    animation: emergencyPulse 2s infinite;
+  }
+
+  /* Emergency Type Selection Modal */
+  .emergency-type-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(10, 22, 54, 0.97);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 3003;
+    padding: 20px;
+    box-sizing: border-box;
+    overflow-y: auto;
+    backdrop-filter: blur(15px);
+    animation: fadeIn 0.3s ease;
+  }
+
+  .emergency-type-modal.active {
+    display: flex;
+  }
+
+  .emergency-type-box {
+    background: linear-gradient(145deg, rgba(25, 40, 85, 0.98), rgba(15, 27, 59, 0.98));
+    color: #fff;
+    padding: 35px;
+    border-radius: 24px;
+    text-align: center;
+    width: 100%;
+    max-width: 500px;
+    border: 2px solid rgba(252, 211, 77, 0.8);
+    box-shadow:
+      0 25px 60px rgba(0, 0, 0, 0.7),
+      0 0 0 1px rgba(255, 255, 255, 0.1) inset,
+      0 0 40px rgba(252, 211, 77, 0.25);
+    animation: slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    backdrop-filter: blur(15px);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .emergency-type-close-btn {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: rgba(239, 68, 68, 0.8);
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    z-index: 2;
+    color: white;
+    font-size: 16px;
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+  }
+
+  .emergency-type-close-btn:hover {
+    background: rgba(239, 68, 68, 0.9);
+    border-color: white;
+    transform: scale(1.1);
+    box-shadow: 0 6px 16px rgba(239, 68, 68, 0.4);
+  }
+
+  .emergency-type-icon {
+    background: linear-gradient(135deg, #fcd34d, #fbbf24);
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    color: #0a1636;
+    margin: 0 auto 20px;
+    box-shadow: 0 10px 25px rgba(252, 211, 77, 0.5);
+    border: 3px solid rgba(255, 255, 255, 0.2);
+    animation: pulseIcon 2s infinite;
+  }
+
+  .emergency-type-title {
+    color: #fcd34d;
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+    text-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+    letter-spacing: 0.5px;
+  }
+
+  .emergency-type-subtitle {
+    color: #e2e8f0;
+    font-size: 1rem;
+    margin-bottom: 30px;
+    font-weight: 400;
+  }
+
+  .emergency-type-options {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 15px;
+    margin-bottom: 30px;
+  }
+
+  .emergency-type-btn {
+    background: rgba(255, 255, 255, 0.08);
+    border: 2px solid rgba(252, 211, 77, 0.3);
+    border-radius: 16px;
+    padding: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    text-align: left;
+    backdrop-filter: blur(10px);
+  }
+
+  .emergency-type-btn:hover {
+    background: rgba(252, 211, 77, 0.15);
+    border-color: #fcd34d;
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(252, 211, 77, 0.3);
+  }
+
+  .emergency-type-icon-small {
+    background: linear-gradient(135deg, #fcd34d, #fbbf24);
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    color: #0a1636;
+    flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(252, 211, 77, 0.4);
+  }
+
+  .emergency-type-info {
+    flex: 1;
+  }
+
+  .emergency-type-name {
+    color: #fcd34d;
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+
+  .emergency-type-description {
+    color: #cbd5e1;
+    font-size: 0.9rem;
+    line-height: 1.4;
+  }
+
+  .emergency-type-buttons {
+    display: flex;
+    justify-content: center;
+  }
+
+  .emergency-type-btn-cancel {
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.08));
+    color: #e2e8f0;
+    border: 2px solid rgba(255, 255, 255, 0.25);
+    border-radius: 12px;
+    padding: 14px 28px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 1rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    letter-spacing: 0.3px;
+  }
+
+  .emergency-type-btn-cancel:hover {
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.12));
+    border-color: rgba(255, 255, 255, 0.35);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+  }
+
+  @keyframes emergencyPulse {
+    0%, 100% { 
+      transform: scale(1); 
+      box-shadow: 0 6px 25px rgba(239, 68, 68, 0.5);
+    }
+    50% { 
+      transform: scale(1.05); 
+      box-shadow: 0 8px 30px rgba(239, 68, 68, 0.7);
+    }
+  }
+
+  .emergency-hotline:hover {
+    transform: scale(1.1);
+    box-shadow: 0 8px 35px rgba(239, 68, 68, 0.8);
+  }
+
+  /* IMPROVED: Legal Notice Popup */
   .legal-notice-overlay {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(10, 22, 54, 0.95);
+    background-color: rgba(10, 22, 54, 0.97);
     display: none;
     justify-content: center;
     align-items: center;
@@ -325,7 +574,7 @@
     padding: 20px;
     box-sizing: border-box;
     overflow-y: auto;
-    backdrop-filter: blur(8px);
+    backdrop-filter: blur(15px);
     animation: fadeIn 0.3s ease;
   }
 
@@ -339,22 +588,24 @@
   }
 
   .legal-notice-box {
-    background: linear-gradient(145deg, rgba(25, 40, 85, 0.97), rgba(15, 27, 59, 0.97));
+    background: linear-gradient(145deg, rgba(25, 40, 85, 0.98), rgba(15, 27, 59, 0.98));
     color: #fff;
-    padding: 32px;
+    padding: 35px;
     border-radius: 24px;
     text-align: center;
     width: 100%;
-    max-width: 540px;
+    max-width: 600px;
     border: 2px solid rgba(239, 68, 68, 0.8);
     box-shadow: 
-      0 20px 50px rgba(0, 0, 0, 0.6),
+      0 25px 60px rgba(0, 0, 0, 0.7),
       0 0 0 1px rgba(255, 255, 255, 0.1) inset,
-      0 0 30px rgba(239, 68, 68, 0.2);
+      0 0 40px rgba(239, 68, 68, 0.25);
     animation: slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    backdrop-filter: blur(12px);
+    backdrop-filter: blur(15px);
     position: relative;
     overflow: hidden;
+    font-size: 0.95rem;
+    line-height: 1.6;
   }
 
   @keyframes slideUp {
@@ -396,9 +647,9 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 16px;
-    margin-bottom: 28px;
-    padding-bottom: 20px;
+    gap: 18px;
+    margin-bottom: 30px;
+    padding-bottom: 22px;
     border-bottom: 2px solid rgba(239, 68, 68, 0.3);
     position: relative;
   }
@@ -415,15 +666,15 @@
 
   .legal-icon {
     background: linear-gradient(135deg, #ef4444, #dc2626);
-    width: 60px;
-    height: 60px;
+    width: 65px;
+    height: 65px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 28px;
+    font-size: 30px;
     color: white;
-    box-shadow: 0 8px 20px rgba(239, 68, 68, 0.4);
+    box-shadow: 0 10px 25px rgba(239, 68, 68, 0.5);
     border: 3px solid rgba(255, 255, 255, 0.2);
     animation: pulseIcon 2s infinite;
   }
@@ -431,41 +682,41 @@
   @keyframes pulseIcon {
     0%, 100% { 
       transform: scale(1); 
-      box-shadow: 0 8px 20px rgba(239, 68, 68, 0.4);
+      box-shadow: 0 10px 25px rgba(239, 68, 68, 0.5);
     }
     50% { 
       transform: scale(1.05); 
-      box-shadow: 0 12px 25px rgba(239, 68, 68, 0.5);
+      box-shadow: 0 15px 30px rgba(239, 68, 68, 0.6);
     }
   }
 
   .legal-notice-title {
     color: #fca5a5;
-    font-size: 1.8rem;
+    font-size: 1.9rem;
     font-weight: 700;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    text-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
     letter-spacing: 0.5px;
   }
 
   .legal-notice-subtitle {
     color: #fecaca;
-    font-size: 1rem;
-    margin-top: 4px;
+    font-size: 1.05rem;
+    margin-top: 6px;
     font-weight: 500;
   }
 
   .legal-notice-content {
     text-align: left;
-    margin-bottom: 28px;
+    margin-bottom: 30px;
     line-height: 1.7;
-    font-size: 0.96rem;
-    max-height: 320px;
+    font-size: 1rem;
+    max-height: 350px;
     overflow-y: auto;
-    padding-right: 12px;
-    padding-left: 4px;
+    padding-right: 15px;
+    padding-left: 5px;
     background: rgba(10, 22, 54, 0.3);
-    border-radius: 12px;
-    padding: 20px;
+    border-radius: 14px;
+    padding: 22px;
     border: 1px solid rgba(255, 255, 255, 0.1);
   }
 
@@ -488,31 +739,27 @@
   }
 
   .legal-notice-content p {
-    margin-bottom: 16px;
+    margin-bottom: 18px;
     color: #e2e8f0;
   }
 
   .legal-notice-content strong {
     color: #fca5a5;
     font-weight: 600;
-    background: linear-gradient(to right, #fca5a5, #fecaca);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
   }
 
   .legal-notice-content ul {
-    margin-left: 22px;
-    margin-bottom: 22px;
+    margin-left: 24px;
+    margin-bottom: 24px;
     padding-left: 8px;
   }
 
   .legal-notice-content li {
-    margin-bottom: 12px;
+    margin-bottom: 14px;
     color: #cbd5e1;
     position: relative;
-    padding-left: 10px;
-    line-height: 1.5;
+    padding-left: 12px;
+    line-height: 1.6;
   }
 
   .legal-notice-content li::before {
@@ -526,10 +773,10 @@
   .legal-checkbox-container {
     display: flex;
     align-items: flex-start;
-    margin: 30px 0;
-    padding: 22px;
+    margin: 32px 0;
+    padding: 24px;
     background: linear-gradient(145deg, rgba(239, 68, 68, 0.15), rgba(220, 38, 38, 0.1));
-    border-radius: 14px;
+    border-radius: 16px;
     border: 2px solid rgba(239, 68, 68, 0.4);
     transition: all 0.3s ease;
     position: relative;
@@ -550,20 +797,20 @@
     border-color: #ef4444;
     background: linear-gradient(145deg, rgba(239, 68, 68, 0.2), rgba(220, 38, 38, 0.15));
     box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15), 
-                inset 0 2px 10px rgba(0, 0, 0, 0.2);
+                inset 0 2px 12px rgba(0, 0, 0, 0.2);
   }
 
   .legal-checkbox {
-    margin-right: 18px;
-    margin-top: 2px;
+    margin-right: 20px;
+    margin-top: 4px;
     flex-shrink: 0;
   }
 
   .legal-checkbox input[type="checkbox"] {
-    width: 24px;
-    height: 24px;
+    width: 26px;
+    height: 26px;
     border: 2px solid rgba(239, 68, 68, 0.6);
-    border-radius: 6px;
+    border-radius: 7px;
     background: rgba(10, 22, 54, 0.9);
     cursor: pointer;
     appearance: none;
@@ -580,12 +827,12 @@
     content: '✓';
     position: absolute;
     color: white;
-    font-size: 16px;
+    font-size: 17px;
     font-weight: bold;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
   }
 
   .legal-checkbox input[type="checkbox"]:hover {
@@ -596,7 +843,7 @@
   .legal-checkbox-label {
     color: #fecaca;
     font-weight: 500;
-    font-size: 0.98rem;
+    font-size: 1rem;
     line-height: 1.6;
     text-align: left;
     flex: 1;
@@ -605,33 +852,29 @@
   .legal-checkbox-label strong {
     color: #ffffff;
     font-weight: 600;
-    background: linear-gradient(to right, #ffffff, #fecaca);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
   }
 
   .legal-buttons {
     display: flex;
-    gap: 16px;
-    margin-top: 24px;
+    gap: 18px;
+    margin-top: 28px;
     flex-wrap: wrap;
   }
 
   .legal-btn {
-    padding: 16px 28px;
-    border-radius: 12px;
+    padding: 17px 30px;
+    border-radius: 14px;
     border: none;
-    font-weight: bold;
+    font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
-    font-size: 1.05rem;
+    font-size: 1.1rem;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 12px;
+    gap: 14px;
     flex: 1;
-    min-width: 150px;
+    min-width: 160px;
     position: relative;
     overflow: hidden;
     letter-spacing: 0.5px;
@@ -662,20 +905,20 @@
     background: linear-gradient(145deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.12));
     border-color: rgba(255, 255, 255, 0.35);
     transform: translateY(-3px);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
   }
 
   .legal-btn-confirm {
     background: linear-gradient(145deg, #ef4444, #dc2626);
     color: white;
     border: 2px solid rgba(255, 255, 255, 0.3);
-    box-shadow: 0 6px 18px rgba(239, 68, 68, 0.4);
+    box-shadow: 0 8px 22px rgba(239, 68, 68, 0.4);
   }
 
   .legal-btn-confirm:hover:not(:disabled) {
     background: linear-gradient(145deg, #dc2626, #b91c1c);
     transform: translateY(-3px);
-    box-shadow: 0 10px 25px rgba(239, 68, 68, 0.5);
+    box-shadow: 0 12px 28px rgba(239, 68, 68, 0.5);
     border-color: rgba(255, 255, 255, 0.4);
   }
 
@@ -694,42 +937,290 @@
     box-shadow: none;
   }
 
+  /* Privacy Policy Popup */
+  .privacy-policy-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(10, 22, 54, 0.97);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 3001;
+    padding: 20px;
+    box-sizing: border-box;
+    overflow-y: auto;
+    backdrop-filter: blur(15px);
+    animation: fadeIn 0.3s ease;
+  }
+
+  .privacy-policy-overlay.active {
+    display: flex;
+  }
+
+  .privacy-policy-box {
+    background: linear-gradient(145deg, rgba(25, 40, 85, 0.98), rgba(15, 27, 59, 0.98));
+    color: #fff;
+    padding: 35px;
+    border-radius: 24px;
+    text-align: center;
+    width: 100%;
+    max-width: 700px;
+    border: 2px solid rgba(59, 130, 246, 0.8);
+    box-shadow: 
+      0 25px 60px rgba(0, 0, 0, 0.7),
+      0 0 0 1px rgba(255, 255, 255, 0.1) inset,
+      0 0 40px rgba(59, 130, 246, 0.25);
+    animation: slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    backdrop-filter: blur(15px);
+    position: relative;
+    overflow: hidden;
+    font-size: 0.95rem;
+    line-height: 1.6;
+  }
+
+  .privacy-policy-box::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 6px;
+    background: linear-gradient(90deg, #3b82f6, #2563eb, #1d4ed8, #1e40af);
+    z-index: 1;
+  }
+
+  .privacy-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 18px;
+    margin-bottom: 30px;
+    padding-bottom: 22px;
+    border-bottom: 2px solid rgba(59, 130, 246, 0.3);
+    position: relative;
+  }
+
+  .privacy-header::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 25%;
+    right: 25%;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, #fcd34d, transparent);
+  }
+
+  .privacy-icon {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    width: 65px;
+    height: 65px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 30px;
+    color: white;
+    box-shadow: 0 10px 25px rgba(59, 130, 246, 0.5);
+    border: 3px solid rgba(255, 255, 255, 0.2);
+  }
+
+  .privacy-title {
+    color: #93c5fd;
+    font-size: 1.9rem;
+    font-weight: 700;
+    text-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+    letter-spacing: 0.5px;
+  }
+
+  .privacy-content {
+    text-align: left;
+    margin-bottom: 30px;
+    line-height: 1.7;
+    font-size: 1rem;
+    max-height: 400px;
+    overflow-y: auto;
+    padding-right: 15px;
+    padding-left: 5px;
+    background: rgba(10, 22, 54, 0.3);
+    border-radius: 14px;
+    padding: 22px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .privacy-section {
+    margin-bottom: 25px;
+  }
+
+  .privacy-section h3 {
+    color: #fcd34d;
+    font-size: 1.2rem;
+    margin-bottom: 12px;
+    font-weight: 600;
+  }
+
+  .privacy-section p {
+    color: #e2e8f0;
+    margin-bottom: 10px;
+  }
+
+  .privacy-section ul {
+    margin-left: 24px;
+    margin-bottom: 15px;
+  }
+
+  .privacy-section li {
+    color: #cbd5e1;
+    margin-bottom: 8px;
+    position: relative;
+    padding-left: 5px;
+  }
+
+  .privacy-buttons {
+    display: flex;
+    gap: 18px;
+    margin-top: 28px;
+    justify-content: center;
+  }
+
+  .privacy-btn {
+    padding: 15px 30px;
+    border-radius: 14px;
+    border: none;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 1.1rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    min-width: 180px;
+  }
+
+  .privacy-btn-agree {
+    background: linear-gradient(145deg, #3b82f6, #2563eb);
+    color: white;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+  }
+
+  .privacy-btn-agree:hover {
+    background: linear-gradient(145deg, #2563eb, #1d4ed8);
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(59, 130, 246, 0.4);
+  }
+
   /* Mobile-specific adjustments */
   @media (max-width: 768px) {
-    .legal-notice-box {
-      padding: 24px;
+    body {
+      font-size: 15px;
+    }
+    
+    .legal-notice-box,
+    .privacy-policy-box {
+      padding: 25px;
       border-radius: 20px;
       max-width: 90%;
-      margin: 10px;
+      margin: 15px;
     }
     
-    .legal-notice-header {
+    .legal-notice-header,
+    .privacy-header {
       flex-direction: column;
-      gap: 12px;
-      margin-bottom: 20px;
+      gap: 15px;
+      margin-bottom: 25px;
     }
     
-    .legal-icon {
-      width: 50px;
-      height: 50px;
-      font-size: 24px;
+    .legal-icon,
+    .privacy-icon {
+      width: 55px;
+      height: 55px;
+      font-size: 26px;
     }
     
-    .legal-notice-title {
-      font-size: 1.5rem;
+    .legal-notice-title,
+    .privacy-title {
+      font-size: 1.6rem;
       text-align: center;
     }
     
     .legal-notice-subtitle {
-      font-size: 0.9rem;
+      font-size: 0.95rem;
       text-align: center;
     }
     
-    .legal-notice-content {
-      font-size: 0.92rem;
+    .legal-notice-content,
+    .privacy-content {
+      font-size: 0.95rem;
+      max-height: 300px;
+      padding: 18px;
+      margin-bottom: 25px;
+    }
+    
+    .legal-checkbox-container {
+      padding: 20px;
+      margin: 25px 0;
+    }
+    
+    .legal-checkbox-label {
+      font-size: 0.95rem;
+      line-height: 1.5;
+    }
+    
+    .legal-checkbox input[type="checkbox"] {
+      width: 24px;
+      height: 24px;
+    }
+    
+    .legal-buttons {
+      flex-direction: column;
+      gap: 15px;
+    }
+    
+    .legal-btn,
+    .privacy-btn {
+      padding: 16px 25px;
+      width: 100%;
+      min-width: auto;
+      font-size: 1.05rem;
+    }
+    
+    .toast-notification {
+      width: 280px;
+      right: 15px;
+      padding: 15px 20px;
+    }
+    
+    .emergency-hotline {
+      width: 65px;
+      height: 65px;
+      font-size: 1.6rem;
+      bottom: 25px;
+      right: 15px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .legal-notice-box,
+    .privacy-policy-box {
+      padding: 20px;
+      border-radius: 18px;
+      max-width: 95%;
+      margin: 10px;
+    }
+    
+    .legal-notice-title,
+    .privacy-title {
+      font-size: 1.4rem;
+    }
+    
+    .legal-notice-content,
+    .privacy-content {
+      font-size: 0.9rem;
       max-height: 280px;
-      padding: 16px;
-      margin-bottom: 20px;
+      padding: 15px;
     }
     
     .legal-checkbox-container {
@@ -739,78 +1230,49 @@
     
     .legal-checkbox-label {
       font-size: 0.9rem;
-      line-height: 1.5;
     }
     
-    .legal-checkbox input[type="checkbox"] {
-      width: 22px;
-      height: 22px;
-    }
-    
-    .legal-buttons {
-      flex-direction: column;
-      gap: 12px;
-    }
-    
-    .legal-btn {
-      padding: 14px 24px;
-      width: 100%;
-      min-width: auto;
+    .legal-btn,
+    .privacy-btn {
+      padding: 14px 20px;
       font-size: 1rem;
     }
-  }
-
-  @media (max-width: 480px) {
-    .legal-notice-box {
-      padding: 20px;
-      border-radius: 18px;
-      max-width: 95%;
-      margin: 5px;
-    }
     
-    .legal-notice-title {
-      font-size: 1.3rem;
-    }
-    
-    .legal-notice-content {
-      font-size: 0.88rem;
-      max-height: 240px;
-      padding: 14px;
-    }
-    
-    .legal-checkbox-container {
-      padding: 16px;
-      margin: 16px 0;
-    }
-    
-    .legal-checkbox-label {
-      font-size: 0.86rem;
-    }
-    
-    .legal-btn {
-      padding: 13px 20px;
-      font-size: 0.96rem;
-    }
-    
-    .legal-notice-overlay {
+    .legal-notice-overlay,
+    .privacy-policy-overlay {
       padding: 15px;
       align-items: flex-start;
       padding-top: 40px;
+    }
+    
+    .notification {
+      width: 45px;
+      height: 45px;
+      font-size: 20px;
+      right: 15px;
+    }
+    
+    .hamburger {
+      width: 45px;
+      height: 45px;
     }
   }
 
   /* Small screen height adjustments */
   @media (max-height: 700px) {
-    .legal-notice-content {
-      max-height: 220px;
+    .legal-notice-content,
+    .privacy-content {
+      max-height: 250px;
     }
     
-    .legal-notice-box {
+    .legal-notice-box,
+    .privacy-policy-box {
       max-height: 85vh;
       overflow-y: auto;
     }
     
-    .legal-notice-overlay {
+    .legal-notice-overlay,
+    .privacy-policy-overlay {
       align-items: flex-start;
       padding-top: 40px;
     }
@@ -820,9 +1282,9 @@
   .legal-warning-highlight {
     background: linear-gradient(to right, rgba(239, 68, 68, 0.1), rgba(220, 38, 38, 0.1));
     border-left: 4px solid #ef4444;
-    padding: 16px;
-    border-radius: 8px;
-    margin: 20px 0;
+    padding: 18px;
+    border-radius: 10px;
+    margin: 22px 0;
     position: relative;
   }
 
@@ -840,7 +1302,460 @@
     align-items: center;
     justify-content: center;
     font-size: 12px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  }
+
+
+
+  /* Guest Reporting Button */
+  .guest-report-btn {
+    background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 14px 28px;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 15px;
+    letter-spacing: 0.3px;
+  }
+
+  .guest-report-btn:hover {
+    background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(139, 92, 246, 0.4);
+  }
+
+  /* Typography improvements */
+  h1, h2, h3, h4, h5, h6 {
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    line-height: 1.3;
+  }
+
+  p {
+    margin-bottom: 1rem;
+    letter-spacing: 0.1px;
+  }
+
+  /* Hotline Modal */
+  .hotline-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(10, 22, 54, 0.97);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 3002;
+    padding: 10px;
+    backdrop-filter: blur(15px);
+    animation: fadeIn 0.3s ease;
+  }
+
+  .hotline-modal.active {
+    display: flex;
+  }
+
+  .hotline-box {
+    background: linear-gradient(145deg, rgba(25, 40, 85, 0.98), rgba(15, 27, 59, 0.98));
+    color: #fff;
+    padding: 20px;
+    border-radius: 16px;
+    text-align: center;
+    width: 100%;
+    max-width: 400px;
+    border: 2px solid rgba(239, 68, 68, 0.8);
+    box-shadow:
+      0 15px 40px rgba(0, 0, 0, 0.7),
+      0 0 25px rgba(239, 68, 68, 0.25);
+    animation: slideUp 0.4s ease;
+    position: relative;
+    overflow: hidden;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+
+  .hotline-box::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #ef4444, #dc2626, #b91c1c);
+    z-index: 1;
+  }
+
+  /* Close button in top-right corner */
+  .hotline-close-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(239, 68, 68, 0.8);
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    z-index: 2;
+    color: white;
+    font-size: 16px;
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+  }
+
+  .hotline-close-btn:hover {
+    background: rgba(239, 68, 68, 0.9);
+    border-color: white;
+    transform: scale(1.1);
+    box-shadow: 0 6px 16px rgba(239, 68, 68, 0.4);
+  }
+
+  .hotline-icon {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    color: white;
+    margin: 0 auto 15px;
+    box-shadow: 0 10px 25px rgba(239, 68, 68, 0.5);
+    border: 3px solid rgba(255, 255, 255, 0.2);
+    animation: pulseIcon 2s infinite;
+  }
+
+  .hotline-title {
+    color: #fca5a5;
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  }
+
+  .hotline-subtitle {
+    color: #fecaca;
+    font-size: 0.9rem;
+    margin-bottom: 20px;
+    font-weight: 500;
+  }
+
+  .hotline-numbers {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 25px;
+  }
+
+  .hotline-item {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(252, 211, 77, 0.3);
+    border-radius: 10px;
+    padding: 15px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+  }
+
+  .hotline-item:hover {
+    background: rgba(252, 211, 77, 0.15);
+    transform: translateY(-2px);
+    border-color: #fcd34d;
+  }
+
+  .hotline-name {
+    color: #fcd34d;
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .hotline-number {
+    color: white;
+    font-size: 1.2rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+  }
+
+  .hotline-description {
+    color: #cbd5e1;
+    font-size: 0.8rem;
+    margin-top: 6px;
+    font-style: italic;
+  }
+
+  .hotline-buttons {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+  }
+
+  .hotline-btn {
+    padding: 12px 20px;
+    border-radius: 10px;
+    border: none;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.95rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    flex: 1;
+    max-width: 150px;
+  }
+
+  .hotline-btn-call {
+    background: linear-gradient(145deg, #10b981, #059669);
+    color: white;
+  }
+
+  .hotline-btn-call:hover {
+    background: linear-gradient(145deg, #059669, #047857);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
+  }
+
+  .hotline-btn-close {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+  }
+
+  .hotline-btn-close:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateY(-2px);
+  }
+
+  /* Mobile-specific adjustments for hotline modal */
+  @media (max-width: 768px) {
+    .hotline-modal {
+      padding: 5px;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .hotline-box {
+      padding: 15px;
+      border-radius: 12px;
+      max-width: 95%;
+      max-height: 85vh;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .hotline-title {
+      font-size: 1.3rem;
+    }
+
+    .hotline-subtitle {
+      font-size: 0.85rem;
+      margin-bottom: 15px;
+    }
+
+    .hotline-numbers {
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+
+    .hotline-item {
+      padding: 12px;
+    }
+
+    .hotline-name {
+      font-size: 0.9rem;
+      margin-bottom: 4px;
+    }
+
+    .hotline-number {
+      font-size: 1.1rem;
+    }
+
+    .hotline-description {
+      font-size: 0.75rem;
+      margin-top: 4px;
+    }
+
+    .hotline-buttons {
+      gap: 8px;
+    }
+
+    .hotline-btn {
+      padding: 10px 16px;
+      font-size: 0.9rem;
+      max-width: 120px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .hotline-modal {
+      padding: 5px;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .hotline-box {
+      padding: 12px;
+      border-radius: 10px;
+      max-width: 98%;
+      max-height: 80vh;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    .hotline-close-btn {
+      width: 35px;
+      height: 35px;
+      font-size: 14px;
+      top: 8px;
+      right: 8px;
+    }
+
+    .hotline-icon {
+      width: 50px;
+      height: 50px;
+      font-size: 24px;
+      margin-bottom: 12px;
+    }
+
+    .hotline-title {
+      font-size: 1.2rem;
+      margin-bottom: 6px;
+    }
+
+    .hotline-subtitle {
+      font-size: 0.8rem;
+      margin-bottom: 12px;
+    }
+
+    .hotline-numbers {
+      gap: 6px;
+      margin-bottom: 15px;
+    }
+
+    .hotline-item {
+      padding: 10px;
+    }
+
+    .hotline-name {
+      font-size: 0.85rem;
+      margin-bottom: 3px;
+      gap: 6px;
+    }
+
+    .hotline-number {
+      font-size: 1rem;
+    }
+
+    .hotline-description {
+      font-size: 0.7rem;
+      margin-top: 3px;
+    }
+
+    .hotline-buttons {
+      gap: 6px;
+    }
+
+    .hotline-btn {
+      padding: 8px 12px;
+      font-size: 0.85rem;
+      max-width: 100px;
+    }
+  }
+
+  /* Extra small screens */
+  @media (max-width: 360px) {
+    .hotline-modal {
+      padding: 3px;
+      align-items: flex-start;
+      padding-top: 5px;
+    }
+
+    .hotline-box {
+      padding: 10px;
+      border-radius: 8px;
+      max-width: 99%;
+      max-height: 95vh;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    .hotline-close-btn {
+      width: 30px;
+      height: 30px;
+      font-size: 12px;
+      top: 5px;
+      right: 5px;
+    }
+
+    .hotline-icon {
+      width: 40px;
+      height: 40px;
+      font-size: 20px;
+      margin-bottom: 10px;
+    }
+
+    .hotline-title {
+      font-size: 1.1rem;
+      margin-bottom: 5px;
+    }
+
+    .hotline-subtitle {
+      font-size: 0.75rem;
+      margin-bottom: 10px;
+    }
+
+    .hotline-numbers {
+      gap: 5px;
+      margin-bottom: 12px;
+    }
+
+    .hotline-item {
+      padding: 8px;
+    }
+
+    .hotline-name {
+      font-size: 0.8rem;
+      margin-bottom: 2px;
+      gap: 5px;
+    }
+
+    .hotline-number {
+      font-size: 0.95rem;
+    }
+
+    .hotline-description {
+      font-size: 0.65rem;
+      margin-top: 2px;
+    }
+
+    .hotline-buttons {
+      gap: 5px;
+    }
+
+    .hotline-btn {
+      padding: 6px 10px;
+      font-size: 0.8rem;
+      max-width: 90px;
+    }
   }
 </style>
 </head>
@@ -848,16 +1763,21 @@
 <body class="min-h-screen flex flex-col font-sans">
 <div class="relative">
   <!-- Desktop Links -->
-  <div class="hidden md:flex items-center space-x-4 p-4 bg-opacity-10 backdrop-blur-md">
-    <a href="account.html" class="text-yellow-300 hover:text-white px-3 py-2 rounded-md transition-colors duration-200">
-      <i class="fas fa-user mr-2"></i>Account
-    </a>
-    <a href="about.html" class="text-yellow-300 hover:text-white px-3 py-2 rounded-md transition-colors duration-200">
-      <i class="fas fa-info-circle mr-2"></i>About
-    </a>
-    <a href="#" onclick="handleExit()" class="text-yellow-300 hover:text-white px-3 py-2 rounded-md transition-colors duration-200">
-      <i class="fas fa-sign-out-alt mr-2"></i>Exit
-    </a>
+  <div class="hidden md:flex items-center justify-between p-6 bg-opacity-10 backdrop-blur-md">
+    <div class="flex items-center space-x-4">
+      <a href="account.html" class="text-yellow-300 hover:text-white px-4 py-2 rounded-lg transition-colors duration-200 bg-white/5 hover:bg-white/10 flex items-center gap-2">
+        <i class="fas fa-user"></i> Account
+      </a>
+      <a href="about.html" class="text-yellow-300 hover:text-white px-4 py-2 rounded-lg transition-colors duration-200 bg-white/5 hover:bg-white/10 flex items-center gap-2">
+        <i class="fas fa-info-circle"></i> About
+      </a>
+      <a href="history.html" class="text-yellow-300 hover:text-white px-4 py-2 rounded-lg transition-colors duration-200 bg-white/5 hover:bg-white/10 flex items-center gap-2">
+        <i class="fas fa-history"></i> History
+      </a>
+      <button onclick="showPrivacyPolicy()" class="text-yellow-300 hover:text-white px-4 py-2 rounded-lg transition-colors duration-200 bg-white/5 hover:bg-white/10 flex items-center gap-2">
+        <i class="fas fa-shield-alt"></i> Privacy
+      </button>
+    </div>
   </div>
 
   <!-- Mobile Hamburger Menu -->
@@ -872,23 +1792,32 @@
 
   <!-- Mobile Menu -->
   <div id="mobileMenu">
-    <div class="p-6 border-b border-yellow-300/20 mb-4">
-      <h2 class="text-xl font-bold text-yellow-300">AidTracker</h2>
-      <p class="text-sm text-gray-300 mt-1">Emergency Reporting System</p>
+    <div class="p-6 border-b border-yellow-300/20 mb-6">
+      <h2 class="text-2xl font-bold text-yellow-300 mb-1">AidTracker</h2>
+      <p class="text-sm text-gray-300">Emergency Response System</p>
     </div>
     
     <a href="account.html" class="mobile-menu-item" onclick="closeMobileMenu()">
-      <i class="fas fa-user"></i> Account
+      <i class="fas fa-user"></i> Account Settings
     </a>
     <a href="about.html" class="mobile-menu-item" onclick="closeMobileMenu()">
-      <i class="fas fa-info-circle"></i> About
+      <i class="fas fa-info-circle"></i> About Us
     </a>
-    <a href="#" class="mobile-menu-item" onclick="handleExit(); closeMobileMenu(); return false;">
-      <i class="fas fa-sign-out-alt"></i> Exit
+     <a href="history.html" class="mobile-menu-item" onclick="closeMobileMenu()">
+      <i class="fas fa-history"></i> Report History
     </a>
+    <button class="mobile-menu-item w-full text-left" onclick="showPrivacyPolicy(); closeMobileMenu();">
+      <i class="fas fa-shield-alt"></i> Privacy Policy
+    </button>
+    <button class="mobile-menu-item w-full text-left" onclick="showHotlineModal(); closeMobileMenu();">
+      <i class="fas fa-phone-alt"></i> Emergency Hotlines
+    </button>
+    <button class="mobile-menu-item w-full text-left" onclick="handleExit(); closeMobileMenu();">
+      <i class="fas fa-sign-out-alt"></i> Exit App
+    </button>
     
-    <div class="absolute bottom-0 left-0 right-0 p-6 text-center text-gray-400 text-sm">
-      <p>Help is here.</p>
+    <div class="absolute bottom-0 left-0 right-0 p-6 text-center text-gray-400 text-sm border-t border-white/10 pt-4">
+      <p class="text-yellow-300/70">Help is just a tap away</p>
     </div>
   </div>
 </div>
@@ -902,64 +1831,89 @@
   <span id="notificationCount" class="notification-count" style="display: none;">0</span>
 </div>
 
-<!-- MAIN CONTENT -->
-<main class="flex-grow pt-4">
-  <div class="container mx-auto p-4 md:p-8 text-center">
-    <h1 class="text-3xl md:text-4xl font-bold text-yellow-300 drop-shadow-md mt-8 md:mt-0">AidTracker</h1>
-    <h4 class="text-sm md:text-base font-semibold mb-8 text-white opacity-90">Help is here.</h4>
+<!-- Emergency Hotline Button -->
+<button class="emergency-hotline" onclick="showHotlineModal()">
+  <i class="fas fa-phone-alt"></i>
+</button>
 
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 max-w-4xl mx-auto">
-      <div class="card rounded-lg p-6 md:p-8 text-center">
-        <div class="text-3xl md:text-4xl mb-4 text-yellow-200">
+<!-- MAIN CONTENT -->
+<main class="flex-grow pt-4" style="display: none;">
+  <div class="container mx-auto p-4 md:p-8 text-center">
+    <h1 class="text-4xl md:text-5xl font-bold text-yellow-300 drop-shadow-lg mt-8 md:mt-0 mb-2">AidTracker</h1>
+    <h4 class="text-base md:text-lg font-semibold mb-8 text-white/90">Immediate Emergency Response System</h4>
+
+    <!-- Guest Mode Indicator -->
+    <div id="guestModeIndicator" class="hidden bg-gradient-to-r from-blue-600/20 to-purple-600/20 border border-blue-400/30 rounded-lg p-3 mb-6 backdrop-blur-sm">
+      <div class="flex items-center justify-center gap-2 text-blue-300">
+        <i class="fas fa-user-clock text-lg"></i>
+        <span class="font-medium">You are currently in Guest Mode</span>
+        <span class="text-sm text-blue-200/80">(Reports will be anonymous)</span>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto mb-12">
+      <div class="card rounded-xl p-6 text-center">
+        <div class="text-4xl mb-4 text-yellow-200">
           <i class="fas fa-car-crash"></i>
         </div>
-        <h2 class="text-xl md:text-2xl font-bold mb-4 text-yellow-200">Motor/Car Accident</h2>
-        <button onclick="showLegalNotice('motor')" class="btn py-2 px-4 rounded w-full md:w-auto">
+        <h2 class="text-xl font-bold mb-4 text-yellow-200">Vehicular Accident</h2>
+        <button onclick="handleReport('vehicular')" class="btn py-3 px-6 rounded-xl w-full">
           <i class="fas fa-exclamation-triangle mr-2"></i>Report
         </button>
       </div>
 
-      <div class="card rounded-lg p-6 md:p-8 text-center">
-        <div class="text-3xl md:text-4xl mb-4 text-yellow-200">
+      <div class="card rounded-xl p-6 text-center">
+        <div class="text-4xl mb-4 text-yellow-200">
           <i class="fas fa-fire"></i>
         </div>
-        <h2 class="text-xl md:text-2xl font-bold mb-4 text-yellow-200">Fire Accident</h2>
-        <button onclick="showLegalNotice('fire')" class="btn py-2 px-4 rounded w-full md:w-auto">
+        <h2 class="text-xl font-bold mb-4 text-yellow-200">Fire Accident</h2>
+        <button onclick="handleReport('fire')" class="btn py-3 px-6 rounded-xl w-full">
           <i class="fas fa-exclamation-triangle mr-2"></i>Report
         </button>
       </div>
 
-      <div class="card rounded-lg p-6 md:p-8 text-center">
-        <div class="text-3xl md:text-4xl mb-4 text-yellow-200">
+      <div class="card rounded-xl p-6 text-center">
+        <div class="text-4xl mb-4 text-yellow-200">
           <i class="fas fa-user-shield"></i>
         </div>
-        <h2 class="text-xl md:text-2xl font-bold mb-4 text-yellow-200">Assault Crime</h2>
-        <button onclick="showLegalNotice('assault')" class="btn py-2 px-4 rounded w-full md:w-auto">
+        <h2 class="text-xl font-bold mb-4 text-yellow-200">Assault Crime</h2>
+        <button onclick="handleReport('assault')" class="btn py-3 px-6 rounded-xl w-full">
+          <i class="fas fa-exclamation-triangle mr-2"></i>Report
+        </button>
+      </div>
+
+      <div class="card rounded-xl p-6 text-center">
+        <div class="text-4xl mb-4 text-yellow-200">
+          <i class="fas fa-ambulance"></i>
+        </div>
+        <h2 class="text-xl font-bold mb-4 text-yellow-200">Medical Emergency</h2>
+        <button onclick="handleReport('medical')" class="btn py-3 px-6 rounded-xl w-full">
           <i class="fas fa-exclamation-triangle mr-2"></i>Report
         </button>
       </div>
     </div>
     
+
+    
     <!-- Quick Stats -->
-    <div class="mt-12 max-w-2xl mx-auto p-6 bg-white/5 rounded-xl border border-yellow-300/20">
-      <h3 class="text-lg font-semibold text-yellow-300 mb-4">Emergency Response System</h3>
-      <p class="text-gray-300 mb-4">Report emergencies quickly and efficiently. Your reports help save lives and improve community safety.</p>
+    <div class="mt-8 max-w-4xl mx-auto p-6 bg-white/5 rounded-2xl border border-yellow-300/20 backdrop-blur-sm">
+      <h3 class="text-xl font-semibold text-yellow-300 mb-6">Emergency Response Features</h3>
       <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-        <div class="p-3 bg-white/5 rounded-lg">
-          <div class="text-2xl text-yellow-300 font-bold">24/7</div>
-          <div class="text-sm text-gray-300">Monitoring</div>
+        <div class="p-4 bg-white/5 rounded-xl hover:bg-white/10 transition-all">
+          <div class="text-2xl text-yellow-300 font-bold mb-1">24/7</div>
+          <div class="text-sm text-gray-300">Live Monitoring</div>
         </div>
-        <div class="p-3 bg-white/5 rounded-lg">
-          <div class="text-2xl text-yellow-300 font-bold">Fast</div>
-          <div class="text-sm text-gray-300">Response</div>
+        <div class="p-4 bg-white/5 rounded-xl hover:bg-white/10 transition-all">
+          <div class="text-2xl text-yellow-300 font-bold mb-1">Fast</div>
+          <div class="text-sm text-gray-300">Response Time</div>
         </div>
-        <div class="p-3 bg-white/5 rounded-lg">
-          <div class="text-2xl text-yellow-300 font-bold">Live</div>
-          <div class="text-sm text-gray-300">Tracking</div>
+        <div class="p-4 bg-white/5 rounded-xl hover:bg-white/10 transition-all">
+          <div class="text-2xl text-yellow-300 font-bold mb-1">Live</div>
+          <div class="text-sm text-gray-300">GPS Tracking</div>
         </div>
-        <div class="p-3 bg-white/5 rounded-lg">
-          <div class="text-2xl text-yellow-300 font-bold">Secure</div>
-          <div class="text-sm text-gray-300">Reports</div>
+        <div class="p-4 bg-white/5 rounded-xl hover:bg-white/10 transition-all">
+          <div class="text-2xl text-yellow-300 font-bold mb-1">Secure</div>
+          <div class="text-sm text-gray-300">Data Protection</div>
         </div>
       </div>
     </div>
@@ -970,7 +1924,7 @@
   <iframe src="map.html" width="100%" height="80%" frameborder="0"></iframe>
 </div>
 
-<!-- LEGAL NOTICE POPUP - IMPROVED UI -->
+<!-- LEGAL NOTICE POPUP -->
 <div class="legal-notice-overlay" id="legalNoticeOverlay">
   <div class="legal-notice-box">
     <div class="legal-notice-header">
@@ -1037,6 +1991,148 @@
   </div>
 </div>
 
+<!-- PRIVACY POLICY POPUP -->
+<div class="privacy-policy-overlay" id="privacyPolicyOverlay">
+  <div class="privacy-policy-box">
+    <div class="privacy-header">
+      <div class="privacy-icon">
+        <i class="fas fa-shield-alt"></i>
+      </div>
+      <div>
+        <div class="privacy-title">Privacy Policy</div>
+        <div class="legal-notice-subtitle">AidTracker Emergency System</div>
+      </div>
+    </div>
+    
+    <div class="privacy-content">
+      <div class="privacy-section">
+        <h3>Data Collection</h3>
+        <p>We collect only essential information for emergency response:</p>
+        <ul>
+          <li>Location data (GPS coordinates)</li>
+          <li>Emergency type and description</li>
+          <li>Optional: Photos of the incident</li>
+          <li>Optional: Account information if you create an account</li>
+        </ul>
+      </div>
+      
+      <div class="privacy-section">
+        <h3>Data Usage</h3>
+        <p>Your data is used solely for:</p>
+        <ul>
+          <li>Emergency response coordination</li>
+          <li>Dispatch of appropriate emergency services</li>
+          <li>Incident tracking and follow-up</li>
+          <li>Improving emergency response systems</li>
+        </ul>
+      </div>
+      
+      <div class="privacy-section">
+        <h3>Data Protection</h3>
+        <p>We implement industry-standard security measures:</p>
+        <ul>
+          <li>End-to-end encryption for sensitive data</li>
+          <li>Secure server infrastructure</li>
+          <li>Regular security audits</li>
+          <li>Compliance with data protection regulations</li>
+        </ul>
+      </div>
+      
+      <div class="privacy-section">
+        <h3>Data Retention</h3>
+        <p>Emergency reports are retained for:</p>
+        <ul>
+          <li>Legal and regulatory compliance (7 years)</li>
+          <li>Emergency response improvement</li>
+          <li>Statistical analysis (anonymized)</li>
+        </ul>
+      </div>
+      
+      <div class="privacy-section">
+        <h3>Your Rights</h3>
+        <p>You have the right to:</p>
+        <ul>
+          <li>Access your personal data</li>
+          <li>Request data correction</li>
+          <li>Request data deletion (subject to legal requirements)</li>
+          <li>Report anonymously as a guest user</li>
+        </ul>
+      </div>
+    </div>
+    
+    <div class="privacy-buttons">
+      <button onclick="closePrivacyPolicy()" class="privacy-btn privacy-btn-agree">
+        <i class="fas fa-check-circle"></i> I Understand
+      </button>
+    </div>
+  </div>
+</div>
+
+
+
+
+
+<!-- ACCOUNT CHOICE MODAL -->
+<div class="hotline-modal" id="accountChoiceModal">
+  <div class="hotline-box">
+    <button class="hotline-close-btn" onclick="closeAccountChoiceModal()">
+      <i class="fas fa-times"></i>
+    </button>
+    <div class="hotline-icon">
+      <i class="fas fa-user-circle"></i>
+    </div>
+
+    <h2 class="hotline-title">Choose Account Option</h2>
+    <p class="hotline-subtitle">Select how you want to report this emergency</p>
+  </div>
+</div>
+
+<!-- HOTLINE MODAL -->
+<div class="hotline-modal" id="hotlineModal">
+  <div class="hotline-box">
+    <button class="hotline-close-btn" onclick="closeHotlineModal()">
+      <i class="fas fa-times"></i>
+    </button>
+    <div class="hotline-icon">
+      <i class="fas fa-phone-alt"></i>
+    </div>
+    <h2 class="hotline-title">Emergency Hotlines</h2>
+    <p class="hotline-subtitle">Call emergency services directly</p>
+
+    <div class="hotline-numbers">
+      <div class="hotline-item" onclick="callEmergency('911')">
+        <div class="hotline-name">
+          <i class="fas fa-ambulance"></i> Emergency (911)
+        </div>
+        <div class="hotline-number">911</div>
+        <div class="hotline-description">For immediate emergency response</div>
+      </div>
+
+      <div class="hotline-item" onclick="callEmergency('112')">
+        <div class="hotline-name">
+          <i class="fas fa-phone"></i> European Emergency (112)
+        </div>
+        <div class="hotline-number">112</div>
+        <div class="hotline-description">European emergency number</div>
+      </div>
+
+      <div class="hotline-item" onclick="callEmergency('999')">
+        <div class="hotline-name">
+          <i class="fas fa-shield-alt"></i> Police (999)
+        </div>
+        <div class="hotline-number">999</div>
+        <div class="hotline-description">Police emergency services</div>
+      </div>
+    </div>
+
+    <div class="hotline-buttons">
+      <button onclick="closeHotlineModal()" class="hotline-btn hotline-btn-close">
+        <i class="fas fa-times"></i> Close
+      </button>
+    </div>
+  </div>
+</div>
+
 <script>
 // --- FIXED SUPABASE INITIALIZATION ---
 const SUPABASE_URL = 'https://gwvepxupoxyyydnisulb.supabase.co';
@@ -1044,7 +2140,6 @@ const SUPABASE_KEY = 'sb_publishable_4baWNqraxymp0Gal3OKhxQ_Bl-IHHdt';
 
 // Safely initialize Supabase
 try {
-  // Check if supabase object is available
   if (window.supabase && window.supabase.createClient) {
     supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
       realtime: {
@@ -1082,34 +2177,68 @@ let realtimeSubscription = null;
 let currentUser = null;
 let notificationCount = 0;
 let unreadNotifications = new Set();
-let currentAccidentType = null; // Store the accident type for legal notice
+let currentAccidentType = null;
 
 // --- HELPER FUNCTIONS ---
-function getCurrentUser() {
-  const profileData = localStorage.getItem('profileData');
+function checkUserHasAccount() {
+  const accountData = localStorage.getItem('accountData');
   const reporterName = localStorage.getItem('reporterName');
   
-  if (profileData) {
+  if (accountData) {
     try {
-      const parsedData = JSON.parse(profileData);
-      if (parsedData.fullName || reporterName) {
-        return {
-          id: `user-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-          name: parsedData.fullName || reporterName || 'User'
-        };
+      const parsedData = JSON.parse(accountData);
+      if (parsedData.fullName && parsedData.fullName.trim() !== '') {
+        return true;
       }
     } catch (e) {
-      console.error("Error parsing profile data:", e);
+      console.error("Error parsing account data:", e);
     }
   }
   
+  if (reporterName && reporterName.trim() !== '') {
+    return true;
+  }
+  
+  return false;
+}
+
+function getCurrentUser() {
+  const accountData = localStorage.getItem('accountData');
+  const reporterName = localStorage.getItem('reporterName');
+  const isGuestMode = localStorage.getItem('isGuestMode') === 'true';
+
+  if (accountData) {
+    try {
+      const parsedData = JSON.parse(accountData);
+      if (parsedData.fullName || reporterName) {
+        return {
+          id: `user-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+          name: parsedData.fullName || reporterName || 'User',
+          isGuest: false
+        };
+      }
+    } catch (e) {
+      console.error("Error parsing account data:", e);
+    }
+  }
+
   if (reporterName) {
     return {
       id: `user-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      name: reporterName
+      name: reporterName,
+      isGuest: false
     };
   }
-  
+
+  // For guest mode, create a guest user for notifications
+  if (isGuestMode) {
+    return {
+      id: `guest-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      name: 'Guest User',
+      isGuest: true
+    };
+  }
+
   return null;
 }
 
@@ -1186,15 +2315,11 @@ function updateNotificationCount() {
 
 // Clear all notifications
 function clearAllNotifications() {
-  // Clear local notifications
   notificationCount = 0;
   unreadNotifications.clear();
   updateNotificationCount();
-  
-  // Clear from localStorage
   localStorage.setItem('notificationCount', '0');
   
-  // Mark as read for current user
   if (currentUser) {
     localStorage.setItem(`lastNotificationCheck_${currentUser.name}`, new Date().toISOString());
   }
@@ -1204,19 +2329,16 @@ function clearAllNotifications() {
 function hasImportantChanges(oldReport, newReport) {
   if (!oldReport) return false;
   
-  // Check if responders were just assigned
   if ((!oldReport.assigned_responders || oldReport.assigned_responders.trim() === '') && 
       newReport.assigned_responders && newReport.assigned_responders.trim() !== '') {
     return 'responder-assigned';
   }
   
-  // Check if status changed to investigating
   if ((oldReport.status === 'pending' || !oldReport.status) && 
       newReport.status && newReport.status.toLowerCase() === 'investigating') {
     return 'status-investigating';
   }
   
-  // Check if status changed to resolved
   if (oldReport.status !== 'resolved' && newReport.status === 'resolved') {
     return 'status-resolved';
   }
@@ -1231,7 +2353,6 @@ function setupRealtimeSubscription() {
     return;
   }
   
-  // Remove existing subscription if any
   if (realtimeSubscription) {
     supabase.removeChannel(realtimeSubscription);
   }
@@ -1250,12 +2371,10 @@ function setupRealtimeSubscription() {
         const report = payload.new || payload.old;
         if (!report) return;
         
-        // Check if this report belongs to current user
         const isUserReport = report.reporter === currentUser.name;
         if (!isUserReport) return;
         
         if (payload.eventType === 'UPDATE') {
-          // Get the previous state from database
           const { data: oldReportData } = await supabase
             .from('reports')
             .select('*')
@@ -1264,8 +2383,6 @@ function setupRealtimeSubscription() {
             .catch(() => ({ data: null }));
           
           const oldReport = oldReportData || payload.old;
-          
-          // Check for important changes
           const changeType = hasImportantChanges(oldReport, report);
           
           if (changeType) {
@@ -1321,39 +2438,32 @@ async function checkForNotifications() {
   if (!currentUser) return;
   
   try {
-    // Get last notification check time
     const lastCheck = localStorage.getItem(`lastNotificationCheck_${currentUser.name}`);
     const lastCheckTime = lastCheck ? new Date(lastCheck) : new Date(0);
     
-    // Get user's reports from the last 24 hours
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
     
     const { data: reports, error } = await supabase
       .from('reports')
       .select('id, reporter, status, assigned_responders, created_at, updated_at')
-      .or(`reporter.eq.${currentUser.name},reporter.ilike.%${currentUser.name}%`)
+      .eq('reporter', currentUser.name)
       .gt('created_at', yesterday.toISOString())
       .order('created_at', { ascending: false });
     
     if (error) throw error;
     
-    // Clear existing notifications
     unreadNotifications.clear();
     
-    // Check each report for unread important changes
     reports.forEach(report => {
-      // Check if report was updated after last check
       const reportUpdated = new Date(report.updated_at || report.created_at);
       const isNewOrUpdated = reportUpdated > lastCheckTime;
       
       if (isNewOrUpdated) {
-        // Check for assigned responders
         if (report.assigned_responders && report.assigned_responders.trim() !== '') {
           unreadNotifications.add(report.id);
         }
         
-        // Check for status changes
         if (report.status === 'investigating' || report.status === 'resolved') {
           unreadNotifications.add(report.id);
         }
@@ -1367,34 +2477,36 @@ async function checkForNotifications() {
   }
 }
 
-// Handle notification click - FIXED VERSION
+// Handle notification click
 function handleNotificationClick() {
-  // Clear all notifications
-  clearAllNotifications();
-  
-  // Navigate to notifications page
-  window.location.href = 'my-reports.html';
+  window.location.href = 'notifications.html';
 }
 
 // --- MAIN FUNCTIONS ---
-// NEW: Show legal notice before proceeding
-function showLegalNotice(accidentType) {
-  const profileData = JSON.parse(localStorage.getItem('profileData') || '{}');
-  if (!profileData.fullName) {
-    alert("You must create an account to report emergencies.");
-    window.location.href = "account.html";
-    return;
+function handleReport(accidentType) {
+  const hasAccount = checkUserHasAccount();
+
+  if (!hasAccount) {
+    // User doesn't have an account - go directly to guest mode
+    currentAccidentType = accidentType;
+    localStorage.setItem('isGuestMode', 'true');
+    localStorage.setItem('profileName', 'Guest User');
+    showLegalNotice(accidentType);
+  } else {
+    // User has an account - proceed normally
+    currentAccidentType = accidentType;
+    localStorage.setItem('isGuestMode', 'false');
+    showLegalNotice(accidentType);
   }
-  
-  // Store the accident type
+}
+
+function showLegalNotice(accidentType) {
   currentAccidentType = accidentType;
   
-  // Show the legal notice popup
   const legalNotice = document.getElementById('legalNoticeOverlay');
   legalNotice.classList.add('active');
   document.body.style.overflow = 'hidden';
   
-  // Enable/disable proceed button based on checkbox
   const checkbox = document.getElementById('legalAgreement');
   const proceedBtn = document.getElementById('proceedBtn');
   
@@ -1405,73 +2517,116 @@ function showLegalNotice(accidentType) {
     proceedBtn.disabled = !this.checked;
   });
   
-  // Scroll to top of content
   const content = document.querySelector('.legal-notice-content');
   if (content) {
     content.scrollTop = 0;
   }
 }
 
-// NEW: Cancel report
+// For backward compatibility - direct guest reporting button
+function startGuestReporting() {
+  if (confirm("Report as guest? Your report will be anonymous and won't be saved to your personal account history, but will still be processed for emergency response.")) {
+    // Show emergency types modal for guest
+    showEmergencyTypeModal();
+  }
+}
+
 function cancelReport() {
   const legalNotice = document.getElementById('legalNoticeOverlay');
   legalNotice.classList.remove('active');
   document.body.style.overflow = '';
   currentAccidentType = null;
+  localStorage.removeItem('isGuestMode');
 }
 
-// NEW: Proceed to map after legal agreement
 function proceedToMap() {
   const legalNotice = document.getElementById('legalNoticeOverlay');
   legalNotice.classList.remove('active');
   document.body.style.overflow = '';
-  
-  // Save the accident type to localStorage
+
   localStorage.setItem('accidentType', currentAccidentType);
-  localStorage.setItem('profileName', JSON.parse(localStorage.getItem('profileData') || '{}').fullName);
-  
-  // Proceed to map page
+
   window.location.href = "map.html";
 }
 
-// OLD FUNCTION (kept for compatibility)
-function openMap(accidentType) {
-  // This is now handled by showLegalNotice
-  showLegalNotice(accidentType);
+function showPrivacyPolicy() {
+  const privacyPolicy = document.getElementById('privacyPolicyOverlay');
+  privacyPolicy.classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+function closePrivacyPolicy() {
+  const privacyPolicy = document.getElementById('privacyPolicyOverlay');
+  privacyPolicy.classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+function showHotlineModal() {
+  const hotlineModal = document.getElementById('hotlineModal');
+  hotlineModal.classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeHotlineModal() {
+  const hotlineModal = document.getElementById('hotlineModal');
+  hotlineModal.classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+function showAccountChoiceModal() {
+  const accountChoiceModal = document.getElementById('accountChoiceModal');
+  accountChoiceModal.classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeAccountChoiceModal() {
+  const accountChoiceModal = document.getElementById('accountChoiceModal');
+  accountChoiceModal.classList.remove('active');
+  document.body.style.overflow = '';
+  currentAccidentType = null;
+}
+
+function chooseCreateAccount() {
+  closeAccountChoiceModal();
+  window.location.href = 'user-choices.html';
+}
+
+function chooseGuestMode() {
+  closeAccountChoiceModal();
+  // Guest mode now goes directly to legal notice
+  currentAccidentType = 'general'; // Default type for guest mode
+  localStorage.setItem('isGuestMode', 'true');
+  localStorage.setItem('profileName', 'Guest User');
+  showLegalNotice('general');
+}
+
+function callEmergency(number) {
+  if (confirm(`Call ${number}? This will use your phone's dialer.`)) {
+    window.location.href = `tel:${number}`;
+  }
 }
 
 function handleExit() {
   if (confirm("Are you sure you want to exit AidTracker?")) {
-    // Check if we're running on a native Capacitor platform
     if (window.Capacitor && Capacitor.isNativePlatform()) {
       try {
-        // Use Capacitor App plugin to exit the app
         if (Capacitor && Capacitor.Plugins && Capacitor.Plugins.App && Capacitor.Plugins.App.exitApp) {
           Capacitor.Plugins.App.exitApp();
+        } else if (window.Android && window.Android.exitApp) {
+          window.Android.exitApp();
+        } else if (navigator.app && navigator.app.exitApp) {
+          navigator.app.exitApp();
         } else {
-          // Fallback: try using Android-specific exit method
-          if (window.Android && window.Android.exitApp) {
-            window.Android.exitApp();
-          } else {
-            // Last resort: use navigator.app.exitApp for Cordova/PhoneGap compatibility
-            if (navigator.app && navigator.app.exitApp) {
-              navigator.app.exitApp();
-            } else {
-              console.log('No exit method available, app cannot be closed programmatically');
-              alert('Unable to exit app. Please use your device\'s back button or home button.');
-            }
-          }
+          alert('Unable to exit app. Please use your device\'s back button or home button.');
         }
       } catch (error) {
         console.log('Error exiting app:', error);
         alert('Unable to exit app. Please use your device\'s back button or home button.');
       }
     } else {
-      // Web browser fallback - close window or go to home page
       if (window.history.length > 1) {
         window.history.back();
       } else {
-        // Instead of window.close() which may not work, redirect to a blank page or home
         window.location.href = 'about:blank';
       }
     }
@@ -1503,10 +2658,14 @@ menuOverlay.addEventListener('click', closeMobileMenu);
 
 // Initialize when page loads
 document.addEventListener('DOMContentLoaded', function() {
-  // Get current user
+  // Redirect to user choices if not already chosen
+  if (!localStorage.getItem('isGuestMode') && !localStorage.getItem('userId')) {
+    window.location.href = 'user-choices.html';
+    return;
+  }
+
   currentUser = getCurrentUser();
-  
-  // Load saved notification count
+
   const savedCount = localStorage.getItem('notificationCount');
   if (savedCount) {
     notificationCount = parseInt(savedCount) || 0;
@@ -1516,59 +2675,94 @@ document.addEventListener('DOMContentLoaded', function() {
       countElement.style.display = 'flex';
     }
   }
-  
+
+  // Show main content
+  const mainElement = document.querySelector('main');
+  if (mainElement) {
+    mainElement.style.display = 'block';
+  }
+
+  // Show/hide guest reporting section based on account status
+  const hasAccount = checkUserHasAccount();
+  const guestSection = document.getElementById('guestReportingSection');
+
+  if (guestSection) {
+    if (!hasAccount) {
+      guestSection.style.display = 'block';
+    } else {
+      guestSection.style.display = 'none';
+    }
+  }
+
+  // If user has account, ensure guest mode is disabled (but don't override if explicitly set to guest)
+  if (hasAccount && localStorage.getItem('isGuestMode') !== 'true') {
+    localStorage.setItem('isGuestMode', 'false');
+    localStorage.removeItem('profileName');
+    localStorage.removeItem('guestJoinDate');
+  }
+
+  // Show/hide guest mode indicator
+  const isGuestMode = localStorage.getItem('isGuestMode') === 'true';
+  const guestIndicator = document.getElementById('guestModeIndicator');
+
+  if (guestIndicator) {
+    if (isGuestMode) {
+      guestIndicator.classList.remove('hidden');
+    } else {
+      guestIndicator.classList.add('hidden');
+    }
+  }
+
   if (currentUser) {
-    // Check for existing notifications
     checkForNotifications();
-    
-    // Setup realtime subscription for live updates
     setupRealtimeSubscription();
   }
-  
-  // Request notification permission
+
   if ("Notification" in window && Notification.permission === "default") {
     Notification.requestPermission();
   }
-  
-  // Clear notification count if coming back from my-reports page
+
   if (document.referrer.includes('my-reports.html')) {
     clearAllNotifications();
   }
-  
-  // Add escape key to close legal notice
+
+
+
   document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') {
       const legalNotice = document.getElementById('legalNoticeOverlay');
+      const privacyPolicy = document.getElementById('privacyPolicyOverlay');
+      const hotlineModal = document.getElementById('hotlineModal');
+
       if (legalNotice.classList.contains('active')) {
         cancelReport();
+      } else if (privacyPolicy.classList.contains('active')) {
+        closePrivacyPolicy();
+      } else if (hotlineModal.classList.contains('active')) {
+        closeHotlineModal();
       }
     }
   });
 });
 
-// Save notification count when leaving page
 window.addEventListener('beforeunload', () => {
   if (realtimeSubscription) {
     supabase.removeChannel(realtimeSubscription);
   }
 });
 
-// Handle visibility change
 document.addEventListener('visibilitychange', () => {
   if (!document.hidden && currentUser) {
-    // Page became visible, check for new notifications
     checkForNotifications();
   }
 });
 
-// Close mobile menu on resize to desktop
 window.addEventListener('resize', () => {
   if (window.innerWidth >= 768 && mobileMenu.classList.contains('active')) {
     closeMobileMenu();
   }
 });
 
-// Close menu when clicking outside on mobile
 document.addEventListener('click', (e) => {
   if (window.innerWidth < 768 && 
       !mobileMenu.contains(e.target) && 

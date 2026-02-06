@@ -10,7 +10,7 @@
 <!--logo-->
 <link rel="website icon" href="assets/aid-tracker-logo.png">
 <style>
-/* === NEW: Notification Styles === */
+/* === Notification Styles === */
 .notification-badge {
   position: absolute;
   top: 10px;
@@ -203,6 +203,12 @@ body {
   top: 0;
   z-index: 100;
   backdrop-filter: blur(10px);
+}
+span#headerTitle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 16px;
 }
 
 .back-btn {
@@ -621,6 +627,7 @@ body {
 @media (max-width: 768px) {
   .container {
     padding: 15px;
+    max-width: 100%;
   }
   
   .notif {
@@ -750,32 +757,62 @@ body {
       window.location.href = "index.html";
     }
 
-    // Get current user
+    // Get current user - FIXED VERSION
     function getCurrentUser() {
-      const profileData = localStorage.getItem('profileData');
+      // Check for guest mode FIRST - prioritize guest over account data
+      const isGuestMode = localStorage.getItem('isGuestMode') === 'true';
+      if (isGuestMode) {
+        return {
+          id: `guest-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+          name: 'Guest User',
+          isGuest: true
+        };
+      }
+
+      // Try to get from accountData (your created account)
+      const accountData = localStorage.getItem('accountData');
+      if (accountData) {
+        try {
+          const parsedData = JSON.parse(accountData);
+          if (parsedData.fullName && parsedData.fullName.trim() !== '') {
+            return {
+              id: `user-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+              name: parsedData.fullName,
+              isGuest: false
+            };
+          }
+        } catch (e) {
+          console.error("Error parsing account data:", e);
+        }
+      }
+
+      // Try reporterName (from guest reporting)
       const reporterName = localStorage.getItem('reporterName');
-      
+      if (reporterName && reporterName.trim() !== '') {
+        return {
+          id: `user-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+          name: reporterName,
+          isGuest: false
+        };
+      }
+
+      // Try profileData (from older versions)
+      const profileData = localStorage.getItem('profileData');
       if (profileData) {
         try {
           const parsedData = JSON.parse(profileData);
-          if (parsedData.fullName || reporterName) {
+          if (parsedData.fullName && parsedData.fullName.trim() !== '') {
             return {
               id: `user-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-              name: parsedData.fullName || reporterName || 'User'
+              name: parsedData.fullName,
+              isGuest: false
             };
           }
         } catch (e) {
           console.error("Error parsing profile data:", e);
         }
       }
-      
-      if (reporterName) {
-        return {
-          id: `user-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-          name: reporterName
-        };
-      }
-      
+
       return null;
     }
 
@@ -945,7 +982,7 @@ body {
           <div class="text-content">
             <div class="notif-title">
               <i class="fas fa-user-circle"></i>
-              ${report.reporter || "Anonymous"}
+              ${currentUser ? currentUser.name : (report.reporter || "Anonymous")}
             </div>
             
             <div class="notif-details">
@@ -1132,19 +1169,24 @@ body {
       // MARK ALL NOTIFICATIONS AS READ WHEN PAGE LOADS
       markAllNotificationsAsRead();
       
-      // Update header
+      // Update header - show guest mode properly
       const headerTitle = document.getElementById('headerTitle');
-      headerTitle.innerHTML = `<i class="fas fa-user-circle"></i> ${currentUser.name}'s Reports`;
+      if (currentUser.isGuest) {
+        headerTitle.innerHTML = `<i class="fas fa-bell"></i> Guest Report Notifications`;
+      } else {
+        headerTitle.innerHTML = `<i class="fas fa-user-circle"></i> ${currentUser.name}'s Reports`;
+      }
       
       statusEl.textContent = "Loading your emergency reports...";
       realtimeIndicator.style.display = 'none';
 
       try {
-        // Fetch reports for current user
+        // Fetch reports for current user (exclude resolved reports - they go to history)
         const { data: fetchedReports, error } = await supabaseClient
           .from('reports')
           .select('*')
-          .or(`reporter.eq.${currentUser.name},reporter.ilike.%${currentUser.name}%`)
+          .eq('reporter', currentUser.name)
+          .neq('status', 'resolved')
           .order('created_at', { ascending: false });
 
         if (error) throw error;

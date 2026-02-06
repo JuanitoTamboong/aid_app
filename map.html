@@ -515,7 +515,16 @@ body {
   </div>
   
   <h1 class="page-title">AidTracker Map</h1>
-  
+
+  <!-- Guest Mode Indicator -->
+  <div id="guestModeIndicator" class="hidden" style="position: absolute; top: 70px; left: 50%; transform: translateX(-50%); z-index: 999; background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(147, 197, 253, 0.2)); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 12px; padding: 8px 16px; backdrop-filter: blur(10px);">
+    <div class="flex items-center justify-center gap-2 text-blue-300">
+      <i class="fas fa-user-clock text-lg"></i>
+      <span class="font-medium">You are currently in Guest Mode</span>
+      <span class="text-sm text-blue-200/80">(Reports will be anonymous)</span>
+    </div>
+  </div>
+
   <div id="map"></div>
 
   <!-- FIXED: Button Container for better mobile layout -->
@@ -819,6 +828,18 @@ body {
     // Initialize when DOM loads
     document.addEventListener('DOMContentLoaded', function() {
       initializeMap();
+
+      // Show/hide guest mode indicator
+      const isGuestMode = localStorage.getItem('isGuestMode') === 'true';
+      const guestIndicator = document.getElementById('guestModeIndicator');
+
+      if (guestIndicator) {
+        if (isGuestMode) {
+          guestIndicator.classList.remove('hidden');
+        } else {
+          guestIndicator.classList.add('hidden');
+        }
+      }
     });
 
     /* ============================ MAP INITIALIZATION ============================= */
@@ -841,69 +862,128 @@ body {
 
     /* ============================ GPS TRACKING ============================= */
     function startGeoTracking() {
-      if (navigator.geolocation) {
-        // First try with faster, lower accuracy settings
-        navigator.geolocation.watchPosition(
-          (pos) => {
-            const { latitude, longitude } = pos.coords;
-            currentUserLocation = { lat: latitude, lng: longitude };
+      if (!navigator.geolocation) {
+        console.warn("Geolocation is not supported by this browser");
+        alert("Geolocation is not supported by your browser. You can still use the map by pinpointing locations manually.");
+        return;
+      }
 
-            // Set initial report location to current location
+      // Check if we already have a location from localStorage
+      const savedLocation = localStorage.getItem('lastKnownLocation');
+      if (savedLocation) {
+        try {
+          const location = JSON.parse(savedLocation);
+          if (location && location.lat && location.lng) {
+            currentUserLocation = location;
             if (!reportLocation) {
-              reportLocation = { lat: latitude, lng: longitude };
+              reportLocation = location;
             }
-
             if (!userMarker) {
-              userMarker = L.marker([latitude, longitude], {
+              userMarker = L.marker([location.lat, location.lng], {
                 icon: L.divIcon({ html: '<div class="pulse"></div>' })
               }).addTo(map);
-              map.setView([latitude, longitude], 14);
-            } else {
-              userMarker.setLatLng([latitude, longitude]);
+              map.setView([location.lat, location.lng], 14);
             }
-          },
-          (error) => {
-            console.warn("Fast geolocation failed, trying with high accuracy:", error);
-
-            // Fallback to high accuracy if fast mode fails
-            navigator.geolocation.watchPosition(
-              (pos) => {
-                const { latitude, longitude } = pos.coords;
-                currentUserLocation = { lat: latitude, lng: longitude };
-
-                if (!reportLocation) {
-                  reportLocation = { lat: latitude, lng: longitude };
-                }
-
-                if (!userMarker) {
-                  userMarker = L.marker([latitude, longitude], {
-                    icon: L.divIcon({ html: '<div class="pulse"></div>' })
-                  }).addTo(map);
-                  map.setView([latitude, longitude], 14);
-                } else {
-                  userMarker.setLatLng([latitude, longitude]);
-                }
-              },
-              (fallbackError) => {
-                console.error("Geolocation error:", fallbackError);
-                alert("Unable to get your location. Please enable GPS and try refreshing the page.");
-              },
-              {
-                enableHighAccuracy: true,
-                maximumAge: 30000, // Increased cache time
-                timeout: 10000 // Increased timeout for high accuracy
-              }
-            );
-          },
-          {
-            enableHighAccuracy: false, // Start with low accuracy for speed
-            maximumAge: 30000, // Use cached location for 30 seconds
-            timeout: 2000 // Much shorter timeout for faster response
           }
-        );
-      } else {
-        alert("Geolocation is not supported by your browser.");
+        } catch (e) {
+          console.warn("Error parsing saved location:", e);
+        }
       }
+
+      // Try to get current location with better error handling
+      const options = {
+        enableHighAccuracy: false, // Start with low accuracy
+        maximumAge: 300000, // Accept locations up to 5 minutes old
+        timeout: 15000 // 15 second timeout
+      };
+
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          const { latitude, longitude, accuracy } = pos.coords;
+          console.log(`Location obtained with accuracy: ${accuracy} meters`);
+
+          currentUserLocation = { lat: latitude, lng: longitude };
+
+          // Save to localStorage for future use
+          localStorage.setItem('lastKnownLocation', JSON.stringify(currentUserLocation));
+
+          // Set initial report location to current location
+          if (!reportLocation) {
+            reportLocation = { lat: latitude, lng: longitude };
+          }
+
+          if (!userMarker) {
+            userMarker = L.marker([latitude, longitude], {
+              icon: L.divIcon({ html: '<div class="pulse"></div>' })
+            }).addTo(map);
+            map.setView([latitude, longitude], 14);
+          } else {
+            userMarker.setLatLng([latitude, longitude]);
+          }
+
+          // Now start watching for position changes with low accuracy
+          startPositionWatch();
+        },
+        (error) => {
+          console.warn("Initial geolocation failed:", error);
+
+          // Provide user-friendly error messages
+          let errorMessage = "Unable to get your location. ";
+          switch(error.code) {
+            case error.PERMISSION_DENIED:
+              errorMessage += "Please enable location permissions in your browser settings and refresh the page.";
+              break;
+            case error.POSITION_UNAVAILABLE:
+              errorMessage += "Location information is unavailable. You can still use the map by pinpointing locations manually.";
+              break;
+            case error.TIMEOUT:
+              errorMessage += "Location request timed out. You can still use the map by pinpointing locations manually.";
+              break;
+            default:
+              errorMessage += "You can still use the map by pinpointing locations manually.";
+              break;
+          }
+
+          alert(errorMessage);
+
+          // Still allow map usage without GPS
+          if (!userMarker) {
+            // Center on default location if no saved location
+            map.setView([12.35, 122.0], 11);
+          }
+        },
+        options
+      );
+    }
+
+    function startPositionWatch() {
+      if (!navigator.geolocation) return;
+
+      const watchOptions = {
+        enableHighAccuracy: false, // Keep low accuracy for continuous tracking
+        maximumAge: 60000, // Accept 1 minute old locations
+        timeout: 30000 // 30 second timeout
+      };
+
+      navigator.geolocation.watchPosition(
+        (pos) => {
+          const { latitude, longitude } = pos.coords;
+          currentUserLocation = { lat: latitude, lng: longitude };
+
+          // Update localStorage
+          localStorage.setItem('lastKnownLocation', JSON.stringify(currentUserLocation));
+
+          // Update marker position if it exists
+          if (userMarker) {
+            userMarker.setLatLng([latitude, longitude]);
+          }
+        },
+        (error) => {
+          console.warn("Position watch error:", error);
+          // Don't show alert for watch errors, just log them
+        },
+        watchOptions
+      );
     }
 
     /* ============================ PINPOINT ============================= */
@@ -1097,12 +1177,16 @@ body {
       const accidentType = localStorage.getItem("accidentType") || "emergency";
       let displayText = "Emergency";
       let typeValue = "emergency";
-      
+
       // Map the accident type to display text and value
       switch(accidentType) {
-        case "motor":
-          displayText = "Motor/Car Accident";
-          typeValue = "motor";
+        case "vehicular":
+          displayText = "Vehicular Accident";
+          typeValue = "vehicular";
+          break;
+        case "medical":
+          displayText = "Medical Emergency";
+          typeValue = "medical";
           break;
         case "fire":
           displayText = "Fire Accident";

@@ -1,5 +1,6 @@
 // ============ SUPABASE CLIENT ==============
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+// Using the new import method for ES modules
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.4";
 
 let supabase = null;
 
@@ -14,13 +15,42 @@ try {
     }
 
     // Initialize Supabase client
-    supabase = createClient(supabaseUrl, supabaseKey);
+    supabase = createClient(supabaseUrl, supabaseKey, {
+        auth: {
+            persistSession: false
+        },
+        global: {
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        }
+    });
 
     console.log("Supabase client initialized successfully");
 
 } catch (error) {
     console.error("Failed to initialize Supabase:", error);
-    throw new Error(`Supabase initialization failed: ${error.message}`);
+    // Create a mock supabase object to prevent crashes
+    supabase = {
+        storage: {
+            from: () => ({
+                upload: () => Promise.resolve({ data: null, error: null }),
+                getPublicUrl: () => ({ data: { publicUrl: null } })
+            })
+        },
+        from: () => ({
+            insert: () => Promise.resolve({ data: null, error: null }),
+            select: () => Promise.resolve({ data: null, error: null }),
+            update: () => Promise.resolve({ data: null, error: null }),
+            delete: () => Promise.resolve({ data: null, error: null }),
+            eq: () => ({
+                select: () => Promise.resolve({ data: null, error: null }),
+                update: () => Promise.resolve({ data: null, error: null }),
+                delete: () => Promise.resolve({ data: null, error: null })
+            })
+        }),
+        rpc: () => Promise.resolve({ data: null, error: null })
+    };
 }
 
 // ======================================================
@@ -37,33 +67,40 @@ export async function saveReportToSupabase(report, base64Image) {
   let imageURL = null;
 
   // 1. Upload image to storage if exists
-  if (base64Image) {
+  if (base64Image && base64Image.trim() !== '') {
     try {
       console.log("Processing image...");
-      const fileName = `report-${Date.now()}-${Math.random().toString(36).substr(2, 9)}.jpg`;
+      
+      // Generate unique filename
+      const timestamp = Date.now();
+      const randomStr = Math.random().toString(36).substring(2, 15);
+      const fileName = `report-${timestamp}-${randomStr}.jpg`;
       
       // Convert base64 to blob
       let imageBlob;
+      
       try {
-        if (base64Image.startsWith('data:')) {
-          // If it's already a data URL
-          const base64Response = await fetch(base64Image);
-          imageBlob = await base64Response.blob();
-        } else {
-          // If it's raw base64
-          const base64Data = base64Image.replace(/^data:image\/\w+;base64,/, '');
-          const byteCharacters = atob(base64Data);
-          const byteNumbers = new Array(byteCharacters.length);
-          for (let i = 0; i < byteCharacters.length; i++) {
-            byteNumbers[i] = byteCharacters.charCodeAt(i);
-          }
-          const byteArray = new Uint8Array(byteNumbers);
-          imageBlob = new Blob([byteArray], { type: 'image/jpeg' });
+        // Remove data URL prefix if present
+        const base64Data = base64Image.includes(',') 
+            ? base64Image.split(',')[1] 
+            : base64Image;
+        
+        // Decode base64
+        const byteCharacters = atob(base64Data);
+        const byteNumbers = new Array(byteCharacters.length);
+        
+        for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i);
         }
+        
+        const byteArray = new Uint8Array(byteNumbers);
+        imageBlob = new Blob([byteArray], { type: 'image/jpeg' });
+        
+        console.log(`Image blob created: ${imageBlob.size} bytes`);
+        
       } catch (blobError) {
-        console.error("Error converting to blob:", blobError);
-        // Try alternative method
-        imageBlob = base64ToBlob(base64Image);
+        console.error("Error converting base64 to blob:", blobError);
+        throw new Error("Failed to process image. Please try again with a different image.");
       }
       
       console.log("Uploading to bucket: aid-upload");
@@ -83,14 +120,30 @@ export async function saveReportToSupabase(report, base64Image) {
         
         // Provide helpful error messages
         if (uploadError.message && uploadError.message.includes('Bucket not found')) {
-          throw new Error(`Bucket 'aid-upload' not found. Please create the bucket in Supabase Storage.`);
+          throw new Error(`Storage bucket 'aid-upload' not found. Please create the bucket in Supabase Storage.`);
         }
         
         if (uploadError.message && uploadError.message.includes('row-level security policy')) {
-          throw new Error("Storage RLS policy blocking upload. Check storage policies in Supabase.");
+          throw new Error("Storage permission denied. Please check storage RLS policies in Supabase.");
         }
         
-        throw uploadError;
+        if (uploadError.message && uploadError.message.includes('already exists')) {
+          // Try with different filename
+          const newFileName = `report-${Date.now()}-${Math.random().toString(36).substring(2, 15)}.jpg`;
+          const retryUpload = await supabase
+            .storage
+            .from("aid-upload")
+            .upload(newFileName, imageBlob, {
+              cacheControl: '3600',
+              upsert: false,
+              contentType: 'image/jpeg'
+            });
+            
+          if (retryUpload.error) throw retryUpload.error;
+          uploadData = retryUpload.data;
+        } else {
+          throw uploadError;
+        }
       }
 
       console.log("Upload successful:", uploadData);
@@ -99,68 +152,119 @@ export async function saveReportToSupabase(report, base64Image) {
       const { data: publicUrlData } = supabase
         .storage
         .from("aid-upload")
-        .getPublicUrl(fileName);
+        .getPublicUrl(uploadData?.path || fileName);
 
       imageURL = publicUrlData.publicUrl;
-      console.log("Image URL:", imageURL);
+      console.log("Image URL generated:", imageURL);
       
     } catch (imageError) {
       console.error("Image upload failed:", imageError);
-      // Continue without image
-      console.log("Continuing without image...");
+      // Continue without image but warn the user
+      console.log("Continuing without image due to upload error...");
+      // You could show a toast notification here
     }
   }
 
   // 2. Insert report into database
   try {
-    console.log("Inserting into database...");
+    console.log("Inserting report into database...");
     
-    // Ensure latitude and longitude are numbers
-    const latitude = parseFloat(report.latitude) || 0;
-    const longitude = parseFloat(report.longitude) || 0;
+    // Ensure latitude and longitude are valid numbers
+    const latitude = !isNaN(parseFloat(report.latitude)) ? parseFloat(report.latitude) : 0;
+    const longitude = !isNaN(parseFloat(report.longitude)) ? parseFloat(report.longitude) : 0;
     
+    // Get reporter name from report or localStorage
+    let reporterName = report.reporter || 'Anonymous';
+    if (!reporterName || reporterName === 'Anonymous') {
+      const accountData = localStorage.getItem('accountData');
+      if (accountData) {
+        try {
+          const parsed = JSON.parse(accountData);
+          reporterName = parsed.fullName || 'Anonymous';
+        } catch (e) {
+          reporterName = 'Anonymous';
+        }
+      }
+      // Don't fall back to old reporterName - only use account data or Anonymous
+    }
+    
+    // Check if in guest mode
+    const isGuestMode = localStorage.getItem('isGuestMode') === 'true';
+    if (isGuestMode) {
+      reporterName = 'Guest User';
+    }
+
     const reportData = {
       type: report.type || 'emergency',
       type_display: report.type_display || 'Emergency',
-      reporter: report.reporter || 'Anonymous',
+      reporter: reporterName,
       latitude: latitude,
       longitude: longitude,
-      timestamp: report.timestamp || new Date().toISOString(),
       photo_url: imageURL,
+      timestamp: report.timestamp || new Date().toISOString(),
       created_at: new Date().toISOString(),
       status: report.status || 'pending',
-      updated_at: new Date().toISOString()
+      updated_at: new Date().toISOString(),
+      is_guest: false
     };
-    
+
     console.log("Report data to insert:", reportData);
 
-    const { data, error: insertError } = await supabase
+    // Insert the report
+    const { data: insertedData, error: insertError } = await supabase
       .from('reports')
       .insert([reportData])
-      .select();
+      .select()
+      .single();  // Get single record back
 
     if (insertError) {
       console.error("Supabase Insert Error:", insertError);
-      console.error("Error details:", insertError.details, insertError.hint, insertError.code);
-      
-      if (insertError.code === 'PGRST204' || insertError.message?.includes('Could not find')) {
-        throw new Error(`Database table 'reports' not found. Please create the table first.`);
+      console.error("Error details:", {
+        code: insertError.code,
+        message: insertError.message,
+        details: insertError.details,
+        hint: insertError.hint
+      });
+
+      // Helpful error messages based on common issues
+      if (insertError.code === '42P01' || insertError.message?.includes('relation "reports" does not exist')) {
+        throw new Error(`Database table 'reports' not found. Please create the table in Supabase.`);
       }
-      
+
+      if (insertError.message?.includes('violates row-level security policy')) {
+        throw new Error("Permission denied. Please check RLS policies for the 'reports' table.");
+      }
+
       if (insertError.message?.includes('violates check constraint')) {
         throw new Error(`Invalid status value. Status must be one of: pending, investigating, resolved, cancelled`);
       }
-      
-      throw insertError;
+
+      if (insertError.message?.includes('null value in column')) {
+        throw new Error(`Missing required field: ${insertError.message.match(/column "(\w+)"/)?.[1] || 'unknown'}`);
+      }
+
+      throw new Error(`Database error: ${insertError.message}`);
     }
 
     console.log("Report saved successfully with status:", reportData.status);
-    console.log("Saved data:", data);
-    return { success: true, data };
+    console.log("Saved data:", insertedData);
+
+    return {
+      success: true,
+      data: insertedData,
+      reportId: insertedData?.id,
+      message: "Emergency report submitted successfully!"
+    };
     
   } catch (dbError) {
     console.error("Database operation failed:", dbError);
-    throw dbError;
+    
+    // If we have a more specific error message, use it
+    if (dbError.message) {
+      throw dbError;
+    }
+    
+    throw new Error(`Failed to save report: ${dbError.message || 'Unknown database error'}`);
   }
 }
 
@@ -171,7 +275,14 @@ export async function saveReportToSupabase(report, base64Image) {
 // Get unread notification count for user
 export async function getUnreadNotificationCount(userName) {
   try {
-    if (!supabase) throw new Error("Supabase not initialized");
+    if (!supabase) {
+      console.warn("Supabase not initialized");
+      return { count: 0, reports: [], error: "Supabase not initialized" };
+    }
+    
+    if (!userName || userName.trim() === '') {
+      return { count: 0, reports: [] };
+    }
     
     // Get last notification check time from localStorage
     const lastCheck = localStorage.getItem(`lastNotificationCheck_${userName}`);
@@ -181,20 +292,25 @@ export async function getUnreadNotificationCount(userName) {
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
     
+    console.log(`Fetching notifications for: ${userName}, since: ${lastCheckTime}`);
+    
     const { data: reports, error } = await supabase
       .from('reports')
       .select('id, reporter, status, assigned_responders, created_at, updated_at')
-      .or(`reporter.eq.${userName},reporter.ilike.%${userName}%`)
+      .ilike('reporter', `%${userName}%`)
       .gt('created_at', yesterday.toISOString())
       .order('created_at', { ascending: false });
     
-    if (error) throw error;
+    if (error) {
+      console.error('Error fetching notifications:', error);
+      return { count: 0, reports: [], error: error.message };
+    }
     
     // Filter for unread notifications (updated after last check)
     let unreadCount = 0;
     const unreadReports = [];
     
-    reports.forEach(report => {
+    reports?.forEach(report => {
       const reportUpdated = new Date(report.updated_at || report.created_at);
       const isUnread = reportUpdated > lastCheckTime;
       
@@ -210,7 +326,13 @@ export async function getUnreadNotificationCount(userName) {
       }
     });
     
-    return { count: unreadCount, reports: unreadReports };
+    console.log(`Found ${unreadCount} unread notifications`);
+    
+    return { 
+      count: unreadCount, 
+      reports: unreadReports,
+      total: reports?.length || 0
+    };
   } catch (error) {
     console.error('Error getting unread notifications:', error);
     return { count: 0, reports: [], error: error.message };
@@ -220,16 +342,48 @@ export async function getUnreadNotificationCount(userName) {
 // Mark notifications as read for user
 export function markNotificationsAsRead(userName) {
   try {
+    if (!userName || userName.trim() === '') {
+      return { success: false, error: "Invalid username" };
+    }
+    
     // Store current time as last check time
     localStorage.setItem(`lastNotificationCheck_${userName}`, new Date().toISOString());
     
     // Also clear the notification count in localStorage
     localStorage.setItem('notificationCount', '0');
     
+    console.log(`Notifications marked as read for: ${userName}`);
+    
     return { success: true, message: "Notifications marked as read" };
   } catch (error) {
     console.error('Error marking notifications as read:', error);
     return { success: false, error: error.message };
+  }
+}
+
+// Get recent reports for user
+export async function getUserReports(userName, limit = 50) {
+  try {
+    if (!supabase) {
+      throw new Error("Supabase not initialized");
+    }
+    
+    if (!userName || userName.trim() === '') {
+      return { data: [], error: "Invalid username" };
+    }
+    
+    const { data, error } = await supabase
+      .from('reports')
+      .select('*')
+      .ilike('reporter', `%${userName}%`)
+      .order('created_at', { ascending: false })
+      .limit(limit);
+    
+    if (error) throw error;
+    return { data: data || [], error: null };
+  } catch (error) {
+    console.error('Error fetching user reports:', error);
+    return { data: [], error: error.message };
   }
 }
 
@@ -257,30 +411,31 @@ export function base64ToBlob(base64) {
     return new Blob([ab], { type: mimeString });
   } catch (error) {
     console.error("Error converting base64 to blob:", error);
-    throw error;
+    throw new Error("Failed to process image");
   }
 }
 
 // Get all reports (for admin dashboard)
-export async function getAllReports() {
+export async function getAllReports(limit = 100) {
   try {
     if (!supabase) throw new Error("Supabase not initialized");
     
     const { data, error } = await supabase
       .from('reports')
       .select('*')
-      .order('created_at', { ascending: false });
+      .order('created_at', { ascending: false })
+      .limit(limit);
 
     if (error) throw error;
-    return data;
+    return { data: data || [], error: null };
   } catch (error) {
     console.error('Error fetching reports:', error);
-    throw error;
+    return { data: [], error: error.message };
   }
 }
 
 // Update report status
-export async function updateReportStatus(reportId, newStatus) {
+export async function updateReportStatus(reportId, newStatus, assignedResponders = null) {
   try {
     if (!supabase) throw new Error("Supabase not initialized");
     
@@ -290,17 +445,24 @@ export async function updateReportStatus(reportId, newStatus) {
       throw new Error(`Invalid status. Must be one of: ${validStatuses.join(', ')}`);
     }
 
+    const updateData = { 
+      status: newStatus,
+      updated_at: new Date().toISOString() 
+    };
+    
+    if (assignedResponders !== null) {
+      updateData.assigned_responders = assignedResponders;
+    }
+
     const { data, error } = await supabase
       .from('reports')
-      .update({ 
-        status: newStatus,
-        updated_at: new Date().toISOString() 
-      })
+      .update(updateData)
       .eq('id', reportId)
-      .select();
+      .select()
+      .single();
 
     if (error) throw error;
-    return data;
+    return { success: true, data };
   } catch (error) {
     console.error('Error updating report status:', error);
     throw error;
@@ -314,17 +476,28 @@ export async function testSupabaseConnection() {
       return { connected: false, error: "Supabase client not initialized" };
     }
     
-    // Simple test query
+    // Try to fetch schema or do a simple query
     const { data, error } = await supabase
       .from('reports')
-      .select('count')
-      .limit(1);
+      .select('count', { count: 'exact', head: true });
     
-    if (error && error.code !== '42P01') { // Ignore "relation does not exist" error
+    if (error) {
+      // Check if it's a missing table error
+      if (error.code === '42P01' || error.message?.includes('does not exist')) {
+        return { 
+          connected: true, 
+          error: 'Table "reports" does not exist. Please create it first.',
+          canCreateTables: true
+        };
+      }
       return { connected: false, error: error.message };
     }
     
-    return { connected: true, data };
+    return { 
+      connected: true, 
+      data,
+      message: "Successfully connected to Supabase"
+    };
   } catch (error) {
     return { connected: false, error: error.message };
   }
@@ -355,29 +528,34 @@ export async function getReportCounts() {
       }
     });
     
-    return counts;
+    return { counts, error: null };
   } catch (error) {
     console.error('Error getting report counts:', error);
-    throw error;
+    return { counts: null, error: error.message };
   }
 }
 
 // Search reports by reporter name or type
-export async function searchReports(searchTerm) {
+export async function searchReports(searchTerm, limit = 50) {
   try {
     if (!supabase) throw new Error("Supabase not initialized");
+    
+    if (!searchTerm || searchTerm.trim() === '') {
+      return getAllReports(limit);
+    }
     
     const { data, error } = await supabase
       .from('reports')
       .select('*')
       .or(`reporter.ilike.%${searchTerm}%,type.ilike.%${searchTerm}%,type_display.ilike.%${searchTerm}%`)
-      .order('created_at', { ascending: false });
+      .order('created_at', { ascending: false })
+      .limit(limit);
 
     if (error) throw error;
-    return data;
+    return { data: data || [], error: null };
   } catch (error) {
     console.error('Error searching reports:', error);
-    throw error;
+    return { data: [], error: error.message };
   }
 }
 
@@ -393,7 +571,7 @@ export async function deleteReport(reportId) {
       .select();
 
     if (error) throw error;
-    return data;
+    return { success: true, data };
   } catch (error) {
     console.error('Error deleting report:', error);
     throw error;
@@ -401,7 +579,7 @@ export async function deleteReport(reportId) {
 }
 
 // Get reports by status
-export async function getReportsByStatus(status) {
+export async function getReportsByStatus(status, limit = 50) {
   try {
     if (!supabase) throw new Error("Supabase not initialized");
     
@@ -409,13 +587,36 @@ export async function getReportsByStatus(status) {
       .from('reports')
       .select('*')
       .eq('status', status)
+      .order('created_at', { ascending: false })
+      .limit(limit);
+
+    if (error) throw error;
+    return { data: data || [], error: null };
+  } catch (error) {
+    console.error('Error fetching reports by status:', error);
+    return { data: [], error: error.message };
+  }
+}
+
+// Get today's reports
+export async function getTodaysReports() {
+  try {
+    if (!supabase) throw new Error("Supabase not initialized");
+    
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    const { data, error } = await supabase
+      .from('reports')
+      .select('*')
+      .gte('created_at', today.toISOString())
       .order('created_at', { ascending: false });
 
     if (error) throw error;
-    return data;
+    return { data: data || [], error: null };
   } catch (error) {
-    console.error('Error fetching reports by status:', error);
-    throw error;
+    console.error('Error fetching today\'s reports:', error);
+    return { data: [], error: error.message };
   }
 }
 

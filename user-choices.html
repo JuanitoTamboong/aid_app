@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AidTracker - Choose Account</title>
+    
+    <!-- External Resources -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    
+    <!-- CSS Styles -->
+    <style>
+        * {
+            font-family: 'Poppins', 'Roboto', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0a1636 0%, #1a2c5a 50%, #0c1b42 100%);
+            color: #f8fafc;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Animated background elements */
+        body::before {
+            content: "";
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 20% 80%, rgba(252, 211, 77, 0.05) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 20%, rgba(59, 130, 246, 0.05) 0%, transparent 50%);
+            z-index: -1;
+        }
+
+        /* Card Container */
+        .card-container {
+            background: rgba(10, 22, 54, 0.85);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2.5rem;
+            width: 100%;
+            max-width: 500px;
+            text-align: center;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5),
+                        0 0 0 1px rgba(252, 211, 77, 0.1);
+            border: 1px solid rgba(252, 211, 77, 0.15);
+            transform-style: preserve-3d;
+            position: relative;
+            overflow: hidden;
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        .card-container::before {
+            content: "";
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(252, 211, 77, 0.03) 1%, transparent 20%);
+            z-index: -1;
+        }
+
+        /* Logo */
+        .logo-container {
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .logo {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 0.5rem;
+            border-radius: 12px;
+            object-fit: contain;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .logo-text {
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(to right, #fcd34d, #f59e0b);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 0.5rem;
+            letter-spacing: 0.5px;
+        }
+
+        .tagline {
+            color: #94a3b8;
+            font-size: 0.95rem;
+            margin-bottom: 2rem;
+            line-height: 1.5;
+        }
+
+        /* Header */
+        .header h1 {
+            color: #f8fafc;
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            color: #cbd5e1;
+            margin-bottom: 2.5rem;
+            font-size: 1rem;
+        }
+
+        /* Options Container */
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+            margin-bottom: 2rem;
+        }
+
+        /* Option Cards */
+        .option-card {
+            background: rgba(15, 30, 70, 0.6);
+            border-radius: 14px;
+            padding: 1.5rem;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .option-card:hover {
+            transform: translateY(-5px);
+            background: rgba(20, 40, 90, 0.8);
+            border-color: rgba(252, 211, 77, 0.3);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .option-card.active {
+            background: rgba(25, 45, 100, 0.8);
+            border-color: rgba(252, 211, 77, 0.5);
+        }
+
+        .option-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+        }
+
+        .create-account .option-icon {
+            background: rgba(252, 211, 77, 0.15);
+            color: #fcd34d;
+        }
+
+        .guest-mode .option-icon {
+            background: rgba(59, 130, 246, 0.15);
+            color: #60a5fa;
+        }
+
+        .option-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #f8fafc;
+        }
+
+        .option-description {
+            color: #94a3b8;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .option-badge {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: rgba(252, 211, 77, 0.15);
+            color: #fcd34d;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            width: 100%;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(to right, #fcd34d, #f59e0b);
+            color: #0a1636;
+            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(245, 158, 11, 0.4);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.05);
+            color: #cbd5e1;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-3px);
+        }
+
+        /* Modal Styles - FIXED */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            overflow-y: auto;
+            padding: 1rem;
+            box-sizing: border-box;
+        }
+
+        .modal-content {
+            background: rgba(10, 22, 54, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(252, 211, 77, 0.2);
+            border-radius: 20px;
+            margin: 2rem auto;
+            padding: 2rem;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+            position: relative;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .close {
+            color: #94a3b8;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            z-index: 10;
+        }
+
+        .close:hover {
+            color: #fcd34d;
+        }
+
+        /* Form Styles */
+        .form-label {
+            display: block;
+            color: #e2e8f0;
+            font-weight: 500;
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+        }
+
+        .form-input {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            padding: 14px 16px;
+            color: white;
+            font-size: 1rem;
+            box-sizing: border-box;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: rgba(252, 211, 77, 0.5);
+            box-shadow: 0 0 0 2px rgba(252, 211, 77, 0.1);
+        }
+
+        /* Modal Header */
+        .modal-header {
+            color: #fcd34d;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding-right: 30px;
+        }
+
+        /* Modal Form Buttons */
+        .modal-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .modal-btn {
+            flex: 1;
+            min-width: 140px;
+            padding: 15px 25px;
+            border-radius: 12px;
+            border: none;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            box-sizing: border-box;
+        }
+
+        .modal-btn-primary {
+            background: linear-gradient(to right, #fcd34d, #fbbf24);
+            color: #0a1636;
+        }
+
+        .modal-btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        /* Footer */
+        .footer-text {
+            margin-top: 1.5rem;
+            color: #64748b;
+            font-size: 0.85rem;
+        }
+
+        .footer-text a {
+            color: #fcd34d;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .footer-text a:hover {
+            text-decoration: underline;
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Toast Styles */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(10, 22, 54, 0.95);
+            border: 1px solid rgba(252, 211, 77, 0.2);
+            border-radius: 12px;
+            padding: 1rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            z-index: 10000;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+            max-width: 350px;
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .toast.success {
+            border-color: rgba(34, 197, 94, 0.3);
+        }
+
+        .toast.error {
+            border-color: rgba(239, 68, 68, 0.3);
+        }
+
+        .toast-content {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .toast i {
+            font-size: 1.2rem;
+        }
+
+        .toast.success i {
+            color: #22c55e;
+        }
+
+        .toast.error i {
+            color: #ef4444;
+        }
+
+        .toast-message {
+            font-size: 0.95rem;
+            color: #f8fafc;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 640px) {
+            .card-container {
+                padding: 2rem 1.5rem;
+            }
+            
+            .logo-text {
+                font-size: 1.6rem;
+            }
+            
+            .header h1 {
+                font-size: 1.5rem;
+            }
+            
+            .option-card {
+                padding: 1.25rem;
+            }
+            
+            .modal-content {
+                margin: 1rem auto;
+                padding: 1.5rem;
+                max-height: 85vh;
+            }
+            
+            .modal-header {
+                font-size: 1.3rem;
+                margin-bottom: 1rem;
+            }
+            
+            .modal-buttons {
+                flex-direction: column;
+            }
+            
+            .modal-btn {
+                min-width: 100%;
+            }
+            
+            .form-input {
+                padding: 12px 14px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .modal-content {
+                padding: 1.25rem;
+            }
+            
+            .close {
+                top: 10px;
+                right: 15px;
+                font-size: 24px;
+            }
+            
+            body {
+                padding: 0.5rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Main Account Selection Card -->
+    <div class="card-container">
+        <div class="logo-container">
+            <img class="logo" src="www/assets/aid-tracker-logo.png" alt="AidTracker Logo">
+            <div class="logo-text">AidTracker</div>
+            <div class="tagline">Track, report, and manage aid incidents efficiently</div>
+        </div>
+        
+        <div class="header">
+            <h1>Welcome to AidTracker</h1>
+            <p>Select how you'd like to proceed with the platform</p>
+        </div>
+        
+        <div class="options-container">
+            <!-- Create Account Option -->
+            <div class="option-card create-account active" id="createAccountOption" onclick="selectOption('create');">
+                <div class="option-icon">
+                    <i class="fas fa-user-plus"></i>
+                </div>
+                <div class="option-title">Create Account</div>
+                <div class="option-description">
+                    Create a permanent account to save your reports, track progress, and access advanced features.
+                </div>
+                <div class="option-badge">Recommended</div>
+            </div>
+
+            <!-- Guest Mode Option -->
+            <div class="option-card guest-mode" id="guestModeOption" onclick="selectOption('guest');">
+                <div class="option-icon">
+                    <i class="fas fa-user-clock"></i>
+                </div>
+                <div class="option-title">Report as Guest</div>
+                <div class="option-description">
+                    Submit a report without creating an account. Your data will be saved locally for 30 days.
+                </div>
+            </div>
+        </div>
+
+        <!-- Continue Button -->
+        <button class="btn btn-primary" onclick="proceed()">
+            <i class="fas fa-arrow-right"></i>
+            Continue
+        </button>
+
+        <!-- Footer -->
+        <p class="footer-text">
+            By continuing, you agree to our <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>
+        </p>
+    </div>
+
+    <!-- Account Creation Modal -->
+    <div id="accountModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            
+            <div class="modal-header">
+                <i class="fas fa-user-edit"></i>
+                Create Your Account
+            </div>
+
+            <form id="accountForm">
+                <!-- Full Name -->
+                <div style="margin-bottom: 1rem;">
+                    <label class="form-label">Full Name *</label>
+                    <input type="text" class="form-input" id="fullName" 
+                           placeholder="Enter your name for report tracking" maxlength="25" required>
+                </div>
+
+                <!-- Phone Number -->
+                <div style="margin-bottom: 1rem;">
+                    <label class="form-label">Phone Number *</label>
+                    <input type="tel" class="form-input" id="phoneNumber" 
+                           placeholder="For status updates" maxlength="11" pattern="[0-9]{11}" required>
+                </div>
+
+                <!-- Age -->
+                <div style="margin-bottom: 1rem;">
+                    <label class="form-label">Age *</label>
+                    <input type="number" class="form-input" id="age" 
+                           placeholder="Enter your age (1-99)" min="1" max="99" maxlength="2" required>
+                </div>
+
+                <!-- Gender -->
+                <div style="margin-bottom: 1rem;">
+                    <label class="form-label">Gender *</label>
+                    <select class="form-input" id="gender" required>
+                        <option value="" style="color: #0a1636;">Select gender</option>
+                        <option value="male" style="color: #0a1636;">Male</option>
+                        <option value="female" style="color: #0a1636;">Female</option>
+                        <option value="other" style="color: #0a1636;">Other</option>
+                        <option value="prefer-not-to-say" style="color: #0a1636;">Prefer not to say</option>
+                    </select>
+                </div>
+
+                <!-- Barangay -->
+                <div style="margin-bottom: 1rem;">
+                    <label class="form-label">Barangay *</label>
+                    <select class="form-input" id="barangay" required>
+                        <option value="" style="color: #0a1636;">-- Select Barangay --</option>
+                        <option value="Amatong" style="color: #0a1636;">Amatong</option>
+                        <option value="Anahao" style="color: #0a1636;">Anahao</option>
+                        <option value="Bangon" style="color: #0a1636;">Bangon</option>
+                        <option value="Batiano" style="color: #0a1636;">Batiano</option>
+                        <option value="Budiong" style="color: #0a1636;">Budiong</option>
+                        <option value="Canduyong" style="color: #0a1636;">Canduyong</option>
+                        <option value="Dapawan" style="color: #0a1636;">Dapawan</option>
+                        <option value="Gabawan" style="color: #0a1636;">Gabawan</option>
+                        <option value="Libertad" style="color: #0a1636;">Libertad</option>
+                        <option value="Ligaya" style="color: #0a1636;">Ligaya</option>
+                        <option value="Liwanag" style="color: #0a1636;">Liwanag</option>
+                        <option value="Liwayway" style="color: #0a1636;">Liwayway</option>
+                        <option value="Malilico" style="color: #0a1636;">Malilico</option>
+                        <option value="Mayha" style="color: #0a1636;">Mayha</option>
+                        <option value="Panique" style="color: #0a1636;">Panique</option>
+                        <option value="Pato-o" style="color: #0a1636;">Pato-o</option>
+                        <option value="Poctoy" style="color: #0a1636;">Poctoy</option>
+                        <option value="Progreso Este" style="color: #0a1636;">Progreso Este</option>
+                        <option value="Progreso Weste" style="color: #0a1636;">Progreso Weste</option>
+                        <option value="Rizal" style="color: #0a1636;">Rizal</option>
+                        <option value="Tabing Dagat" style="color: #0a1636;">Tabing Dagat</option>
+                        <option value="Tabobo-an" style="color: #0a1636;">Tabobo-an</option>
+                        <option value="Tuburan" style="color: #0a1636;">Tuburan</option>
+                        <option value="Tumingad" style="color: #0a1636;">Tumingad</option>
+                        <option value="Tulay" style="color: #0a1636;">Tulay</option>
+                    </select>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="modal-buttons">
+                    <button type="submit" class="modal-btn modal-btn-primary">
+                        <i class="fas fa-save"></i>
+                        Create Account
+                    </button>
+                    <button type="button" onclick="closeModal()" class="modal-btn modal-btn-secondary">
+                        <i class="fas fa-times"></i>
+                        Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        let selectedOption = 'create';
+
+        // ===== OPTION SELECTION =====
+        function selectOption(option) {
+            selectedOption = option;
+
+            // Update visual selection
+            const createOption = document.getElementById('createAccountOption');
+            const guestOption = document.getElementById('guestModeOption');
+
+            if (option === 'create') {
+                createOption.classList.add('active');
+                guestOption.classList.remove('active');
+            } else {
+                guestOption.classList.add('active');
+                createOption.classList.remove('active');
+            }
+        }
+
+        // ===== PROCEED FUNCTION =====
+        function proceed() {
+            if (selectedOption === 'create') {
+                openModal();
+            } else {
+                // Guest mode
+                localStorage.setItem('isGuestMode', 'true');
+                localStorage.setItem('profileName', 'Guest User');
+                localStorage.setItem('guestJoinDate', new Date().toISOString());
+                window.location.href = 'index.html';
+            }
+        }
+
+        // ===== ACCOUNT CREATION =====
+        function saveAccount() {
+            const accountData = {
+                fullName: document.getElementById('fullName').value.trim(),
+                phoneNumber: document.getElementById('phoneNumber').value.trim(),
+                age: document.getElementById('age').value.trim(),
+                gender: document.getElementById('gender').value.trim(),
+                barangay: document.getElementById('barangay').value.trim(),
+                updatedAt: new Date().toISOString()
+            };
+
+            // Get previous account data to check if name changed
+            const previousData = JSON.parse(localStorage.getItem('accountData') || '{}');
+
+            // Clear any old reporterName to prevent conflicts
+            localStorage.removeItem('reporterName');
+
+            // Clear guest mode settings
+            localStorage.setItem('isGuestMode', 'false');
+            localStorage.removeItem('profileName');
+            localStorage.removeItem('guestJoinDate');
+
+            // Save to localStorage
+            localStorage.setItem('accountData', JSON.stringify(accountData));
+
+            // Also save reporter name separately for easy access
+            if (accountData.fullName) {
+                localStorage.setItem('reporterName', accountData.fullName);
+
+                // If the name changed, clear old notification data and reset for new user
+                if (previousData.fullName && previousData.fullName !== accountData.fullName) {
+                    // Clear notification data for the old name
+                    localStorage.removeItem(`lastNotificationCheck_${previousData.fullName}`);
+                    localStorage.removeItem('notificationCount');
+                    localStorage.removeItem('unreadNotifications');
+
+                    // Reset notification data for the new user
+                    localStorage.setItem(`lastNotificationCheck_${accountData.fullName}`, new Date().toISOString());
+                    localStorage.setItem('notificationCount', '0');
+                } else if (!previousData.fullName) {
+                    // First time setting up account, initialize notification data
+                    localStorage.setItem(`lastNotificationCheck_${accountData.fullName}`, new Date().toISOString());
+                    localStorage.setItem('notificationCount', '0');
+                }
+            } else {
+                // If no name provided, clear the old reporterName to prevent conflicts
+                localStorage.removeItem('reporterName');
+            }
+
+            // Show success message and redirect
+            showToast('Account information saved successfully!', 'success');
+            window.location.href = 'account.html';
+        }
+
+        // ===== SKIP ACCOUNT =====
+        function skipAccount() {
+            localStorage.removeItem('accountData');
+            localStorage.removeItem('reporterName');
+
+            showToast('You can always set up an account later from the menu', 'info');
+
+            setTimeout(() => {
+                window.location.href = 'index.html';
+            }, 1000);
+        }
+
+        // ===== MODAL FUNCTIONS =====
+        function openModal() {
+            document.getElementById('accountModal').style.display = 'block';
+            // Prevent body scrolling when modal is open
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            document.getElementById('accountModal').style.display = 'none';
+            // Restore body scrolling
+            document.body.style.overflow = 'auto';
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('accountModal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        }
+
+        // ===== TOAST NOTIFICATION =====
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.innerHTML = `
+                <div class="toast-content">
+                    <i class="fas fa-info-circle"></i>
+                    <div class="toast-message">${message}</div>
+                </div>
+            `;
+
+            document.body.appendChild(toast);
+
+            // Set icon and class
+            const icon = toast.querySelector('i');
+            if (icon) {
+                if (type === 'success') {
+                    icon.className = 'fas fa-check-circle';
+                    toast.classList.add('success');
+                } else if (type === 'error') {
+                    icon.className = 'fas fa-exclamation-circle';
+                    toast.classList.add('error');
+                } else {
+                    icon.className = 'fas fa-info-circle';
+                }
+            }
+
+            // Show toast
+            setTimeout(() => {
+                toast.classList.add('show');
+            }, 100);
+
+            // Auto-hide
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => {
+                    if (toast.parentNode) {
+                        document.body.removeChild(toast);
+                    }
+                }, 300);
+            }, 3000);
+        }
+
+        // ===== INITIALIZATION =====
+        document.addEventListener('DOMContentLoaded', function() {
+            // Card hover effects
+            const cards = document.querySelectorAll('.option-card');
+            cards.forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    if (!this.classList.contains('active')) {
+                        this.style.transform = 'translateY(-5px)';
+                    }
+                });
+
+                card.addEventListener('mouseleave', function() {
+                    if (!this.classList.contains('active')) {
+                        this.style.transform = 'translateY(0)';
+                    }
+                });
+            });
+
+            // Form submission
+            document.getElementById('accountForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                saveAccount();
+            });
+
+            // Age input validation
+            const ageInput = document.getElementById('age');
+            ageInput.addEventListener('input', function(e) {
+                // Remove any non-numeric characters
+                let value = this.value.replace(/\D/g, '');
+
+                // Limit to 2 digits
+                if (value.length > 2) {
+                    value = value.substring(0, 2);
+                }
+
+                // Ensure value is within 1-99 range
+                const numValue = parseInt(value);
+                if (numValue > 99) {
+                    value = '99';
+                }
+
+                this.value = value;
+            });
+
+            // Prevent paste of invalid content
+            ageInput.addEventListener('paste', function(e) {
+                e.preventDefault();
+                const pastedText = (e.clipboardData || window.clipboardData).getData('text');
+                const numericText = pastedText.replace(/\D/g, '').substring(0, 2);
+                const numValue = parseInt(numericText);
+                this.value = numValue > 99 ? '99' : numericText;
+            });
+
+            // Set initial selection
+            selectOption('create');
+        });
+    </script>
+</body>
+</html>

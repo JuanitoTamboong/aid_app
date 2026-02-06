@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Report History - AidTracker</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<!-- Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<!--logo-->
+<link rel="website icon" href="assets/aid-tracker-logo.png">
+<style>
+/* === History Styles === */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(135deg, #0a1636 70%, #1a2c5a 30%);
+  color: white;
+  min-height: 100vh;
+  padding-bottom: 20px;
+}
+
+/* === Header === */
+.header {
+  background: linear-gradient(135deg, #0a1636 0%, #1e3a8a 100%);
+  color: #fcd34d;
+  padding: 15px 20px;
+  font-size: 1.3rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 2px solid rgba(212, 175, 55, 0.5);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}
+
+.back-btn {
+  background: rgba(252, 211, 77, 0.9);
+  color: #0a1636;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+  font-size: 0.95rem;
+}
+
+.back-btn:hover {
+  background: #fcd34d;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(252, 211, 77, 0.3);
+}
+
+/* === Main Container === */
+.container {
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+/* === History Cards === */
+.history-container {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.history-card {
+  background: linear-gradient(145deg, rgba(30, 45, 90, 0.9), rgba(20, 35, 80, 0.9));
+  border: 1px solid rgba(252, 211, 77, 0.3);
+  border-radius: 12px;
+  padding: 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  position: relative;
+  overflow: hidden;
+}
+
+.history-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(252, 211, 77, 0.2);
+  border-color: rgba(252, 211, 77, 0.5);
+  background: linear-gradient(145deg, rgba(40, 55, 100, 0.9), rgba(30, 45, 90, 0.9));
+}
+
+.history-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: linear-gradient(to bottom, #fcd34d, #fbbf24);
+}
+
+/* Emergency Type Badge */
+.emergency-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  margin-bottom: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.motor-badge {
+  background: rgba(220, 38, 38, 0.2);
+  color: #fca5a5;
+  border: 1px solid rgba(220, 38, 38, 0.4);
+}
+
+.fire-badge {
+  background: rgba(249, 115, 22, 0.2);
+  color: #fdba74;
+  border: 1px solid rgba(249, 115, 22, 0.4);
+}
+
+.assault-badge {
+  background: rgba(139, 92, 246, 0.2);
+  color: #c4b5fd;
+  border: 1px solid rgba(139, 92, 246, 0.4);
+}
+
+.medical-badge {
+  background: rgba(59, 130, 246, 0.2);
+  color: #93c5fd;
+  border: 1px solid rgba(59, 130, 246, 0.4);
+}
+
+/* Card Content */
+.history-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 15px;
+}
+
+.text-content {
+  flex: 1;
+}
+
+.history-title {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #fcd34d;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.history-details {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.detail-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  font-size: 0.85rem;
+}
+
+.detail-label {
+  color: #94a3b8;
+  font-weight: 500;
+  min-width: 80px;
+}
+
+.detail-value {
+  color: #e2e8f0;
+  font-weight: 500;
+}
+
+/* Status Badge */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-top: 10px;
+}
+
+.status-pending {
+  background: rgba(245, 158, 11, 0.2);
+  color: #fcd34d;
+  border: 1px solid rgba(245, 158, 11, 0.4);
+}
+
+.status-resolved {
+  background: rgba(34, 197, 94, 0.2);
+  color: #86efac;
+  border: 1px solid rgba(34, 197, 94, 0.4);
+}
+
+.status-investigating {
+  background: rgba(59, 130, 246, 0.2);
+  color: #93c5fd;
+  border: 1px solid rgba(59, 130, 246, 0.4);
+}
+
+.status-cancelled {
+  background: rgba(239, 68, 68, 0.2);
+  color: #fca5a5;
+  border: 1px solid rgba(239, 68, 68, 0.4);
+}
+
+/* Photo Preview */
+.photo-preview {
+  width: 80px;
+  height: 80px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 2px solid rgba(252, 211, 77, 0.3);
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+.photo-preview:hover {
+  border-color: #fcd34d;
+  transform: scale(1.05);
+}
+
+.photo-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.no-photo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.05);
+  color: #94a3b8;
+  font-size: 0.8rem;
+}
+
+/* === Loading State === */
+#status {
+  color: #f3f4f6;
+  text-align: center;
+  font-weight: 600;
+  margin-top: 40px;
+  font-size: 1.1rem;
+}
+
+.loading-dots:after {
+  content: '.';
+  animation: dots 1.5s steps(5, end) infinite;
+}
+
+@keyframes dots {
+  0%, 20% { content: '.'; }
+  40% { content: '..'; }
+  60%, 100% { content: '...'; }
+}
+
+/* === Empty State === */
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: #94a3b8;
+}
+
+.empty-icon {
+  font-size: 4rem;
+  color: rgba(252, 211, 77, 0.3);
+  margin-bottom: 20px;
+}
+
+.empty-title {
+  font-size: 1.4rem;
+  color: #fcd34d;
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+
+.empty-subtitle {
+  font-size: 1rem;
+  max-width: 400px;
+  margin: 0 auto;
+  line-height: 1.5;
+}
+
+/* === Error State === */
+.error-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: #fca5a5;
+  background: rgba(220, 38, 38, 0.1);
+  border-radius: 12px;
+  border: 1px solid rgba(220, 38, 38, 0.3);
+  margin: 20px 0;
+}
+
+.error-icon {
+  font-size: 3rem;
+  margin-bottom: 15px;
+}
+
+.error-title {
+  font-size: 1.2rem;
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+
+.retry-btn {
+  background: linear-gradient(to right, #fcd34d, #fbbf24);
+  color: #0a1636;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 24px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 15px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+}
+
+.retry-btn:hover {
+  background: linear-gradient(to right, #fbbf24, #f59e0b);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(251, 191, 36, 0.3);
+}
+
+/* === User Info === */
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  color: #fcd34d;
+  margin-top: 5px;
+  padding: 10px;
+  background: rgba(30, 45, 90, 0.5);
+  border-radius: 8px;
+  border: 1px solid rgba(252, 211, 77, 0.3);
+}
+
+/* === Guest Warning === */
+.guest-warning {
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 25px;
+  text-align: center;
+}
+
+.guest-warning-icon {
+  font-size: 2rem;
+  color: #fcd34d;
+  margin-bottom: 10px;
+}
+
+.guest-warning-title {
+  color: #fcd34d;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.guest-warning-text {
+  color: #e2e8f0;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+/* === Responsive === */
+@media (max-width: 768px) {
+  .container {
+    padding: 15px;
+  }
+
+  .history-card {
+    padding: 15px;
+  }
+
+  .history-details {
+    grid-template-columns: 1fr;
+  }
+
+  .photo-preview {
+    width: 70px;
+    height: 70px;
+  }
+
+  .back-btn span {
+    display: none;
+  }
+
+  .back-btn {
+    padding: 8px 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .header {
+    padding: 12px 15px;
+    font-size: 1.1rem;
+    gap: 10px;
+  }
+
+  .history-content {
+    flex-direction: column;
+  }
+
+  .photo-preview {
+    width: 100%;
+    height: 120px;
+    margin-top: 10px;
+  }
+}
+</style>
+</head>
+
+<body>
+  <!-- Header -->
+  <div class="header">
+    <button class="back-btn" onclick="goBack()">
+      <i class="fas fa-arrow-left"></i>
+      <span>Back</span>
+    </button>
+    <span id="headerTitle"><i class="fas fa-history"></i> Report History</span>
+    <div style="width: 60px;"></div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="container">
+    <!-- Loading/Status Message -->
+    <div id="status" class="mt-4">Loading your report history<span class="loading-dots"></span></div>
+
+    <!-- Guest Warning (shown for guest users) -->
+    <div id="guestWarning" class="guest-warning" style="display: none;">
+      <div class="guest-warning-icon">
+        <i class="fas fa-user-clock"></i>
+      </div>
+      <div class="guest-warning-title">Guest Mode History</div>
+      <div class="guest-warning-text">
+        As a guest user, your report history is limited and stored locally on this device.
+        Create an account to access full report tracking and history across devices.
+      </div>
+    </div>
+
+    <!-- Reports Container -->
+    <div id="historyList" class="history-container"></div>
+  </div>
+
+  <!-- Load Supabase JS -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+
+  <script>
+    // --- CONFIG ---
+    const SUPABASE_URL = 'https://gwvepxupoxyyydnisulb.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_4baWNqraxymp0Gal3OKhxQ_Bl-IHHdt';
+
+    // Initialize Supabase
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    // Global variables
+    let currentUser = null;
+    let isGuestMode = false;
+
+    function goBack() {
+      window.location.href = "index.html";
+    }
+
+    // Get current user - ONLY account users can access history
+    function getCurrentUser() {
+      // Check if in guest mode - guests cannot access history
+      const guestMode = localStorage.getItem('isGuestMode');
+      if (guestMode === 'true') {
+        return null; // No history access for guests
+      }
+
+      // Only account users can access history
+      const accountData = localStorage.getItem('accountData');
+
+      if (accountData) {
+        try {
+          const parsedData = JSON.parse(accountData);
+          if (parsedData.fullName && parsedData.fullName.trim() !== '') {
+            return {
+              id: `user-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+              name: parsedData.fullName,
+              isGuest: false
+            };
+          }
+        } catch (e) {
+          console.error("Error parsing account data:", e);
+        }
+      }
+
+      return null; // No account = no history access
+    }
+
+    // Get badge class based on emergency type
+    function getBadgeClass(type) {
+      switch(type) {
+        case 'motor': return 'motor-badge';
+        case 'fire': return 'fire-badge';
+        case 'assault': return 'assault-badge';
+        case 'medical': return 'medical-badge';
+        default: return 'medical-badge';
+      }
+    }
+
+    // Get display text for emergency type
+    function getTypeDisplay(type) {
+      switch(type) {
+        case 'motor': return 'Vehicular Accident';
+        case 'fire': return 'Fire Accident';
+        case 'assault': return 'Assault Crime';
+        case 'medical': return 'Medical Emergency';
+        default: return 'Emergency';
+      }
+    }
+
+    // Get icon for emergency type
+    function getTypeIcon(type) {
+      switch(type) {
+        case 'motor': return 'fas fa-car-crash';
+        case 'fire': return 'fas fa-fire';
+        case 'assault': return 'fas fa-user-shield';
+        case 'medical': return 'fas fa-ambulance';
+        default: return 'fas fa-exclamation-triangle';
+      }
+    }
+
+    // Create a history card element
+    function createHistoryCard(report, isLocal = false) {
+      const reportId = report.id || `local-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      let status = report.status || "Pending";
+      status = String(status).trim();
+
+      // Determine status class
+      let statusClass = 'status-pending';
+      if (status.toLowerCase() === 'resolved') {
+        statusClass = 'status-resolved';
+      } else if (status.toLowerCase() === 'investigating' ||
+                 status.toLowerCase() === 'in progress' ||
+                 status.toLowerCase() === 'inprogress') {
+        statusClass = 'status-investigating';
+      } else if (status.toLowerCase() === 'cancelled' ||
+                 status.toLowerCase() === 'canceled') {
+        statusClass = 'status-cancelled';
+      } else if (status.toLowerCase() === 'active') {
+        statusClass = 'status-pending';
+        status = 'Pending';
+      }
+
+      // Format time
+      const reportTime = new Date(report.timestamp || report.created_at);
+      const timeString = reportTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      const dateString = reportTime.toLocaleDateString();
+
+      const div = document.createElement("div");
+      div.className = "history-card";
+      div.dataset.id = reportId;
+
+      div.innerHTML = `
+        <div class="emergency-badge ${getBadgeClass(report.type)}">
+          <i class="${getTypeIcon(report.type)}"></i> ${getTypeDisplay(report.type)}
+        </div>
+
+        <div class="history-content">
+          <div class="text-content">
+            <div class="history-title">
+              <i class="fas fa-user-circle"></i>
+              ${currentUser ? currentUser.name : (report.reporter || "Anonymous")}
+              ${isLocal ? '<span style="font-size: 0.7rem; color: #94a3b8; margin-left: 8px;">(Local)</span>' : ''}
+            </div>
+
+            <div class="history-details">
+              <div class="detail-item">
+                <span class="detail-label"><i class="far fa-clock"></i> Time:</span>
+                <span class="detail-value">${timeString}</span>
+              </div>
+
+              <div class="detail-item">
+                <span class="detail-label"><i class="far fa-calendar"></i> Date:</span>
+                <span class="detail-value">${dateString}</span>
+              </div>
+
+              <div class="detail-item">
+                <span class="detail-label"><i class="fas fa-map-marker-alt"></i> Location:</span>
+                <span class="detail-value">${report.latitude?.toFixed(4)}, ${report.longitude?.toFixed(4)}</span>
+              </div>
+
+              <div class="detail-item">
+                <span class="detail-label"><i class="fas fa-hashtag"></i> ID:</span>
+                <span class="detail-value">${reportId.slice(0, 8)}...</span>
+              </div>
+            </div>
+
+            <div class="status-badge ${statusClass}">
+              <i class="fas fa-circle"></i> ${status}
+            </div>
+          </div>
+
+          <div class="photo-preview ${report.photo || report.photo_url ? '' : 'no-photo'}">
+            ${report.photo || report.photo_url ?
+              `<img src="${report.photo || report.photo_url}" alt="Incident photo">` :
+              `<span><i class="fas fa-camera"></i> No photo</span>`
+            }
+          </div>
+        </div>
+      `;
+
+      // Click to view report (only for database reports)
+      if (!isLocal && reportId && !reportId.startsWith('local-')) {
+        div.onclick = (e) => {
+          window.location.href = `view-report.html?id=${reportId}`;
+        };
+      } else {
+        div.style.cursor = 'default';
+        div.onclick = null;
+      }
+
+      return div;
+    }
+
+    // Load guest history from localStorage - only show resolved reports
+    function loadGuestHistory() {
+      const guestReports = JSON.parse(localStorage.getItem('guestReports') || '[]');
+      const container = document.getElementById("historyList");
+
+      // Filter only resolved reports
+      const resolvedReports = guestReports.filter(report =>
+        report.status && report.status.toLowerCase() === 'resolved'
+      );
+
+      if (resolvedReports.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-icon">
+              <i class="fas fa-clock"></i>
+            </div>
+            <div class="empty-title">Waiting for Resolution</div>
+            <div class="empty-subtitle">
+              Your emergency reports are being processed. Resolved reports will appear here automatically.
+            </div>
+          </div>
+        `;
+      } else {
+        container.innerHTML = "";
+
+        // Sort by timestamp (newest first)
+        resolvedReports.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+        resolvedReports.forEach(report => {
+          const card = createHistoryCard(report, true);
+          container.appendChild(card);
+        });
+
+        // Add user info
+        const userInfo = document.createElement('div');
+        userInfo.className = 'user-info';
+        userInfo.innerHTML = `
+          <i class="fas fa-user-clock"></i>
+          <span><strong>Guest User</strong> • ${resolvedReports.length} resolved report${resolvedReports.length !== 1 ? 's' : ''}</span>
+        `;
+        container.prepend(userInfo);
+      }
+    }
+
+    async function loadAccountHistory() {
+      const statusEl = document.getElementById("status");
+      const container = document.getElementById("historyList");
+
+      statusEl.textContent = "Loading your report history...";
+
+      try {
+        // Fetch only resolved reports for current user (history shows completed reports)
+        const { data: reports, error } = await supabaseClient
+          .from('reports')
+          .select('*')
+          .or(`reporter.eq.${currentUser.name},reporter.ilike.%${currentUser.name}%`)
+          .eq('status', 'resolved')
+          .order('created_at', { ascending: false });
+
+        if (error) throw error;
+
+        statusEl.style.display = 'none';
+
+        if (reports.length === 0) {
+          container.innerHTML = `
+            <div class="empty-state">
+              <div class="empty-icon">
+                <i class="fas fa-inbox"></i>
+              </div>
+              <div class="empty-title">No Reports From You</div>
+              <div class="empty-subtitle">
+                You haven't submitted any emergency reports yet.
+              </div>
+              <div class="user-info">
+                <i class="fas fa-user"></i> Logged in as: ${currentUser.name}
+              </div>
+              <button class="retry-btn" onclick="goBack()" style="margin-top: 20px;">
+                <i class="fas fa-plus-circle"></i> Report Emergency
+              </button>
+            </div>
+          `;
+        } else {
+          container.innerHTML = "";
+
+          // Add all reports
+          reports.forEach(report => {
+            const card = createHistoryCard(report);
+            container.appendChild(card);
+          });
+
+          // Add user info
+          const userInfo = document.createElement('div');
+          userInfo.className = 'user-info';
+          userInfo.innerHTML = `
+            <i class="fas fa-user"></i>
+            <span><strong>${currentUser.name}</strong> • ${reports.length} report${reports.length !== 1 ? 's' : ''}</span>
+          `;
+          container.prepend(userInfo);
+        }
+
+      } catch (err) {
+        console.error("Error loading reports:", err);
+        statusEl.style.display = 'none';
+        container.innerHTML = `
+          <div class="error-state">
+            <div class="error-icon">
+              <i class="fas fa-exclamation-circle"></i>
+            </div>
+            <div class="error-title">Connection Error</div>
+            <p>Failed to load your report history.</p>
+            <button class="retry-btn" onclick="loadAccountHistory()">
+              <i class="fas fa-sync-alt"></i> Try Again
+            </button>
+          </div>
+        `;
+      }
+    }
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', function() {
+      currentUser = getCurrentUser();
+      isGuestMode = localStorage.getItem('isGuestMode') === 'true';
+
+      if (!currentUser) {
+        // No user at all - show no history message
+        document.getElementById('status').style.display = 'none';
+        document.getElementById('historyList').innerHTML = `
+          <div class="empty-state">
+            <div class="empty-icon">
+              <i class="fas fa-history"></i>
+            </div>
+            <div class="empty-title">No Report History</div>
+            <div class="empty-subtitle">
+              Report history is only available for users with created accounts.
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      // Update header
+      const headerTitle = document.getElementById('headerTitle');
+      if (isGuestMode) {
+        headerTitle.innerHTML = `<i class="fas fa-bell"></i> Guest Report Notifications`;
+        document.getElementById('guestWarning').style.display = 'block';
+        loadGuestHistory();
+      } else {
+        headerTitle.innerHTML = `<i class="fas fa-history"></i> ${currentUser.name}'s Report History`;
+        loadAccountHistory();
+      }
+    });
+
+    // Global functions
+    window.loadAccountHistory = loadAccountHistory;
+  </script>
+</body>
+</html>
