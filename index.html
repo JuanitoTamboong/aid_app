@@ -1782,9 +1782,9 @@
       <a href="history.html" class="text-yellow-300 hover:text-white px-4 py-2 rounded-lg transition-colors duration-200 bg-white/5 hover:bg-white/10 flex items-center gap-2">
         <i class="fas fa-history"></i> History
       </a>
-      <button onclick="showPrivacyPolicy()" class="text-yellow-300 hover:text-white px-4 py-2 rounded-lg transition-colors duration-200 bg-white/5 hover:bg-white/10 flex items-center gap-2">
+      <a href="privacy-policy.html" class="text-yellow-300 hover:text-white px-4 py-2 rounded-lg transition-colors duration-200 bg-white/5 hover:bg-white/10 flex items-center gap-2">
         <i class="fas fa-shield-alt"></i> Privacy
-      </button>
+      </a>
     </div>
   </div>
 
@@ -1814,9 +1814,9 @@
      <a href="history.html" class="mobile-menu-item" onclick="closeMobileMenu()">
       <i class="fas fa-history"></i> Report History
     </a>
-    <button class="mobile-menu-item w-full text-left" onclick="showPrivacyPolicy(); closeMobileMenu();">
+    <a href="privacy-policy.html" class="mobile-menu-item" onclick="closeMobileMenu()">
       <i class="fas fa-shield-alt"></i> Privacy Policy
-    </button>
+    </a>
     <button class="mobile-menu-item w-full text-left" onclick="handleExit(); closeMobileMenu();">
       <i class="fas fa-sign-out-alt"></i> Exit App
     </button>
@@ -1996,82 +1996,7 @@
   </div>
 </div>
 
-<!-- PRIVACY POLICY POPUP -->
-<div class="privacy-policy-overlay" id="privacyPolicyOverlay">
-  <div class="privacy-policy-box">
-    <div class="privacy-header">
-      <div class="privacy-icon">
-        <i class="fas fa-shield-alt"></i>
-      </div>
-      <div>
-        <div class="privacy-title">Privacy Policy</div>
-        <div class="legal-notice-subtitle">AidTracker Emergency System</div>
-      </div>
-    </div>
-    
-    <div class="privacy-content">
-      <div class="privacy-section">
-        <h3>Data Collection</h3>
-        <p>We collect only essential information for emergency response:</p>
-        <ul>
-          <li>Location data (GPS coordinates)</li>
-          <li>Emergency type and description</li>
-          <li>Optional: Photos of the incident</li>
-          <li>Optional: Account information if you create an account</li>
-        </ul>
-      </div>
-      
-      <div class="privacy-section">
-        <h3>Data Usage</h3>
-        <p>Your data is used solely for:</p>
-        <ul>
-          <li>Emergency response coordination</li>
-          <li>Dispatch of appropriate emergency services</li>
-          <li>Incident tracking and follow-up</li>
-          <li>Improving emergency response systems</li>
-        </ul>
-      </div>
-      
-      <div class="privacy-section">
-        <h3>Data Protection</h3>
-        <p>We implement industry-standard security measures:</p>
-        <ul>
-          <li>End-to-end encryption for sensitive data</li>
-          <li>Secure server infrastructure</li>
-          <li>Regular security audits</li>
-          <li>Compliance with data protection regulations</li>
-        </ul>
-      </div>
-      
-      <div class="privacy-section">
-        <h3>Data Retention</h3>
-        <p>Emergency reports are retained for:</p>
-        <ul>
-          <li>Legal and regulatory compliance (7 years)</li>
-          <li>Emergency response improvement</li>
-          <li>Statistical analysis (anonymized)</li>
-        </ul>
-      </div>
-      
-      <div class="privacy-section">
-        <h3>Your Rights</h3>
-        <p>You have the right to:</p>
-        <ul>
-          <li>Access your personal data</li>
-          <li>Request data correction</li>
-          <li>Request data deletion (subject to legal requirements)</li>
-          <li>Report anonymously as a guest user</li>
-        </ul>
-      </div>
-    </div>
-    
-    <div class="privacy-buttons">
-      <button onclick="closePrivacyPolicy()" class="privacy-btn privacy-btn-agree">
-        <i class="fas fa-check-circle"></i> I Understand
-      </button>
-    </div>
-  </div>
-</div>
+
 
 
 

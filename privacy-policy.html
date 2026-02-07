@@ -1,430 +1,641 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Privacy Policy - AidTracker</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<style>
-  :root {
-    --dark-blue: #0a1636;
-    --warning-yellow: #fcd34d;
-  }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy Policy - AidTracker</title>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!--logo-->
+    <link rel="website icon" href="assets/aid-tracker-logo.png">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-  * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-  }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a1636 0%, #1a2c5a 100%);
+            color: white;
+            line-height: 1.6;
+            min-height: 100vh;
+            padding: 20px;
+        }
 
-  body {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-    background: linear-gradient(135deg, #0a1636 0%, #1e293b 100%);
-    color: white;
-    min-height: 100vh;
-    line-height: 1.6;
-  }
+        /* Container */
+        .privacy-container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: linear-gradient(145deg, rgba(20, 35, 80, 0.95), rgba(10, 22, 54, 0.95));
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(252, 211, 77, 0.3);
+            backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
+        }
 
-  .container {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 20px;
-  }
+        /* Decorative elements */
+        .privacy-container::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, rgba(252, 211, 77, 0.1) 0%, transparent 70%);
+            z-index: 0;
+        }
 
-  .header {
-    text-align: center;
-    margin-bottom: 40px;
-    padding-bottom: 20px;
-    border-bottom: 1px solid rgba(252, 211, 77, 0.2);
-  }
+        .privacy-container::after {
+            content: '';
+            position: absolute;
+            bottom: -30%;
+            left: -30%;
+            width: 150px;
+            height: 150px;
+            background: radial-gradient(circle, rgba(59, 130, 246, 0.1) 0%, transparent 70%);
+            z-index: 0;
+        }
 
-  .header h1 {
-    font-size: 2.2rem;
-    font-weight: 900;
-    color: #fcd34d;
-    margin-bottom: 10px;
-  }
+        /* Header */
+        .privacy-header {
+            text-align: center;
+            margin-bottom: 40px;
+            position: relative;
+            z-index: 1;
+        }
 
-  .header p {
-    color: #94a3b8;
-    font-size: 1.1rem;
-  }
+        .header-icon {
+            font-size: 3.5rem;
+            color: #fcd34d;
+            margin-bottom: 15px;
+            display: inline-block;
+            background: rgba(252, 211, 77, 0.1);
+            width: 80px;
+            height: 80px;
+            line-height: 80px;
+            border-radius: 50%;
+            border: 2px solid rgba(252, 211, 77, 0.3);
+        }
 
-  .content-section {
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 16px;
-    padding: 30px;
-    margin-bottom: 25px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-  }
+        .privacy-header h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: #fcd34d;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
 
-  .section-title {
-    font-size: 1.4rem;
-    font-weight: 700;
-    color: #fcd34d;
-    margin-bottom: 20px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
+        .privacy-header .tagline {
+            font-size: 1.1rem;
+            color: #94a3b8;
+            max-width: 600px;
+            margin: 0 auto;
+        }
 
-  .section-content {
-    color: #e2e8f0;
-  }
+        /* Divider */
+        .divider {
+            height: 3px;
+            background: linear-gradient(to right, transparent, #fcd34d, transparent);
+            margin: 30px auto;
+            max-width: 200px;
+            border-radius: 3px;
+        }
 
-  .section-content p {
-    margin-bottom: 15px;
-  }
+        /* Content Sections */
+        .content-section {
+            background: rgba(30, 45, 90, 0.5);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(252, 211, 77, 0.2);
+            position: relative;
+            z-index: 1;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
 
-  .section-content ul {
-    padding-left: 20px;
-    margin-bottom: 15px;
-  }
+        .content-section:hover {
+            transform: translateY(-3px);
+            border-color: rgba(252, 211, 77, 0.4);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+            background: rgba(40, 55, 100, 0.6);
+        }
 
-  .section-content li {
-    margin-bottom: 8px;
-    position: relative;
-    padding-left: 10px;
-  }
+        .section-title {
+            font-size: 1.5rem;
+            color: #fcd34d;
+            margin-bottom: 20px;
+            font-weight: 600;
+            position: relative;
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
 
-  .section-content li::before {
-    content: "•";
-    color: #fcd34d;
-    position: absolute;
-    left: -10px;
-  }
+        .section-title::after {
+            content: '';
+            display: block;
+            width: 40px;
+            height: 3px;
+            background: #fcd34d;
+            margin-top: 8px;
+            border-radius: 3px;
+        }
 
-  .highlight-box {
-    background: rgba(252, 211, 77, 0.1);
-    border-left: 4px solid #fcd34d;
-    border-radius: 8px;
-    padding: 20px;
-    margin: 20px 0;
-  }
+        .section-content {
+            font-size: 1.1rem;
+            line-height: 1.7;
+            color: #e2e8f0;
+        }
 
-  .highlight-title {
-    color: #fcd34d;
-    font-weight: 600;
-    margin-bottom: 10px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
+        .section-content p {
+            margin-bottom: 15px;
+        }
 
-  .action-buttons {
-    display: flex;
-    gap: 15px;
-    margin-top: 40px;
-    flex-wrap: wrap;
-  }
+        .highlight {
+            color: #fcd34d;
+            font-weight: 600;
+        }
 
-  .action-btn {
-    flex: 1;
-    min-width: 200px;
-    padding: 15px 25px;
-    border-radius: 12px;
-    border: none;
-    font-weight: 600;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-  }
+        /* Highlight Box */
+        .highlight-box {
+            background: rgba(252, 211, 77, 0.1);
+            border-left: 4px solid #fcd34d;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
 
-  .btn-primary {
-    background: linear-gradient(to right, #fcd34d, #fbbf24);
-    color: #0a1636;
-  }
+        .highlight-title {
+            color: #fcd34d;
+            font-weight: 600;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 1.1rem;
+        }
 
-  .btn-primary:hover {
-    background: linear-gradient(to right, #fbbf24, #f59e0b);
-    transform: translateY(-2px);
-  }
+        /* Lists */
+        .section-content ul {
+            margin-left: 20px;
+            margin-bottom: 20px;
+        }
 
-  .btn-secondary {
-    background: rgba(255, 255, 255, 0.1);
-    color: white;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-  }
+        .section-content li {
+            margin-bottom: 10px;
+            padding-left: 5px;
+            position: relative;
+        }
 
-  .btn-secondary:hover {
-    background: rgba(255, 255, 255, 0.15);
-    transform: translateY(-2px);
-  }
+        .section-content li::before {
+            content: '•';
+            color: #fcd34d;
+            font-weight: bold;
+            position: absolute;
+            left: -15px;
+        }
 
-  @media (max-width: 768px) {
-    .container {
-      padding: 10px;
-      max-width: 100%;
-    }
+        /* Feature Grid */
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
 
-    .header {
-      margin-bottom: 20px;
-      padding-bottom: 10px;
-    }
+        .feature-card {
+            background: rgba(20, 35, 80, 0.5);
+            border-radius: 12px;
+            padding: 20px;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(252, 211, 77, 0.1);
+        }
 
-    .header h1 {
-      font-size: 1.5rem;
-    }
+        .feature-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(252, 211, 77, 0.3);
+            background: rgba(30, 45, 90, 0.7);
+        }
 
-    .header p {
-      font-size: 0.9rem;
-    }
+        .feature-icon {
+            font-size: 1.8rem;
+            color: #fcd34d;
+            margin-bottom: 15px;
+            display: inline-block;
+            background: rgba(252, 211, 77, 0.1);
+            width: 50px;
+            height: 50px;
+            line-height: 50px;
+            text-align: center;
+            border-radius: 10px;
+        }
 
-    .content-section {
-      padding: 15px;
-      margin-bottom: 15px;
-      border-radius: 12px;
-    }
+        .feature-title {
+            font-size: 1.2rem;
+            color: #fcd34d;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
 
-    .section-title {
-      font-size: 1.2rem;
-      margin-bottom: 15px;
-    }
+        .feature-desc {
+            color: #e2e8f0;
+            line-height: 1.6;
+            font-size: 0.95rem;
+        }
 
-    .section-content p {
-      margin-bottom: 10px;
-      font-size: 0.95rem;
-    }
+        /* Important Note */
+        .important-note {
+            background: rgba(59, 130, 246, 0.1);
+            border-left: 4px solid #3b82f6;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
 
-    .section-content ul {
-      padding-left: 15px;
-      margin-bottom: 10px;
-    }
+        .important-note i {
+            color: #3b82f6;
+            margin-right: 10px;
+        }
 
-    .section-content li {
-      margin-bottom: 5px;
-      padding-left: 5px;
-    }
+        /* Update Notification */
+        .update-notice {
+            background: rgba(252, 211, 77, 0.1);
+            border-left: 4px solid #fcd34d;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 20px;
+            text-align: center;
+        }
 
-    .highlight-box {
-      padding: 15px;
-      margin: 15px 0;
-    }
+        .update-notice i {
+            color: #fcd34d;
+            margin-right: 8px;
+        }
 
-    .action-buttons {
-      flex-direction: column;
-      gap: 10px;
-      margin-top: 30px;
-    }
+        /* Return Button */
+        .return-section {
+            text-align: center;
+            margin-top: 40px;
+            position: relative;
+            z-index: 1;
+        }
 
-    .action-btn {
-      width: 100%;
-      padding: 12px 20px;
-      font-size: 0.9rem;
-    }
-  }
+        .return-btn {
+            background: linear-gradient(to right, #fcd34d, #fbbf24);
+            color: #0a1636;
+            border: none;
+            border-radius: 10px;
+            padding: 14px 32px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 4px 15px rgba(251, 191, 36, 0.2);
+        }
 
-  @media (max-width: 480px) {
-    .container {
-      padding: 8px;
-    }
+        .return-btn:hover {
+            background: linear-gradient(to right, #fbbf24, #f59e0b);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(251, 191, 36, 0.3);
+        }
 
-    .header h1 {
-      font-size: 1.3rem;
-    }
+        /* Responsive */
+        @media (max-width: 768px) {
+            body {
+                padding: 15px;
+            }
+            
+            .privacy-container {
+                padding: 25px;
+            }
+            
+            .privacy-header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .header-icon {
+                width: 60px;
+                height: 60px;
+                line-height: 60px;
+                font-size: 2.5rem;
+            }
+            
+            .content-section {
+                padding: 20px;
+                margin-bottom: 20px;
+            }
+            
+            .section-title {
+                font-size: 1.3rem;
+            }
+            
+            .section-content {
+                font-size: 1rem;
+            }
+            
+            .feature-grid {
+                grid-template-columns: 1fr;
+            }
+        }
 
-    .content-section {
-      padding: 12px;
-    }
+        @media (max-width: 480px) {
+            .privacy-container {
+                padding: 20px;
+            }
+            
+            .privacy-header h1 {
+                font-size: 1.6rem;
+            }
+            
+            .section-title {
+                font-size: 1.1rem;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+            
+            .section-title::after {
+                width: 30px;
+            }
+            
+            .feature-card {
+                padding: 15px;
+            }
+            
+            .return-btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
 
-    .section-title {
-      font-size: 1.1rem;
-    }
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
 
-    .section-content p {
-      font-size: 0.9rem;
-    }
+        ::-webkit-scrollbar-track {
+            background: rgba(10, 22, 54, 0.5);
+        }
 
-    .action-btn {
-      padding: 10px 15px;
-    }
-  }
-</style>
+        ::-webkit-scrollbar-thumb {
+            background: #fcd34d;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #fbbf24;
+        }
+    </style>
 </head>
 <body>
-  <div class="container">
-    <!-- Header -->
-    <div class="header">
-      <h1>
-        <i class="fas fa-user-shield"></i>
-        Privacy Policy
-      </h1>
-      <p>Your privacy and safety are our top priorities</p>
-      <p class="text-sm mt-2 text-gray-400">Last updated: January 2024</p>
-    </div>
-
-    <!-- Introduction -->
-    <div class="content-section">
-      <h2 class="section-title">
-        <i class="fas fa-info-circle"></i>
-        Introduction
-      </h2>
-      <div class="section-content">
-        <p>AidTracker is designed to help you report emergencies quickly and efficiently while protecting your privacy. This policy explains how we collect, use, and protect your information.</p>
-        
-        <div class="highlight-box">
-          <div class="highlight-title">
-            <i class="fas fa-exclamation-circle"></i>
-            Key Principle: No Login Required for Emergency Reporting
-          </div>
-          <p>You can report emergencies immediately without creating an account or providing personal information. Your ability to get help should never be delayed by registration processes.</p>
+    <div class="privacy-container">
+        <!-- Header -->
+        <div class="privacy-header">
+            <div class="header-icon">
+                <i class="fas fa-user-shield"></i>
+            </div>
+            <h1>Privacy Policy</h1>
+            <p class="tagline">Your privacy and safety are our top priorities</p>
+            <div class="divider"></div>
         </div>
-      </div>
-    </div>
 
-    <!-- Data We Collect -->
-    <div class="content-section">
-      <h2 class="section-title">
-        <i class="fas fa-database"></i>
-        Data We Collect
-      </h2>
-      <div class="section-content">
-        <p>We collect only the minimum data necessary to provide emergency services:</p>
-        
-        <ul>
-          <li><strong>Location Data:</strong> GPS coordinates, approximate location from Wi-Fi/cell towers, or manually entered location</li>
-          <li><strong>Emergency Details:</strong> Type of emergency, severity level (optional), number of people involved (optional)</li>
-          <li><strong>Optional Information:</strong> Additional notes, photos (if you choose to provide them)</li>
-          <li><strong>Account Information:</strong> Only if you choose to create an account (name, phone number, emergency contacts)</li>
-          <li><strong>Technical Data:</strong> Device type, app version (for troubleshooting only)</li>
-        </ul>
-        
-        <p><strong>We never collect:</strong> Your contacts, messages, call history, browsing history, or any other personal information unrelated to emergency reporting.</p>
-      </div>
-    </div>
-
-    <!-- How We Use Your Data -->
-    <div class="content-section">
-      <h2 class="section-title">
-        <i class="fas fa-cogs"></i>
-        How We Use Your Data
-      </h2>
-      <div class="section-content">
-        <p>Your data is used exclusively for:</p>
-        
-        <ul>
-          <li><strong>Emergency Response:</strong> Sharing your location and emergency details with authorized responders</li>
-          <li><strong>Report Updates:</strong> Keeping you informed about your report status (if you provide contact info)</li>
-          <li><strong>Service Improvement:</strong> Anonymous, aggregated data to improve the app (never tied to you personally)</li>
-          <li><strong>Legal Compliance:</strong> When required by law or to prevent abuse of emergency services</li>
-        </ul>
-        
-        <div class="highlight-box">
-          <div class="highlight-title">
-            <i class="fas fa-ban"></i>
-            What We Don't Do
-          </div>
-          <p>We <strong>never</strong> sell your data to advertisers. We <strong>never</strong> use your data for marketing. We <strong>never</strong> share your data with third parties except emergency responders.</p>
+        <!-- Introduction -->
+        <div class="content-section">
+            <h2 class="section-title">
+                <i class="fas fa-info-circle"></i>
+                Introduction
+            </h2>
+            <div class="section-content">
+                <p>AidTracker is designed to help you report emergencies quickly and efficiently while protecting your privacy. This policy explains how we collect, use, and protect your information.</p>
+                
+                <div class="highlight-box">
+                    <div class="highlight-title">
+                        <i class="fas fa-exclamation-circle"></i>
+                        Key Principle: No Login Required for Emergency Reporting
+                    </div>
+                    <p>You can report emergencies immediately without creating an account or providing personal information. Your ability to get help should never be delayed by registration processes.</p>
+                </div>
+            </div>
         </div>
-      </div>
+
+        <!-- Data Collection -->
+        <div class="content-section">
+            <h2 class="section-title">
+                <i class="fas fa-database"></i>
+                Data Collection
+            </h2>
+            <div class="section-content">
+                <p>We collect only essential information for emergency response:</p>
+                
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-map-marker-alt"></i>
+                        </div>
+                        <div class="feature-title">Location Data</div>
+                        <div class="feature-desc">GPS coordinates for accurate emergency response</div>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <div class="feature-title">Emergency Details</div>
+                        <div class="feature-desc">Type and description of the emergency situation</div>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-camera"></i>
+                        </div>
+                        <div class="feature-title">Optional Media</div>
+                        <div class="feature-desc">Photos of the incident (if you choose to provide them)</div>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="feature-title">Account Information</div>
+                        <div class="feature-desc">Only if you choose to create an account for faster reporting</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Data Usage -->
+        <div class="content-section">
+            <h2 class="section-title">
+                <i class="fas fa-cogs"></i>
+                Data Usage
+            </h2>
+            <div class="section-content">
+                <p>Your data is used solely for:</p>
+                
+                <ul>
+                    <li><span class="highlight">Emergency response coordination</span> - Connecting you with appropriate emergency services</li>
+                    <li><span class="highlight">Dispatch of appropriate emergency services</span> - Fire, police, medical, or other responders</li>
+                    <li><span class="highlight">Incident tracking and follow-up</span> - Ensuring proper resolution of emergencies</li>
+                    <li><span class="highlight">Improving emergency response systems</span> - Enhancing service quality through data analysis</li>
+                </ul>
+                
+                <div class="highlight-box">
+                    <div class="highlight-title">
+                        <i class="fas fa-ban"></i>
+                        What We Don't Do
+                    </div>
+                    <p>We <span class="highlight">never</span> sell your data, use it for marketing, or share it with unauthorized third parties.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Data Protection -->
+        <div class="content-section">
+            <h2 class="section-title">
+                <i class="fas fa-shield-alt"></i>
+                Data Protection
+            </h2>
+            <div class="section-content">
+                <p>We implement industry-standard security measures:</p>
+                
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-lock"></i>
+                        </div>
+                        <div class="feature-title">End-to-End Encryption</div>
+                        <div class="feature-desc">All sensitive data is encrypted during transmission and storage</div>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-server"></i>
+                        </div>
+                        <div class="feature-title">Secure Infrastructure</div>
+                        <div class="feature-desc">Protected server infrastructure with advanced security protocols</div>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-search"></i>
+                        </div>
+                        <div class="feature-title">Regular Security Audits</div>
+                        <div class="feature-desc">Continuous monitoring and security assessments</div>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-gavel"></i>
+                        </div>
+                        <div class="feature-title">Regulatory Compliance</div>
+                        <div class="feature-desc">Adherence to data protection regulations and standards</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Data Retention -->
+        <div class="content-section">
+            <h2 class="section-title">
+                <i class="fas fa-clock"></i>
+                Data Retention
+            </h2>
+            <div class="section-content">
+                <p>Emergency reports are retained for:</p>
+                
+                <ul>
+                    <li><span class="highlight">Legal and regulatory compliance</span> - 7 years as required by emergency service regulations</li>
+                    <li><span class="highlight">Emergency response improvement</span> - Analyzing response effectiveness and efficiency</li>
+                    <li><span class="highlight">Statistical analysis</span> - Anonymized data used for system enhancement and research</li>
+                </ul>
+                
+                <div class="important-note">
+                    <i class="fas fa-info-circle"></i>
+                    <em>Anonymous reports (without account information) are automatically deleted after 30 days unless required for legal purposes.</em>
+                </div>
+            </div>
+        </div>
+
+        <!-- Your Rights -->
+        <div class="content-section">
+            <h2 class="section-title">
+                <i class="fas fa-user-check"></i>
+                Your Rights
+            </h2>
+            <div class="section-content">
+                <p>You have the right to:</p>
+                
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-eye"></i>
+                        </div>
+                        <div class="feature-title">Access Your Data</div>
+                        <div class="feature-desc">Review all personal information we have about you</div>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-edit"></i>
+                        </div>
+                        <div class="feature-title">Request Corrections</div>
+                        <div class="feature-desc">Correct inaccurate or incomplete information</div>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-trash-alt"></i>
+                        </div>
+                        <div class="feature-title">Request Deletion</div>
+                        <div class="feature-desc">Delete your data (subject to legal requirements)</div>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-user-secret"></i>
+                        </div>
+                        <div class="feature-title">Report Anonymously</div>
+                        <div class="feature-desc">Use the app as a guest without providing personal information</div>
+                    </div>
+                </div>
+                
+                <div class="highlight-box">
+                    <div class="highlight-title">
+                        <i class="fas fa-user-friends"></i>
+                        Guest User Protection
+                    </div>
+                    <p>You can report emergencies completely anonymously. We do not track or store identifying information for guest users beyond what is necessary for the immediate emergency response.</p>
+                </div>
+
+                <div class="update-notice">
+                    <i class="fas fa-sync-alt"></i>
+                    <em>This policy may be updated periodically. We will notify users of significant changes through the app.</em>
+                </div>
+            </div>
+        </div>
+
+        <!-- Return Button -->
+        <div class="return-section">
+            <button class="return-btn" onclick="goBack()">
+                <i class="fas fa-arrow-left"></i> back
+            </button>
+        </div>
     </div>
 
-    <!-- Data Retention -->
-    <div class="content-section">
-      <h2 class="section-title">
-        <i class="fas fa-clock"></i>
-        Data Retention
-      </h2>
-      <div class="section-content">
-        <p>We keep your data only as long as necessary:</p>
-        
-        <ul>
-          <li><strong>Anonymous Reports:</strong> Automatically deleted after 30 days</li>
-          <li><strong>Account-linked Reports:</strong> Retained for 2 years for follow-up and historical reference</li>
-          <li><strong>Photos/Voice Notes:</strong> Deleted immediately after emergency response is complete</li>
-          <li><strong>Account Data:</strong> Retained until you delete your account</li>
-        </ul>
-        
-        <p>You can request deletion of your data at any time by contacting us.</p>
-      </div>
-    </div>
-
-    <!-- Your Rights -->
-    <div class="content-section">
-      <h2 class="section-title">
-        <i class="fas fa-user-check"></i>
-        Your Rights
-      </h2>
-      <div class="section-content">
-        <p>You have the right to:</p>
-        
-        <ul>
-          <li>Access all data we have about you</li>
-          <li>Correct inaccurate data</li>
-          <li>Request deletion of your data</li>
-          <li>Export your data in a machine-readable format</li>
-          <li>Opt out of non-emergency communications</li>
-          <li>Report privacy concerns</li>
-        </ul>
-        
-        <p>To exercise any of these rights, contact us at <strong>privacy@aidtracker.org</strong></p>
-      </div>
-    </div>
-
-    <!-- Security -->
-    <div class="content-section">
-      <h2 class="section-title">
-        <i class="fas fa-shield-alt"></i>
-        Security
-      </h2>
-      <div class="section-content">
-        <p>We implement industry-standard security measures to protect your data:</p>
-        
-        <ul>
-          <li><strong>Encryption:</strong> All data is encrypted in transit and at rest</li>
-          <li><strong>Access Controls:</strong> Strict access controls limit who can see your data</li>
-          <li><strong>Regular Audits:</strong> Security audits and penetration testing</li>
-          <li><strong>Employee Training:</strong> All staff are trained in data privacy</li>
-          <li><strong>Incident Response:</strong> 24/7 monitoring and rapid incident response</li>
-        </ul>
-      </div>
-    </div>
-
-    <!-- Contact -->
-    <div class="content-section">
-      <h2 class="section-title">
-        <i class="fas fa-envelope"></i>
-        Contact Us
-      </h2>
-      <div class="section-content">
-        <p>For privacy concerns or questions about this policy:</p>
-        
-        <ul>
-          <li><strong>Email:</strong> privacy@aidtracker.org</li>
-          <li><strong>Mail:</strong> AidTracker Privacy Office, 123 Safety Street, City, State 12345</li>
-          <li><strong>Emergency Issues:</strong> For immediate concerns about misuse, contact local law enforcement</li>
-        </ul>
-        
-        <p class="mt-4 text-sm text-gray-400">
-          This policy may be updated periodically. We will notify users of significant changes through the app.
-        </p>
-      </div>
-    </div>
-
-    <!-- Action Buttons -->
-    <div class="action-buttons">
-      <button class="action-btn btn-primary" onclick="window.location.href='index.html'">
-        <i class="fas fa-home"></i>
-        Back to Home
-      </button>
-      
-      <button class="action-btn btn-secondary" onclick="window.location.href='account.html'">
-        <i class="fas fa-user-cog"></i>
-        Account Settings
-      </button>
-    </div>
-  </div>
-
-  <script>
-    // Add Font Awesome
-    const faScript = document.createElement('script');
-    faScript.src = 'https://kit.fontawesome.com/a076d05399.js';
-    faScript.crossOrigin = 'anonymous';
-    document.head.appendChild(faScript);
-  </script>
+    <script>
+        function goBack() {
+            window.history.back();
+        }
+    </script>
 </body>
 </html>
