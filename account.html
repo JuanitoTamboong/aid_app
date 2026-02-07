@@ -104,11 +104,6 @@
     background: rgba(255, 255, 255, 0.9);
   }
 
-  .form-input option {
-    color: #0a1636;
-    background: rgba(255, 255, 255, 0.9);
-  }
-
   .optional-badge {
     background: rgba(148, 163, 184, 0.2);
     color: #94a3b8;
@@ -355,10 +350,10 @@
     </div>
 
     <!-- Account Information Display -->
-    <div class="account-card">
-      <h2 class="card-title">
+    <div id="accountCard" class="account-card">
+      <h2 id="accountTitle" class="card-title">
         <i class="fas fa-user-check"></i>
-        Account Management
+        Account Information
       </h2>
 
       <div id="accountInfo" class="saved-data" style="display: none;">
@@ -460,6 +455,19 @@
   <script>
     // ===== INITIALIZATION =====
     document.addEventListener('DOMContentLoaded', function() {
+      // Wait for Capacitor to be ready before initializing
+      if (window.Capacitor) {
+        Capacitor.Plugins.App.addListener('appStateChange', ({ isActive }) => {
+          console.log('App state changed. Is active:', isActive);
+        });
+
+        Capacitor.Plugins.App.addListener('backButton', () => {
+          if (confirm('Exit AidTracker?')) {
+            handleExit();
+          }
+        });
+      }
+
       loadAccountData();
     });
 
@@ -472,21 +480,23 @@
         if (Object.keys(accountData).length > 0) {
           // Show account information
           showAccountInfo(accountData);
+          document.getElementById('accountCard').style.display = 'block';
+          document.getElementById('guestWelcome').style.display = 'none';
         } else {
-          // Show different UI based on guest mode
+          // Hide account card when no account
+          document.getElementById('accountCard').style.display = 'none';
           if (isGuestMode) {
             // Show welcoming guest section
             document.getElementById('guestWelcome').style.display = 'block';
-            document.getElementById('noAccountInfo').style.display = 'none';
           } else {
-            // Show standard no account message
+            // Hide guest welcome if not guest mode
             document.getElementById('guestWelcome').style.display = 'none';
-            document.getElementById('noAccountInfo').style.display = 'block';
           }
         }
       } catch (error) {
         console.error('Error loading account data:', error);
         document.getElementById('noAccountInfo').style.display = 'block';
+        document.getElementById('accountTitle').style.display = 'block';
       }
     }
 

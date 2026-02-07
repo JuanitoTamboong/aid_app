@@ -20,7 +20,7 @@
 <style>
   * {
     font-family: 'Poppins', 'Roboto', sans-serif;
-  }
+  } 
   
   /* Map animation */
   #mapContainer {
@@ -1395,6 +1395,21 @@
     z-index: 1;
   }
 
+  /* Municipality Seal */
+  .hotline-seal {
+    margin-bottom: 15px;
+    display: flex;
+    justify-content: center;
+  }
+
+  .hotline-seal img {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    border: 3px solid #fcd34d;
+    box-shadow: 0 4px 15px rgba(252, 211, 77, 0.3);
+  }
+
   /* Close button in top-right corner */
   .hotline-close-btn {
     position: absolute;
@@ -1457,8 +1472,30 @@
   .hotline-numbers {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 15px;
     margin-bottom: 25px;
+  }
+
+  /* Hotline Categories */
+  .hotline-category {
+    margin-bottom: 20px;
+  }
+
+  .hotline-category-title {
+    color: #fcd34d;
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(252, 211, 77, 0.3);
+  }
+
+  .hotline-category-title i {
+    font-size: 1.2rem;
   }
 
   .hotline-item {
@@ -1468,12 +1505,19 @@
     padding: 15px;
     transition: all 0.3s ease;
     cursor: pointer;
+    margin-bottom: 8px;
   }
 
   .hotline-item:hover {
     background: rgba(252, 211, 77, 0.15);
     transform: translateY(-2px);
     border-color: #fcd34d;
+    box-shadow: 0 4px 15px rgba(252, 211, 77, 0.2);
+  }
+
+  .hotline-item:active {
+    transform: translateY(0);
+    transition: transform 0.1s ease;
   }
 
   .hotline-name {
@@ -1485,6 +1529,12 @@
     align-items: center;
     justify-content: center;
     gap: 8px;
+    text-align: center;
+  }
+
+  .hotline-name i {
+    font-size: 1.1rem;
+    flex-shrink: 0;
   }
 
   .hotline-number {
@@ -1492,57 +1542,15 @@
     font-size: 1.2rem;
     font-weight: 700;
     letter-spacing: 1px;
+    margin-bottom: 4px;
   }
 
   .hotline-description {
     color: #cbd5e1;
     font-size: 0.8rem;
-    margin-top: 6px;
     font-style: italic;
-  }
-
-  .hotline-buttons {
-    display: flex;
-    gap: 10px;
-    justify-content: center;
-  }
-
-  .hotline-btn {
-    padding: 12px 20px;
-    border-radius: 10px;
-    border: none;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    font-size: 0.95rem;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    flex: 1;
-    max-width: 150px;
-  }
-
-  .hotline-btn-call {
-    background: linear-gradient(145deg, #10b981, #059669);
-    color: white;
-  }
-
-  .hotline-btn-call:hover {
-    background: linear-gradient(145deg, #059669, #047857);
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
-  }
-
-  .hotline-btn-close {
-    background: rgba(255, 255, 255, 0.1);
-    color: white;
-    border: 1px solid rgba(255, 255, 255, 0.3);
-  }
-
-  .hotline-btn-close:hover {
-    background: rgba(255, 255, 255, 0.15);
-    transform: translateY(-2px);
+    line-height: 1.4;
+    text-align: center;
   }
 
   /* Mobile-specific adjustments for hotline modal */
@@ -1808,9 +1816,6 @@
     </a>
     <button class="mobile-menu-item w-full text-left" onclick="showPrivacyPolicy(); closeMobileMenu();">
       <i class="fas fa-shield-alt"></i> Privacy Policy
-    </button>
-    <button class="mobile-menu-item w-full text-left" onclick="showHotlineModal(); closeMobileMenu();">
-      <i class="fas fa-phone-alt"></i> Emergency Hotlines
     </button>
     <button class="mobile-menu-item w-full text-left" onclick="handleExit(); closeMobileMenu();">
       <i class="fas fa-sign-out-alt"></i> Exit App
@@ -2096,39 +2101,127 @@
     <div class="hotline-icon">
       <i class="fas fa-phone-alt"></i>
     </div>
-    <h2 class="hotline-title">Emergency Hotlines</h2>
-    <p class="hotline-subtitle">Call emergency services directly</p>
+    <h2 class="hotline-title">Romblon Emergency Hotlines</h2>
+    <p class="hotline-subtitle">Municipality of Romblon, Philippines</p>
 
     <div class="hotline-numbers">
-      <div class="hotline-item" onclick="callEmergency('911')">
-        <div class="hotline-name">
-          <i class="fas fa-ambulance"></i> Emergency (911)
+      <!-- Police Services -->
+      <div class="hotline-category">
+        <h3 class="hotline-category-title"><i class="fas fa-shield-alt"></i> Police Services</h3>
+        <div class="hotline-item" onclick="callEmergency('09562087628')">
+          <div class="hotline-name">
+            <i class="fas fa-user-shield"></i> MDRRMO Romblon
+          </div>
+          <div class="hotline-number">0956-208-7628</div>
+          <div class="hotline-description">Municipal Disaster Risk Reduction Management Office</div>
         </div>
-        <div class="hotline-number">911</div>
-        <div class="hotline-description">For immediate emergency response</div>
+        <div class="hotline-item" onclick="callEmergency('09686799563')">
+          <div class="hotline-name">
+            <i class="fas fa-shield-alt"></i> PDRRMO
+          </div>
+          <div class="hotline-number">0968-679-9563</div>
+          <div class="hotline-description">Provincial Disaster Risk Reduction Management Office</div>
+        </div>
+        <div class="hotline-item" onclick="callEmergency('09454185615')">
+          <div class="hotline-name">
+            <i class="fas fa-building-shield"></i> Romblon Police Provincial Office
+          </div>
+          <div class="hotline-number">0945-418-5615</div>
+          <div class="hotline-description">Provincial Police Headquarters</div>
+        </div>
+        <div class="hotline-item" onclick="callEmergency('09985985892')">
+          <div class="hotline-name">
+            <i class="fas fa-shield-halved"></i> Romblon Municipal Police Station
+          </div>
+          <div class="hotline-number">0998-598-5892</div>
+          <div class="hotline-description">Municipal Police Services</div>
+        </div>
+        <div class="hotline-item" onclick="callEmergency('09772826387')">
+          <div class="hotline-name">
+            <i class="fas fa-anchor"></i> Maritime Police Romblon MARPSTA
+          </div>
+          <div class="hotline-number">0977-282-6387</div>
+          <div class="hotline-description">Maritime Police Station</div>
+        </div>
       </div>
 
-      <div class="hotline-item" onclick="callEmergency('112')">
-        <div class="hotline-name">
-          <i class="fas fa-phone"></i> European Emergency (112)
+      <!-- Fire & Rescue -->
+      <div class="hotline-category">
+        <h3 class="hotline-category-title"><i class="fas fa-fire"></i> Fire & Rescue</h3>
+        <div class="hotline-item" onclick="callEmergency('09213179890')">
+          <div class="hotline-name">
+            <i class="fas fa-fire-extinguisher"></i> Bureau of Fire Protection Romblon Station
+          </div>
+          <div class="hotline-number">0921-317-9890</div>
+          <div class="hotline-description">Fire Emergency Response</div>
         </div>
-        <div class="hotline-number">112</div>
-        <div class="hotline-description">European emergency number</div>
+        <div class="hotline-item" onclick="callEmergency('09156031366')">
+          <div class="hotline-name">
+            <i class="fas fa-fire-extinguisher"></i> Bureau of Fire Protection Romblon Station (Alt)
+          </div>
+          <div class="hotline-number">0915-603-1366</div>
+          <div class="hotline-description">Alternative Fire Emergency Line</div>
+        </div>
       </div>
 
-      <div class="hotline-item" onclick="callEmergency('999')">
-        <div class="hotline-name">
-          <i class="fas fa-shield-alt"></i> Police (999)
+      <!-- Medical Services -->
+      <div class="hotline-category">
+        <h3 class="hotline-category-title"><i class="fas fa-ambulance"></i> Medical Services</h3>
+        <div class="hotline-item" onclick="callEmergency('09209456135')">
+          <div class="hotline-name">
+            <i class="fas fa-plus"></i> Philippine Red Cross Romblon Chapter
+          </div>
+          <div class="hotline-number">0920-945-6135</div>
+          <div class="hotline-description">Emergency Medical Aid</div>
         </div>
-        <div class="hotline-number">999</div>
-        <div class="hotline-description">Police emergency services</div>
+        <div class="hotline-item" onclick="callEmergency('09496913906')">
+          <div class="hotline-name">
+            <i class="fas fa-hospital"></i> Rural Health Center LGU-Romblon
+          </div>
+          <div class="hotline-number">0949-691-3906</div>
+          <div class="hotline-description">Municipal Health Services</div>
+        </div>
+        <div class="hotline-item" onclick="callEmergency('0427527756')">
+          <div class="hotline-name">
+            <i class="fas fa-hospital"></i> Rural Health Center LGU-Romblon (Landline)
+          </div>
+          <div class="hotline-number">(042) 752-7756</div>
+          <div class="hotline-description">Health Center Landline</div>
+        </div>
+        <div class="hotline-item" onclick="callEmergency('09391369404')">
+          <div class="hotline-name">
+            <i class="fas fa-hospital-user"></i> Romblon District Hospital
+          </div>
+          <div class="hotline-number">0939-136-9404</div>
+          <div class="hotline-description">District Hospital Emergency</div>
+        </div>
       </div>
-    </div>
 
-    <div class="hotline-buttons">
-      <button onclick="closeHotlineModal()" class="hotline-btn hotline-btn-close">
-        <i class="fas fa-times"></i> Close
-      </button>
+      <!-- Coast Guard & Utilities -->
+      <div class="hotline-category">
+        <h3 class="hotline-category-title"><i class="fas fa-ship"></i> Coast Guard & Utilities</h3>
+        <div class="hotline-item" onclick="callEmergency('09301377821')">
+          <div class="hotline-name">
+            <i class="fas fa-ship"></i> Philippine Coast Guard Romblon Station
+          </div>
+          <div class="hotline-number">0930-137-7821</div>
+          <div class="hotline-description">Maritime Emergency Response</div>
+        </div>
+        <div class="hotline-item" onclick="callEmergency('09393706364')">
+          <div class="hotline-name">
+            <i class="fas fa-tint"></i> Romblon Water District
+          </div>
+          <div class="hotline-number">0939-370-6364</div>
+          <div class="hotline-description">Water Supply Emergency</div>
+        </div>
+        <div class="hotline-item" onclick="callEmergency('09107833956')">
+          <div class="hotline-name">
+            <i class="fas fa-bolt"></i> Romblon Electric Cooperative – ROMELCO
+          </div>
+          <div class="hotline-number">0910-783-3956</div>
+          <div class="hotline-description">Power Supply Emergency</div>
+        </div>
+      </div>
     </div>
   </div>
 </div>

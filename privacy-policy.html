@@ -157,23 +157,90 @@
 
   @media (max-width: 768px) {
     .container {
-      padding: 15px;
+      padding: 10px;
+      max-width: 100%;
+    }
+
+    .header {
+      margin-bottom: 20px;
+      padding-bottom: 10px;
     }
 
     .header h1 {
-      font-size: 1.8rem;
+      font-size: 1.5rem;
+    }
+
+    .header p {
+      font-size: 0.9rem;
     }
 
     .content-section {
-      padding: 20px;
+      padding: 15px;
+      margin-bottom: 15px;
+      border-radius: 12px;
+    }
+
+    .section-title {
+      font-size: 1.2rem;
+      margin-bottom: 15px;
+    }
+
+    .section-content p {
+      margin-bottom: 10px;
+      font-size: 0.95rem;
+    }
+
+    .section-content ul {
+      padding-left: 15px;
+      margin-bottom: 10px;
+    }
+
+    .section-content li {
+      margin-bottom: 5px;
+      padding-left: 5px;
+    }
+
+    .highlight-box {
+      padding: 15px;
+      margin: 15px 0;
     }
 
     .action-buttons {
       flex-direction: column;
+      gap: 10px;
+      margin-top: 30px;
     }
 
     .action-btn {
       width: 100%;
+      padding: 12px 20px;
+      font-size: 0.9rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .container {
+      padding: 8px;
+    }
+
+    .header h1 {
+      font-size: 1.3rem;
+    }
+
+    .content-section {
+      padding: 12px;
+    }
+
+    .section-title {
+      font-size: 1.1rem;
+    }
+
+    .section-content p {
+      font-size: 0.9rem;
+    }
+
+    .action-btn {
+      padding: 10px 15px;
     }
   }
 </style>
@@ -355,7 +422,7 @@
   <script>
     // Add Font Awesome
     const faScript = document.createElement('script');
-    faScript.src = 'https://kit.fontawesome.com/your-fontawesome-kit.js';
+    faScript.src = 'https://kit.fontawesome.com/a076d05399.js';
     faScript.crossOrigin = 'anonymous';
     document.head.appendChild(faScript);
   </script>

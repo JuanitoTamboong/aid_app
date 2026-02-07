@@ -1,7 +1,7 @@
 {
-  "appId": "com.example.app",
+  "appId": "com.AidTracker.app",
   "appName": "AidTracker",
-  "webDir": "www",
+  "webDir": ".",
   "plugins": {
     "App": {},
     "SplashScreen": {

@@ -26,7 +26,8 @@
       font-weight: 600;
       display: flex;
       align-items: center;
-      justify-content: space-between;
+      justify-content: center;
+      gap: 15px;
       border-bottom: 2px solid rgba(212, 175, 55, 0.5);
       box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
       position: sticky;
@@ -54,6 +55,18 @@
       background: #fcd34d;
       transform: translateY(-2px);
       box-shadow: 0 4px 12px rgba(252, 211, 77, 0.3);
+    }
+    #headerTitle {
+      flex: 1;
+      text-align: center;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    #headerTitle i {
+      margin-right: 8px;
+      color: #fbbf24;
+      font-size: 16px;
     }
 
     #map { height: calc(100vh - 70px); width: 100%; }
@@ -150,7 +163,6 @@
       <span>Back</span>
     </button>
     <span id="headerTitle"><i class="fas fa-map-marker-alt"></i> Report Location</span>
-    <div style="width: 60px;"></div>
   </div>
 
   <div id="loading">Loading report location...</div>

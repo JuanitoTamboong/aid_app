@@ -205,10 +205,11 @@ body {
   backdrop-filter: blur(10px);
 }
 span#headerTitle {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 16px;
+    flex: 1;
+      text-align: center;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
 }
 
 .back-btn {
