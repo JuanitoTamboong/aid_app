@@ -79,7 +79,7 @@ body {
   background-color: #0a1636;
 }
 
-/* FIXED: Button container for better mobile layout */
+/* FIXED: Button container for better mobile layout - HIDDEN WHEN CAMERA IS ACTIVE */
 .button-container {
   position: fixed;
   bottom: 20px;
@@ -91,6 +91,11 @@ body {
   padding: 0 15px;
   z-index: 1000;
   flex-wrap: wrap;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.button-container.hidden {
+  display: none !important;
 }
 
 .map-button {
@@ -369,22 +374,23 @@ body {
   display: none !important; 
 }
 
-/* Camera Overlay - FIXED: Proper centering */
+/* =================== FIXED: CAMERA OVERLAY - RESPONSIVE =================== */
 #cameraOverlay {
   display: none;
   position: fixed;
-  top: 0; 
+  top: 0;
   left: 0;
-  width: 100%; 
+  width: 100%;
   height: 100%;
-  background-color: rgba(10,22,54,0.98);
-  z-index: 3000;
+  background-color: rgba(10, 22, 54, 0.98);
+  z-index: 3001; /* Higher z-index than button container */
+  overflow: hidden;
 }
 
-.camera-wrapper {
+.camera-container {
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
   width: 100%;
   height: 100%;
@@ -392,34 +398,90 @@ body {
   box-sizing: border-box;
 }
 
+.camera-header {
+  text-align: center;
+  color: #fcd34d;
+  font-size: 1.2rem;
+  font-weight: 600;
+  text-shadow: 1px 1px 3px rgba(0,0,0,0.7);
+  margin-bottom: 10px;
+}
+
+.camera-viewport {
+  width: 100%;
+  max-width: 400px;
+  height: auto;
+  aspect-ratio: 4/3;
+  background: #000;
+  border-radius: 12px;
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  border: 3px solid #fcd34d;
+  margin: 10px auto;
+  flex-shrink: 0;
+}
+
 #cameraFeed {
   width: 100%;
-  max-width: 350px;
-  max-height: 60vh;
-  border-radius: 10px;
-  border: 2px solid #fcd34d;
-  background-color: #000;
+  height: 100%;
   object-fit: cover;
   display: block;
 }
 
 .camera-controls {
   display: flex;
+  flex-direction: column;
   gap: 15px;
-  margin-top: 20px;
-  flex-wrap: wrap;
-  justify-content: center;
   width: 100%;
-  max-width: 350px;
+  max-width: 400px;
+  flex-shrink: 0;
 }
 
-.camera-btn {
-  padding: 12px 25px;
-  border-radius: 8px;
+.camera-main-btn {
+  padding: 16px 20px;
+  border-radius: 50px;
   border: none;
   font-weight: bold;
   cursor: pointer;
-  min-width: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.capture-btn {
+  background: linear-gradient(to right, #fcd34d, #fbbf24);
+  color: #0a1636;
+  box-shadow: 0 4px 15px rgba(252, 211, 77, 0.3);
+}
+
+.capture-btn:hover {
+  background: linear-gradient(to right, #fbbf24, #f59e0b);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(252, 211, 77, 0.4);
+}
+
+.cancel-btn {
+  background: rgba(230, 57, 70, 0.9);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.cancel-btn:hover {
+  background: rgba(214, 40, 57, 1);
+  transform: translateY(-2px);
+}
+
+.camera-footer {
+  text-align: center;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.85rem;
+  padding: 10px 20px;
+  margin-top: 10px;
+  flex-shrink: 0;
 }
 
 /* Responsive */
@@ -464,8 +526,22 @@ body {
   }
   
   /* Camera adjustments for mobile */
-  #cameraFeed {
-    max-width: 300px;
+  .camera-viewport {
+    max-width: 90vw;
+    margin: 15px auto;
+  }
+  
+  .camera-controls {
+    max-width: 90vw;
+  }
+  
+  .camera-header {
+    font-size: 1.1rem;
+    top: 15px;
+  }
+  
+  .camera-footer {
+    bottom: 25px; /* More spacing for mobile */
   }
 }
 
@@ -474,34 +550,117 @@ body {
     bottom: 10px;
     padding: 0 10px;
   }
-  
+
   .map-button {
     padding: 12px 15px;
     font-size: 0.9rem;
   }
-  
+
+  .alert-overlay {
+    padding: 10px; /* Reduced padding for more space */
+  }
+
   .alert-box {
     padding: 15px;
     max-width: 95%;
+    max-height: 85vh; /* Limit height to prevent overflow */
+    overflow-y: auto; /* Allow scrolling if content is too tall */
   }
-  
+
   .alert-box h2 {
     font-size: 1.3rem;
   }
-  
+
   /* Adjust image preview for small screens */
   #capturedPreview {
     max-height: 180px !important;
   }
-  
+
   /* Camera adjustments for small screens */
-  #cameraFeed {
-    max-width: 280px;
-    max-height: 50vh;
+  .camera-viewport {
+    max-width: 95vw;
+    aspect-ratio: 3/4;
+    margin: 10px auto;
+  }
+
+  .camera-controls {
+    max-width: 95vw;
+    margin-top: 20px;
+  }
+
+  .camera-main-btn {
+    padding: 14px 18px;
+    font-size: 0.95rem;
+  }
+
+  .camera-header {
+    font-size: 1rem;
+    top: 10px;
+  }
+
+  .camera-footer {
+    bottom: 20px; /* Even more spacing for small screens */
+    font-size: 0.8rem;
+  }
+
+  /* Hide page title and header when camera is active on very small screens */
+  body.camera-active .page-title,
+  body.camera-active .header {
+    display: none !important;
+  }
+}
+
+/* Orientation-specific adjustments */
+@media (max-height: 600px) {
+  .camera-viewport {
+    max-height: 60vh;
+    margin: 10px auto;
   }
   
   .camera-controls {
-    max-width: 280px;
+    margin-top: 15px;
+  }
+  
+  .camera-header {
+    position: relative;
+    top: 0;
+    margin-bottom: 10px;
+  }
+  
+  .camera-footer {
+    bottom: 20px;
+    font-size: 0.8rem;
+  }
+}
+
+/* When camera is active, hide map controls */
+body.camera-active .button-container,
+body.camera-active .header,
+body.camera-active .page-title,
+body.camera-active #guestModeIndicator {
+  display: none !important;
+}
+
+/* For landscape mode on mobile */
+@media (max-width: 768px) and (orientation: landscape) {
+  .camera-viewport {
+    max-height: 70vh;
+    max-width: 80vw;
+    aspect-ratio: 16/9;
+  }
+  
+  .camera-controls {
+    flex-direction: row;
+    justify-content: center;
+    max-width: 80vw;
+  }
+  
+  .camera-main-btn {
+    min-width: 140px;
+  }
+  
+  .camera-footer {
+    bottom: 15px;
   }
 }
 </style>
@@ -527,8 +686,8 @@ body {
 
   <div id="map"></div>
 
-  <!-- FIXED: Button Container for better mobile layout -->
-  <div class="button-container">
+  <!-- FIXED: Button Container - Will be hidden when camera is active -->
+  <div class="button-container" id="mapButtons">
     <button id="reportBtn" class="map-button" onclick="openReportForm()">
       <i class="fas fa-exclamation-triangle"></i> Report Emergency
     </button>
@@ -626,17 +785,28 @@ body {
     </div>
   </div>
 
-  <!-- Camera - FIXED: Proper centering -->
+  <!-- =================== FIXED: CAMERA OVERLAY - RESPONSIVE =================== -->
   <div id="cameraOverlay">
-    <div class="camera-wrapper">
-      <video id="cameraFeed" autoplay playsinline></video>
+    <div class="camera-container">
+      <div class="camera-header">
+        <i class="fas fa-camera"></i> Camera
+      </div>
+      
+      <div class="camera-viewport">
+        <video id="cameraFeed" autoplay playsinline></video>
+      </div>
+      
       <div class="camera-controls">
-        <button id="captureBtn" class="camera-btn" style="background:#fcd34d;color:#0a1636;">
-          <i class="fas fa-camera"></i> Capture
+        <button id="captureBtn" class="camera-main-btn capture-btn">
+          <i class="fas fa-camera"></i> Capture Photo
         </button>
-        <button id="closeCameraBtn" class="camera-btn" style="background:#e63946;color:white;">
+        <button id="closeCameraBtn" class="camera-main-btn cancel-btn">
           <i class="fas fa-times"></i> Cancel
         </button>
+      </div>
+      
+      <div class="camera-footer">
+        Tap "Capture Photo" to take a picture
       </div>
     </div>
   </div>
@@ -824,10 +994,12 @@ body {
     let pinpointMarker = null;        // Marker for pinpointed location
     let capturedBase64 = null;
     let cameraStream = null;
+    let mapButtons = null;
 
     // Initialize when DOM loads
     document.addEventListener('DOMContentLoaded', function() {
       initializeMap();
+      mapButtons = document.getElementById('mapButtons');
 
       // Show/hide guest mode indicator
       const isGuestMode = localStorage.getItem('isGuestMode') === 'true';
@@ -1066,34 +1238,76 @@ body {
       document.querySelectorAll(".alert-overlay").forEach(x => x.classList.add("hidden"));
     }
 
-    /* ============================ CAMERA FUNCTIONS ============================= */
+    /* =================== FIXED: CAMERA FUNCTIONS - RESPONSIVE =================== */
     const cameraOverlay = document.getElementById("cameraOverlay");
     const cameraVideo = document.getElementById("cameraFeed");
     const capturedPreview = document.getElementById("capturedPreview");
 
     async function openCamera() {
+      // Hide all overlays and map buttons
       hideAll();
+      if (mapButtons) {
+        mapButtons.classList.add('hidden');
+      }
+      
+      // Add camera-active class to body
+      document.body.classList.add('camera-active');
+      
+      // Show camera overlay
       cameraOverlay.style.display = "block";
 
       try {
-        cameraStream = await navigator.mediaDevices.getUserMedia({ 
-          video: { 
-            facingMode: 'environment',
+        // Try to use rear camera (environment) first, fall back to any camera
+        const constraints = {
+          video: {
+            facingMode: { ideal: 'environment' },
             width: { ideal: 1280 },
             height: { ideal: 720 }
-          } 
-        });
+          }
+        };
+
+        cameraStream = await navigator.mediaDevices.getUserMedia(constraints);
         cameraVideo.srcObject = cameraStream;
         
         // Wait for video to be ready
-        cameraVideo.onloadedmetadata = () => {
-          console.log("Camera ready, video dimensions:", cameraVideo.videoWidth, "x", cameraVideo.videoHeight);
-        };
+        return new Promise((resolve) => {
+          cameraVideo.onloadedmetadata = () => {
+            console.log("Camera ready, video dimensions:", cameraVideo.videoWidth, "x", cameraVideo.videoHeight);
+            
+            // Force a small delay for proper rendering
+            setTimeout(() => {
+              // Fix for mobile Safari/WebKit browsers
+              cameraVideo.play()
+                .then(() => {
+                  console.log("Camera video playing successfully");
+                  resolve(true);
+                })
+                .catch(err => {
+                  console.warn("Video play failed, but camera should work:", err);
+                  resolve(true);
+                });
+            }, 300);
+          };
+        });
       } catch (error) {
         console.error("Camera error:", error);
-        alert("Unable to access camera. Please check permissions.");
-        cameraOverlay.style.display = "none";
-        reportPopup.classList.remove("hidden");
+        
+        // Try again with less restrictive constraints
+        try {
+          console.log("Trying with simpler camera constraints...");
+          cameraStream = await navigator.mediaDevices.getUserMedia({ 
+            video: true 
+          });
+          cameraVideo.srcObject = cameraStream;
+          
+          cameraVideo.onloadedmetadata = () => {
+            cameraVideo.play().catch(e => console.warn("Play warning:", e));
+          };
+        } catch (secondError) {
+          console.error("Second camera attempt failed:", secondError);
+          alert("Unable to access camera. Please check camera permissions in your browser settings.");
+          closeCamera(); // Use closeCamera to properly restore UI
+        }
       }
     }
 
@@ -1105,9 +1319,9 @@ body {
 
       const canvas = document.createElement("canvas");
       
-      // Set maximum dimensions
-      const MAX_WIDTH = 800;
-      const MAX_HEIGHT = 600;
+      // Set maximum dimensions for the captured image
+      const MAX_WIDTH = 1200;
+      const MAX_HEIGHT = 900;
       
       let width = cameraVideo.videoWidth;
       let height = cameraVideo.videoHeight;
@@ -1115,12 +1329,12 @@ body {
       // Calculate new dimensions maintaining aspect ratio
       if (width > height) {
         if (width > MAX_WIDTH) {
-          height = height * (MAX_WIDTH / width);
+          height = Math.round(height * (MAX_WIDTH / width));
           width = MAX_WIDTH;
         }
       } else {
         if (height > MAX_HEIGHT) {
-          width = width * (MAX_HEIGHT / height);
+          width = Math.round(width * (MAX_HEIGHT / height));
           height = MAX_HEIGHT;
         }
       }
@@ -1132,11 +1346,12 @@ body {
       const ctx = canvas.getContext("2d");
       ctx.drawImage(cameraVideo, 0, 0, width, height);
       
-      // Reduce image quality to save bandwidth
-      capturedBase64 = canvas.toDataURL("image/jpeg", 0.7);
+      // Reduce image quality to save bandwidth (80% quality for good balance)
+      capturedBase64 = canvas.toDataURL("image/jpeg", 0.8);
 
+      // Close camera and restore UI
       stopCamera();
-      cameraOverlay.style.display = "none";
+      closeCamera();
       
       if (capturedPreview) {
         capturedPreview.src = capturedBase64;
@@ -1156,19 +1371,36 @@ body {
         fileInput.value = '';
       }
 
+      // Show report form again
       reportPopup.classList.remove("hidden");
     }
 
     function closeCamera() {
+      // Stop camera
       stopCamera();
+      
+      // Hide camera overlay
       cameraOverlay.style.display = "none";
+      
+      // Remove camera-active class from body
+      document.body.classList.remove('camera-active');
+      
+      // Restore map buttons
+      if (mapButtons) {
+        mapButtons.classList.remove('hidden');
+      }
+      
+      // Show report form again
       reportPopup.classList.remove("hidden");
     }
 
     function stopCamera() {
       if (cameraStream) {
-        cameraStream.getTracks().forEach(track => track.stop());
+        cameraStream.getTracks().forEach(track => {
+          track.stop();
+        });
         cameraStream = null;
+        cameraVideo.srcObject = null;
       }
     }
 
