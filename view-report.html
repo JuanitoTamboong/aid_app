@@ -594,12 +594,12 @@
           
           popupContent += `
             <div style="margin-top: 12px;">
-              <img src="${escapedPhotoUrl}" 
-                   class="popup-img" 
-                   alt="Report photo"
-                   onclick="window.open('${escapedPhotoUrl}', '_blank')"
-                   title="Click to view full size"
-                   onerror="this.style.display='none'; this.parentElement.innerHTML='<p style=\"color:#6b7280;font-size:12px;\">(Image unavailable or failed to load)</p>';">
+      <img src="${escapedPhotoUrl}"
+           class="popup-img"
+           alt="Report photo"
+           crossorigin="anonymous"
+           onclick="window.open('${escapedPhotoUrl}', '_blank')"
+           title="Click to view full size">
               <p style="color: #6b7280; font-size: 11px; margin-top: 4px;">
                 Click image to view full size
               </p>

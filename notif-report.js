@@ -7,7 +7,7 @@ let supabase = null;
 // Initialize Supabase client
 try {
     const supabaseUrl = 'https://gwvepxupoxyyydnisulb.supabase.co';
-    const supabaseKey = 'sb_publishable_4baWNqraxymp0Gal3OKhxQ_Bl-IHHdt';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd3dmVweHVwb3h5eXlkbmlzdWxiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ4MDE4ODcsImV4cCI6MjA4MDM3Nzg4N30.Ku9SXTAKNMvHilgEpxj5HcVA-0TPt4ziuEq0Irao5Qc';
 
     // Check if URL and key are valid
     if (!supabaseUrl || !supabaseKey) {
@@ -18,11 +18,6 @@ try {
     supabase = createClient(supabaseUrl, supabaseKey, {
         auth: {
             persistSession: false
-        },
-        global: {
-            headers: {
-                'Content-Type': 'application/json'
-            }
         }
     });
 
@@ -71,33 +66,86 @@ export async function saveReportToSupabase(report, base64Image) {
     try {
       console.log("Processing image...");
       
-      // Generate unique filename
-      const timestamp = Date.now();
-      const randomStr = Math.random().toString(36).substring(2, 15);
-      const fileName = `report-${timestamp}-${randomStr}.jpg`;
-      
       // Convert base64 to blob
       let imageBlob;
-      
+      let contentType = 'image/jpeg';
+
+        // Handle data URL format to get content type and base64 data
+        let base64Data;
+        if (base64Image.includes(',')) {
+          const parts = base64Image.split(',');
+          const mimeMatch = parts[0].match(/data:([^;]+)/);
+          if (mimeMatch) {
+            contentType = mimeMatch[1];
+          }
+          base64Data = parts[1];
+        } else {
+          base64Data = base64Image;
+        }
+
+        // Ensure content type is a valid image type
+        if (!contentType.startsWith('image/')) {
+          contentType = 'image/jpeg';
+        }
+
+      // Generate unique filename with proper extension based on content type
+      const timestamp = Date.now();
+      const randomStr = Math.random().toString(36).substring(2, 15);
+      let extension = 'jpg';
+      if (contentType.includes('png')) extension = 'png';
+      else if (contentType.includes('gif')) extension = 'gif';
+      else if (contentType.includes('webp')) extension = 'webp';
+      const fileName = `report-${timestamp}-${randomStr}.${extension}`;
+
       try {
-        // Remove data URL prefix if present
-        const base64Data = base64Image.includes(',') 
-            ? base64Image.split(',')[1] 
-            : base64Image;
-        
+
+        // Clean the base64 data - remove any whitespace
+        base64Data = base64Data.replace(/\s/g, '');
+
+        // Validate base64 format
+        if (!/^[A-Za-z0-9+/]*={0,2}$/.test(base64Data)) {
+          throw new Error("Invalid base64 data format");
+        }
+
         // Decode base64
         const byteCharacters = atob(base64Data);
         const byteNumbers = new Array(byteCharacters.length);
-        
+
         for (let i = 0; i < byteCharacters.length; i++) {
           byteNumbers[i] = byteCharacters.charCodeAt(i);
         }
-        
+
         const byteArray = new Uint8Array(byteNumbers);
-        imageBlob = new Blob([byteArray], { type: 'image/jpeg' });
-        
-        console.log(`Image blob created: ${imageBlob.size} bytes`);
-        
+        imageBlob = new Blob([byteArray], { type: contentType });
+
+        console.log(`Image blob created: ${imageBlob.size} bytes, type: ${contentType}`);
+
+        // Validate blob size (should be reasonable for an image)
+        if (imageBlob.size > 10 * 1024 * 1024) { // 10MB limit
+          throw new Error("Image file is too large. Please use a smaller image.");
+        }
+
+        if (imageBlob.size < 1000) { // Less than 1KB is suspicious
+          throw new Error("Image data appears to be corrupted. Please try again.");
+        }
+
+        // Additional validation: check if it looks like image data
+        const firstBytes = byteArray.slice(0, 4);
+        const isValidImage = (
+          // JPEG: FF D8 FF
+          (firstBytes[0] === 0xFF && firstBytes[1] === 0xD8 && firstBytes[2] === 0xFF) ||
+          // PNG: 89 50 4E 47
+          (firstBytes[0] === 0x89 && firstBytes[1] === 0x50 && firstBytes[2] === 0x4E && firstBytes[3] === 0x47) ||
+          // GIF: 47 49 46
+          (firstBytes[0] === 0x47 && firstBytes[1] === 0x49 && firstBytes[2] === 0x46) ||
+          // WebP: 52 49 46 46
+          (firstBytes[0] === 0x52 && firstBytes[1] === 0x49 && firstBytes[2] === 0x46 && firstBytes[3] === 0x46)
+        );
+
+        if (!isValidImage) {
+          console.warn("Blob doesn't appear to be a valid image format, but proceeding anyway");
+        }
+
       } catch (blobError) {
         console.error("Error converting base64 to blob:", blobError);
         throw new Error("Failed to process image. Please try again with a different image.");
@@ -112,7 +160,7 @@ export async function saveReportToSupabase(report, base64Image) {
         .upload(fileName, imageBlob, {
           cacheControl: '3600',
           upsert: false,
-          contentType: 'image/jpeg'
+          contentType: contentType
         });
 
       if (uploadError) {
