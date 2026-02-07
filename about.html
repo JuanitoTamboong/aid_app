@@ -7,7 +7,7 @@
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!--logo-->
-<link rel="website icon" href="assets/aid-tracker-logo.png">
+    <link rel="website icon" href="assets/aid-tracker-logo.png">
     <style>
         * {
             margin: 0;
@@ -22,26 +22,14 @@
             line-height: 1.6;
             min-height: 100vh;
             padding: 20px;
-        }
-
-        /* Container */
-        .about-container {
-            max-width: 900px;
-            margin: 0 auto;
-            background: linear-gradient(145deg, rgba(20, 35, 80, 0.95), rgba(10, 22, 54, 0.95));
-            border-radius: 20px;
-            padding: 40px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
-            border: 1px solid rgba(252, 211, 77, 0.3);
-            backdrop-filter: blur(10px);
             position: relative;
-            overflow: hidden;
+            overflow-x: hidden;
         }
 
         /* Decorative elements */
-        .about-container::before {
+        body::before {
             content: '';
-            position: absolute;
+            position: fixed;
             top: -50%;
             right: -50%;
             width: 200px;
@@ -50,15 +38,23 @@
             z-index: 0;
         }
 
-        .about-container::after {
+        body::after {
             content: '';
-            position: absolute;
+            position: fixed;
             bottom: -30%;
             left: -30%;
             width: 150px;
             height: 150px;
             background: radial-gradient(circle, rgba(59, 130, 246, 0.1) 0%, transparent 70%);
             z-index: 0;
+        }
+
+        /* Main content area */
+        .about-content {
+            max-width: 900px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
         }
 
         /* Header */
@@ -108,14 +104,15 @@
 
         /* Content Sections */
         .intro-section {
-            background: rgba(30, 45, 90, 0.5);
-            border-radius: 15px;
-            padding: 25px;
+            background: linear-gradient(145deg, rgba(20, 35, 80, 0.95), rgba(10, 22, 54, 0.95));
+            border-radius: 20px;
+            padding: 30px;
             margin-bottom: 30px;
-            border: 1px solid rgba(252, 211, 77, 0.2);
+            border: 1px solid rgba(252, 211, 77, 0.3);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
             position: relative;
             z-index: 1;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
         }
 
         .intro-text {
@@ -129,11 +126,44 @@
             font-weight: 600;
         }
 
+        /* Mission Statement */
+        .mission-section {
+            background: linear-gradient(145deg, rgba(20, 35, 80, 0.95), rgba(10, 22, 54, 0.95));
+            border-radius: 20px;
+            padding: 30px;
+            margin: 30px 0;
+            border: 1px solid rgba(252, 211, 77, 0.3);
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            position: relative;
+            z-index: 1;
+        }
+
+        .mission-icon {
+            font-size: 2.5rem;
+            color: #fcd34d;
+            margin-bottom: 20px;
+            display: inline-block;
+            background: rgba(252, 211, 77, 0.1);
+            width: 70px;
+            height: 70px;
+            line-height: 70px;
+            border-radius: 50%;
+        }
+
+        .mission-text {
+            font-size: 1.2rem;
+            font-style: italic;
+            color: #f8fafc;
+            line-height: 1.7;
+        }
+
         /* Benefits Section */
         .benefits-title {
-            font-size: 1.5rem;
+            font-size: 1.8rem;
             color: #fcd34d;
-            margin-bottom: 25px;
+            margin-bottom: 30px;
             text-align: center;
             font-weight: 600;
             position: relative;
@@ -143,76 +173,76 @@
         .benefits-title::after {
             content: '';
             display: block;
-            width: 60px;
-            height: 3px;
+            width: 80px;
+            height: 4px;
             background: #fcd34d;
-            margin: 8px auto 0;
-            border-radius: 3px;
+            margin: 12px auto 0;
+            border-radius: 4px;
         }
 
         .benefits-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
+            gap: 25px;
             margin-bottom: 40px;
             position: relative;
             z-index: 1;
         }
 
         .benefit-card {
-            background: rgba(30, 45, 90, 0.6);
-            border-radius: 12px;
+            background: linear-gradient(145deg, rgba(20, 35, 80, 0.95), rgba(10, 22, 54, 0.95));
+            border-radius: 20px;
             padding: 25px;
-            border: 1px solid rgba(252, 211, 77, 0.2);
+            border: 1px solid rgba(252, 211, 77, 0.3);
             transition: all 0.3s ease;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            position: relative;
+            z-index: 1;
         }
 
         .benefit-card:hover {
             transform: translateY(-5px);
-            border-color: rgba(252, 211, 77, 0.4);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-            background: rgba(40, 55, 100, 0.6);
+            border-color: rgba(252, 211, 77, 0.5);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
         }
 
         .benefit-icon {
             font-size: 1.8rem;
             color: #fcd34d;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
             display: inline-block;
             background: rgba(252, 211, 77, 0.1);
-            width: 50px;
-            height: 50px;
-            line-height: 50px;
+            width: 60px;
+            height: 60px;
+            line-height: 60px;
             text-align: center;
-            border-radius: 10px;
+            border-radius: 12px;
         }
 
         .benefit-title {
-            font-size: 1.2rem;
+            font-size: 1.3rem;
             font-weight: 600;
             color: #fcd34d;
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
+            margin-bottom: 15px;
         }
 
         .benefit-desc {
-            font-size: 0.95rem;
+            font-size: 1rem;
             color: #cbd5e1;
             line-height: 1.6;
+            margin-bottom: 15px;
         }
 
         .benefit-list {
-            margin-top: 10px;
+            margin-top: 15px;
             padding-left: 20px;
         }
 
         .benefit-list li {
-            margin-bottom: 6px;
+            margin-bottom: 8px;
             color: #e2e8f0;
-            font-size: 0.9rem;
+            font-size: 0.95rem;
             position: relative;
         }
 
@@ -228,7 +258,7 @@
         /* Return Button */
         .return-section {
             text-align: center;
-            margin-top: 40px;
+            margin-top: 50px;
             position: relative;
             z-index: 1;
         }
@@ -237,47 +267,22 @@
             background: linear-gradient(to right, #fcd34d, #fbbf24);
             color: #0a1636;
             border: none;
-            border-radius: 10px;
-            padding: 14px 32px;
-            font-size: 1rem;
+            border-radius: 12px;
+            padding: 16px 36px;
+            font-size: 1.1rem;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
             display: inline-flex;
             align-items: center;
-            gap: 10px;
-            box-shadow: 0 4px 15px rgba(251, 191, 36, 0.2);
+            gap: 12px;
+            box-shadow: 0 6px 20px rgba(251, 191, 36, 0.2);
         }
 
         .return-btn:hover {
             background: linear-gradient(to right, #fbbf24, #f59e0b);
             transform: translateY(-3px);
-            box-shadow: 0 6px 20px rgba(251, 191, 36, 0.3);
-        }
-
-        /* Mission Statement */
-        .mission-section {
-            background: rgba(252, 211, 77, 0.1);
-            border-radius: 15px;
-            padding: 25px;
-            margin: 30px 0;
-            border: 1px solid rgba(252, 211, 77, 0.3);
-            text-align: center;
-            position: relative;
-            z-index: 1;
-        }
-
-        .mission-icon {
-            font-size: 2rem;
-            color: #fcd34d;
-            margin-bottom: 15px;
-        }
-
-        .mission-text {
-            font-size: 1.1rem;
-            font-style: italic;
-            color: #f8fafc;
-            line-height: 1.7;
+            box-shadow: 0 10px 25px rgba(251, 191, 36, 0.3);
         }
 
         /* Responsive */
@@ -286,50 +291,149 @@
                 padding: 15px;
             }
             
-            .about-container {
-                padding: 25px;
-            }
-            
             .about-header h1 {
                 font-size: 1.8rem;
             }
             
             .header-icon {
-                width: 60px;
-                height: 60px;
-                line-height: 60px;
-                font-size: 2.5rem;
+                width: 70px;
+                height: 70px;
+                line-height: 70px;
+                font-size: 2.8rem;
             }
             
             .benefits-grid {
                 grid-template-columns: 1fr;
+                gap: 20px;
             }
             
             .benefit-card {
-                padding: 20px;
+                padding: 22px;
             }
             
-            .intro-section {
-                padding: 20px;
+            .intro-section, .mission-section {
+                padding: 25px;
+                margin-bottom: 25px;
+            }
+            
+            .mission-icon {
+                width: 65px;
+                height: 65px;
+                line-height: 65px;
+                font-size: 2.2rem;
+            }
+            
+            .mission-text {
+                font-size: 1.1rem;
+            }
+            
+            .benefits-title {
+                font-size: 1.6rem;
+                margin-bottom: 25px;
+            }
+            
+            .benefit-title {
+                font-size: 1.2rem;
+            }
+            
+            .benefit-desc {
+                font-size: 0.95rem;
+            }
+            
+            .return-btn {
+                padding: 14px 30px;
+                font-size: 1rem;
             }
         }
 
         @media (max-width: 480px) {
-            .about-container {
-                padding: 20px;
+            body {
+                padding: 12px;
             }
             
             .about-header h1 {
                 font-size: 1.6rem;
             }
             
+            .header-icon {
+                width: 65px;
+                height: 65px;
+                line-height: 65px;
+                font-size: 2.5rem;
+            }
+            
+            .about-header .tagline {
+                font-size: 1rem;
+            }
+            
+            .benefit-card {
+                padding: 20px;
+            }
+            
+            .intro-section, .mission-section {
+                padding: 20px;
+                margin-bottom: 20px;
+            }
+            
+            .mission-icon {
+                width: 60px;
+                height: 60px;
+                line-height: 60px;
+                font-size: 2rem;
+            }
+            
+            .benefits-title {
+                font-size: 1.4rem;
+                margin-bottom: 20px;
+            }
+            
+            .benefits-title::after {
+                width: 60px;
+                height: 3px;
+                margin: 10px auto 0;
+            }
+            
             .benefit-title {
                 font-size: 1.1rem;
+            }
+            
+            .benefit-desc {
+                font-size: 0.9rem;
+            }
+            
+            .benefit-list li {
+                font-size: 0.9rem;
             }
             
             .return-btn {
                 width: 100%;
                 justify-content: center;
+                padding: 16px;
+            }
+        }
+
+        @media (max-width: 360px) {
+            body {
+                padding: 10px;
+            }
+            
+            .about-header h1 {
+                font-size: 1.5rem;
+            }
+            
+            .header-icon {
+                width: 60px;
+                height: 60px;
+                line-height: 60px;
+                font-size: 2.2rem;
+            }
+            
+            .intro-section, .mission-section, .benefit-card {
+                padding: 18px;
+            }
+            
+            .mission-text {
+                font-size: 1rem;
             }
         }
 
@@ -353,7 +457,8 @@
     </style>
 </head>
 <body>
-    <div class="about-container">
+    <!-- Main content area -->
+    <div class="about-content">
         <!-- Header -->
         <div class="about-header">
             <div class="header-icon">
