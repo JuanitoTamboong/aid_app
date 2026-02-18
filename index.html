@@ -46,7 +46,7 @@
     cursor: pointer;
     z-index: 1001;
     background: rgba(10, 22, 54, 0.9);
-    border: 1px solid rgba(252, 211, 77, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.3);
     border-radius: 50%;
     width: 50px;
     height: 50px;
@@ -57,7 +57,7 @@
   }
   .notification:hover {
     background: rgba(20, 35, 80, 0.95);
-    border-color: #fcd34d;
+    border-color: #ffffff;
     transform: scale(1.1);
   }
   
@@ -80,49 +80,53 @@
     50% { transform: scale(1.2); }
   }
 
-  /* Gradient Background */
+  /* Gradient Background - Using theme colors */
   body {
-    background: linear-gradient(135deg, #0a1636 70%, #1a2c5a 30%);
-    color: #f8fafc;
+    background-color: #0A0C10;
+    background: linear-gradient(135deg, #0A0C10 0%, #111827 100%);
+    color: #F3F4F6;
     min-height: 100vh;
     font-weight: 400;
     line-height: 1.6;
   }
 
-  /* Card styling */
+  /* Card styling - Using theme colors */
   .card {
-    background: rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(212, 175, 55, 0.5);
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-    transition: transform 0.2s, box-shadow 0.2s;
+    background: #111827;
+    border: 1px solid rgba(74, 222, 128, 0.15);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
     backdrop-filter: blur(10px);
     border-radius: 16px;
   }
   .card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 8px 25px rgba(212, 175, 55, 0.3);
-    background: rgba(255, 255, 255, 0.12);
+    box-shadow: 0 16px 48px rgba(74, 222, 128, 0.2);
+    background: rgba(22, 30, 40, 0.95);
+    border-color: rgba(74, 222, 128, 0.3);
   }
 
   .btn {
-    background: linear-gradient(135deg, #fcd34d 0%, #fbbf24 100%);
-    color: #0a1636;
+    background: linear-gradient(135deg, #1E293B, #0F172A);
+    color: #F3F4F6;
     font-weight: 600;
     transition: all 0.3s ease;
-    border: none;
+    border: 1px solid rgba(74, 222, 128, 0.15);
     border-radius: 12px;
     padding: 12px 24px;
     font-size: 1rem;
     letter-spacing: 0.3px;
   }
   .btn:hover {
-    background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+    background: linear-gradient(135deg, #2D3B55, #1E293B);
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(251, 191, 36, 0.4);
+    box-shadow: 0 16px 48px rgba(74, 222, 128, 0.2);
+    border-color: #4ADE80;
+    color: #4ADE80;
   }
 
   a:hover {
-    color: #f2cb61;
+    color: #4ADE80;
   }
 
   /* Mobile Menu Fixes */
@@ -151,16 +155,16 @@
     text-decoration: none;
     font-size: 1.1rem;
     font-weight: 500;
-    border-bottom: 1px solid rgba(252, 211, 77, 0.2);
+border-bottom: 1px solid rgba(74, 222, 128, 0.2);
     transition: all 0.3s ease;
     letter-spacing: 0.3px;
   }
 
   .mobile-menu-item:hover {
-    background: rgba(252, 211, 77, 0.15);
-    color: #fcd34d;
+    background: rgba(74, 222, 128, 0.15);
+    color: #4ADE80;
     padding-left: 30px;
-    border-left: 4px solid #fcd34d;
+    border-left: 4px solid #4ADE80;
   }
 
   .mobile-menu-item i {
@@ -193,7 +197,7 @@
     left: 15px;
     z-index: 2001;
     background: rgba(10, 22, 54, 0.9);
-    border: 1px solid rgba(252, 211, 77, 0.3);
+    border: 1px solid rgba(74, 222, 128, 0.3);
     border-radius: 12px;
     width: 50px;
     height: 50px;
@@ -207,14 +211,14 @@
 
   .hamburger:hover {
     background: rgba(20, 35, 80, 0.95);
-    border-color: #fcd34d;
+    border-color: #4ADE80;
     transform: scale(1.05);
   }
 
   .hamburger-line {
     width: 24px;
     height: 2px;
-    background: #fcd34d;
+background: #4ADE80;
     margin: 4px 0;
     transition: all 0.3s ease;
     border-radius: 2px;
@@ -238,7 +242,7 @@
     top: 20px;
     right: 90px;
     background: linear-gradient(145deg, rgba(30, 45, 90, 0.97), rgba(20, 35, 80, 0.97));
-    border: 1px solid rgba(252, 211, 77, 0.3);
+    border: 1px solid rgba(74, 222, 128, 0.3);
     border-radius: 14px;
     padding: 18px 22px;
     width: 320px;
@@ -247,7 +251,7 @@
     backdrop-filter: blur(20px);
     transform: translateX(400px);
     animation: slideIn 0.5s ease forwards;
-    border-left: 4px solid #fcd34d;
+    border-left: 4px solid #4ADE80;
     font-size: 0.95rem;
   }
 
@@ -276,7 +280,7 @@
 
   .toast-title {
     font-weight: 600;
-    color: #fcd34d;
+    color: #4ADE80;
     font-size: 1.05rem;
     display: flex;
     align-items: center;
@@ -385,11 +389,11 @@
     text-align: center;
     width: 100%;
     max-width: 500px;
-    border: 2px solid rgba(252, 211, 77, 0.8);
+    border: 2px solid rgba(74, 222, 128, 0.8);
     box-shadow:
       0 25px 60px rgba(0, 0, 0, 0.7),
       0 0 0 1px rgba(255, 255, 255, 0.1) inset,
-      0 0 40px rgba(252, 211, 77, 0.25);
+      0 0 40px rgba(74, 222, 128, 0.25);
     animation: slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     backdrop-filter: blur(15px);
     position: relative;
@@ -424,7 +428,7 @@
   }
 
   .emergency-type-icon {
-    background: linear-gradient(135deg, #fcd34d, #fbbf24);
+    background: linear-gradient(135deg, #4ADE80, #4ADE80);
     width: 70px;
     height: 70px;
     border-radius: 50%;
@@ -434,13 +438,13 @@
     font-size: 32px;
     color: #0a1636;
     margin: 0 auto 20px;
-    box-shadow: 0 10px 25px rgba(252, 211, 77, 0.5);
+    box-shadow: 0 10px 25px rgba(74, 222, 128, 0.5);
     border: 3px solid rgba(255, 255, 255, 0.2);
     animation: pulseIcon 2s infinite;
   }
 
   .emergency-type-title {
-    color: #fcd34d;
+    color: #4ADE80;
     font-size: 1.8rem;
     font-weight: 700;
     margin-bottom: 10px;
@@ -464,7 +468,7 @@
 
   .emergency-type-btn {
     background: rgba(255, 255, 255, 0.08);
-    border: 2px solid rgba(252, 211, 77, 0.3);
+    border: 2px solid rgba(74, 222, 128, 0.3);
     border-radius: 16px;
     padding: 20px;
     cursor: pointer;
@@ -477,14 +481,14 @@
   }
 
   .emergency-type-btn:hover {
-    background: rgba(252, 211, 77, 0.15);
-    border-color: #fcd34d;
+    background: rgba(74, 222, 128, 0.15);
+    border-color: #4ADE80;
     transform: translateY(-3px);
-    box-shadow: 0 8px 25px rgba(252, 211, 77, 0.3);
+    box-shadow: 0 8px 25px rgba(74, 222, 128, 0.3);
   }
 
   .emergency-type-icon-small {
-    background: linear-gradient(135deg, #fcd34d, #fbbf24);
+    background: linear-gradient(135deg, #4ADE80, #4ADE80);
     width: 50px;
     height: 50px;
     border-radius: 50%;
@@ -494,7 +498,7 @@
     font-size: 20px;
     color: #0a1636;
     flex-shrink: 0;
-    box-shadow: 0 4px 12px rgba(252, 211, 77, 0.4);
+    box-shadow: 0 4px 12px rgba(74, 222, 128, 0.4);
   }
 
   .emergency-type-info {
@@ -502,7 +506,7 @@
   }
 
   .emergency-type-name {
-    color: #fcd34d;
+    color: #4ADE80;
     font-size: 1.1rem;
     font-weight: 600;
     margin-bottom: 4px;
@@ -661,7 +665,7 @@
     left: 25%;
     right: 25%;
     height: 3px;
-    background: linear-gradient(90deg, transparent, #fcd34d, transparent);
+    background: linear-gradient(90deg, transparent, #4ADE80, transparent);
   }
 
   .legal-icon {
@@ -790,7 +794,7 @@
     left: 0;
     right: 0;
     height: 2px;
-    background: linear-gradient(90deg, transparent, #fcd34d, transparent);
+    background: linear-gradient(90deg, transparent, #4ADE80, transparent);
   }
 
   .legal-checkbox-container:focus-within {
@@ -1010,7 +1014,7 @@
     left: 25%;
     right: 25%;
     height: 3px;
-    background: linear-gradient(90deg, transparent, #fcd34d, transparent);
+    background: linear-gradient(90deg, transparent, #4ADE80, transparent);
   }
 
   .privacy-icon {
@@ -1055,7 +1059,7 @@
   }
 
   .privacy-section h3 {
-    color: #fcd34d;
+    color: #4ADE80;
     font-size: 1.2rem;
     margin-bottom: 12px;
     font-weight: 600;
@@ -1406,8 +1410,8 @@
     width: 80px;
     height: 80px;
     border-radius: 50%;
-    border: 3px solid #fcd34d;
-    box-shadow: 0 4px 15px rgba(252, 211, 77, 0.3);
+    border: 3px solid #4ADE80;
+    box-shadow: 0 4px 15px rgba(74, 222, 128, 0.3);
   }
 
   /* Close button in top-right corner */
@@ -1482,7 +1486,7 @@
   }
 
   .hotline-category-title {
-    color: #fcd34d;
+    color: #4ADE80;
     font-size: 1.1rem;
     font-weight: 600;
     margin-bottom: 10px;
@@ -1491,7 +1495,7 @@
     justify-content: center;
     gap: 8px;
     padding: 8px 0;
-    border-bottom: 1px solid rgba(252, 211, 77, 0.3);
+    border-bottom: 1px solid rgba(74, 222, 128, 0.3);
   }
 
   .hotline-category-title i {
@@ -1500,7 +1504,7 @@
 
   .hotline-item {
     background: rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(252, 211, 77, 0.3);
+    border: 1px solid rgba(74, 222, 128, 0.3);
     border-radius: 10px;
     padding: 15px;
     transition: all 0.3s ease;
@@ -1509,10 +1513,10 @@
   }
 
   .hotline-item:hover {
-    background: rgba(252, 211, 77, 0.15);
+    background: rgba(74, 222, 128, 0.15);
     transform: translateY(-2px);
-    border-color: #fcd34d;
-    box-shadow: 0 4px 15px rgba(252, 211, 77, 0.2);
+    border-color: #4ADE80;
+    box-shadow: 0 4px 15px rgba(74, 222, 128, 0.2);
   }
 
   .hotline-item:active {
@@ -1521,7 +1525,7 @@
   }
 
   .hotline-name {
-    color: #fcd34d;
+    color: #4ADE80;
     font-size: 1rem;
     font-weight: 600;
     margin-bottom: 6px;
@@ -1773,16 +1777,16 @@
   <!-- Desktop Links -->
   <div class="hidden md:flex items-center justify-between p-6 bg-opacity-10 backdrop-blur-md">
     <div class="flex items-center space-x-4">
-      <a href="account.html" class="text-yellow-300 hover:text-white px-4 py-2 rounded-lg transition-colors duration-200 bg-white/5 hover:bg-white/10 flex items-center gap-2">
+<a href="account.html" class="text-green-400 hover:text-white px-4 py-2 rounded-lg transition-colors duration-200 bg-white/5 hover:bg-white/10 flex items-center gap-2">
         <i class="fas fa-user"></i> Account
       </a>
-      <a href="about.html" class="text-yellow-300 hover:text-white px-4 py-2 rounded-lg transition-colors duration-200 bg-white/5 hover:bg-white/10 flex items-center gap-2">
+<a href="about.html" class="text-green-400 hover:text-white px-4 py-2 rounded-lg transition-colors duration-200 bg-white/5 hover:bg-white/10 flex items-center gap-2">
         <i class="fas fa-info-circle"></i> About
       </a>
-      <a href="history.html" class="text-yellow-300 hover:text-white px-4 py-2 rounded-lg transition-colors duration-200 bg-white/5 hover:bg-white/10 flex items-center gap-2">
+<a href="history.html" class="text-green-400 hover:text-white px-4 py-2 rounded-lg transition-colors duration-200 bg-white/5 hover:bg-white/10 flex items-center gap-2">
         <i class="fas fa-history"></i> History
       </a>
-      <a href="privacy-policy.html" class="text-yellow-300 hover:text-white px-4 py-2 rounded-lg transition-colors duration-200 bg-white/5 hover:bg-white/10 flex items-center gap-2">
+<a href="privacy-policy.html" class="text-green-400 hover:text-white px-4 py-2 rounded-lg transition-colors duration-200 bg-white/5 hover:bg-white/10 flex items-center gap-2">
         <i class="fas fa-shield-alt"></i> Privacy
       </a>
     </div>
@@ -1800,8 +1804,8 @@
 
   <!-- Mobile Menu -->
   <div id="mobileMenu">
-    <div class="p-6 border-b border-yellow-300/20 mb-6">
-      <h2 class="text-2xl font-bold text-yellow-300 mb-1">AidTracker</h2>
+<div class="p-6 border-b border-green-400/20 mb-6">
+      <h2 class="text-2xl font-bold text-green-400 mb-1">AidTracker</h2>
       <p class="text-sm text-gray-300">Emergency Response System</p>
     </div>
     
@@ -1822,7 +1826,7 @@
     </button>
     
     <div class="absolute bottom-0 left-0 right-0 p-6 text-center text-gray-400 text-sm border-t border-white/10 pt-4">
-      <p class="text-yellow-300/70">Help is just a tap away</p>
+<p class="text-green-400/70">Help is just a tap away</p>
     </div>
   </div>
 </div>
@@ -1831,7 +1835,7 @@
 <div id="toastContainer"></div>
 
 <!-- Notification Button -->
-<div class="notification text-yellow-300 hover:text-white" onclick="handleNotificationClick()">
+<div class="notification text-green-400 hover:text-white" onclick="handleNotificationClick()">
   <i class="fas fa-bell"></i>
   <span id="notificationCount" class="notification-count" style="display: none;">0</span>
 </div>
@@ -1844,7 +1848,7 @@
 <!-- MAIN CONTENT -->
 <main class="flex-grow pt-4" style="display: none;">
   <div class="container mx-auto p-4 md:p-8 text-center">
-    <h1 class="text-4xl md:text-5xl font-bold text-yellow-300 drop-shadow-lg mt-8 md:mt-0 mb-2">AidTracker</h1>
+<h1 class="text-4xl md:text-5xl font-bold text-green-400 drop-shadow-lg mt-8 md:mt-0 mb-2">AidTracker</h1>
     <h4 class="text-base md:text-lg font-semibold mb-8 text-white/90">Immediate Emergency Response System</h4>
 
     <!-- Guest Mode Indicator -->
@@ -1858,40 +1862,40 @@
 
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto mb-12">
       <div class="card rounded-xl p-6 text-center">
-        <div class="text-4xl mb-4 text-yellow-200">
+<div class="text-4xl mb-4 text-green-300">
           <i class="fas fa-car-crash"></i>
         </div>
-        <h2 class="text-xl font-bold mb-4 text-yellow-200">Vehicular Accident</h2>
+        <h2 class="text-xl font-bold mb-4 text-green-300">Vehicular Accident</h2>
         <button onclick="handleReport('vehicular')" class="btn py-3 px-6 rounded-xl w-full">
           <i class="fas fa-exclamation-triangle mr-2"></i>Report
         </button>
       </div>
 
       <div class="card rounded-xl p-6 text-center">
-        <div class="text-4xl mb-4 text-yellow-200">
+<div class="text-4xl mb-4 text-green-300">
           <i class="fas fa-fire"></i>
         </div>
-        <h2 class="text-xl font-bold mb-4 text-yellow-200">Fire Accident</h2>
+        <h2 class="text-xl font-bold mb-4 text-green-300">Fire Accident</h2>
         <button onclick="handleReport('fire')" class="btn py-3 px-6 rounded-xl w-full">
           <i class="fas fa-exclamation-triangle mr-2"></i>Report
         </button>
       </div>
 
       <div class="card rounded-xl p-6 text-center">
-        <div class="text-4xl mb-4 text-yellow-200">
+<div class="text-4xl mb-4 text-green-300">
           <i class="fas fa-user-shield"></i>
         </div>
-        <h2 class="text-xl font-bold mb-4 text-yellow-200">Assault Crime</h2>
+        <h2 class="text-xl font-bold mb-4 text-green-300">Assault Crime</h2>
         <button onclick="handleReport('assault')" class="btn py-3 px-6 rounded-xl w-full">
           <i class="fas fa-exclamation-triangle mr-2"></i>Report
         </button>
       </div>
 
       <div class="card rounded-xl p-6 text-center">
-        <div class="text-4xl mb-4 text-yellow-200">
+<div class="text-4xl mb-4 text-green-300">
           <i class="fas fa-ambulance"></i>
         </div>
-        <h2 class="text-xl font-bold mb-4 text-yellow-200">Medical Emergency</h2>
+        <h2 class="text-xl font-bold mb-4 text-green-300">Medical Emergency</h2>
         <button onclick="handleReport('medical')" class="btn py-3 px-6 rounded-xl w-full">
           <i class="fas fa-exclamation-triangle mr-2"></i>Report
         </button>
@@ -1901,23 +1905,23 @@
 
     
     <!-- Quick Stats -->
-    <div class="mt-8 max-w-4xl mx-auto p-6 bg-white/5 rounded-2xl border border-yellow-300/20 backdrop-blur-sm">
-      <h3 class="text-xl font-semibold text-yellow-300 mb-6">Emergency Response Features</h3>
+<div class="mt-8 max-w-4xl mx-auto p-6 bg-white/5 rounded-2xl border border-green-400/20 backdrop-blur-sm">
+      <h3 class="text-xl font-semibold text-green-400 mb-6">Emergency Response Features</h3>
       <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
         <div class="p-4 bg-white/5 rounded-xl hover:bg-white/10 transition-all">
-          <div class="text-2xl text-yellow-300 font-bold mb-1">24/7</div>
+<div class="text-2xl text-green-400 font-bold mb-1">24/7</div>
           <div class="text-sm text-gray-300">Live Monitoring</div>
         </div>
         <div class="p-4 bg-white/5 rounded-xl hover:bg-white/10 transition-all">
-          <div class="text-2xl text-yellow-300 font-bold mb-1">Fast</div>
+<div class="text-2xl text-green-400 font-bold mb-1">Fast</div>
           <div class="text-sm text-gray-300">Response Time</div>
         </div>
         <div class="p-4 bg-white/5 rounded-xl hover:bg-white/10 transition-all">
-          <div class="text-2xl text-yellow-300 font-bold mb-1">Live</div>
+<div class="text-2xl text-green-400 font-bold mb-1">Live</div>
           <div class="text-sm text-gray-300">GPS Tracking</div>
         </div>
         <div class="p-4 bg-white/5 rounded-xl hover:bg-white/10 transition-all">
-          <div class="text-2xl text-yellow-300 font-bold mb-1">Secure</div>
+<div class="text-2xl text-green-400 font-bold mb-1">Secure</div>
           <div class="text-sm text-gray-300">Data Protection</div>
         </div>
       </div>
