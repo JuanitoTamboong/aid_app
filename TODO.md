@@ -46,8 +46,3 @@
 - Green glow: 0 16px 48px rgba(74, 222, 128, 0.2) ✅
 - Red glow: 0 8px 30px rgba(239, 68, 68, 0.3) ✅
 
-## Notes:
-- theme.css provides CSS variables and base styles
-- theme.css is linked in index.html
-- To fully apply the theme to other HTML files, add:
-  <link rel="stylesheet" href="theme.css">
