@@ -1,5 +1,3 @@
-// ============ SUPABASE CLIENT ==============
-// Using the new import method for ES modules
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.4";
 
 let supabase = null;
@@ -9,12 +7,10 @@ try {
     const supabaseUrl = 'https://gwvepxupoxyyydnisulb.supabase.co';
     const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd3dmVweHVwb3h5eXlkbmlzdWxiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ4MDE4ODcsImV4cCI6MjA4MDM3Nzg4N30.Ku9SXTAKNMvHilgEpxj5HcVA-0TPt4ziuEq0Irao5Qc';
 
-    // Check if URL and key are valid
     if (!supabaseUrl || !supabaseKey) {
         throw new Error('Supabase URL or key is missing');
     }
-
-    // Initialize Supabase client
+nt
     supabase = createClient(supabaseUrl, supabaseKey, {
         auth: {
             persistSession: false
@@ -25,7 +21,6 @@ try {
 
 } catch (error) {
     console.error("Failed to initialize Supabase:", error);
-    // Create a mock supabase object to prevent crashes
     supabase = {
         storage: {
             from: () => ({
@@ -48,29 +43,22 @@ try {
     };
 }
 
-// ======================================================
-// ===== SAVE REPORT (SUPABASE UPLOAD + DATABASE) ======
-// ======================================================
 export async function saveReportToSupabase(report, base64Image) {
   console.log("Starting saveReportToSupabase with:", report);
   
-  // Check if Supabase is initialized
   if (!supabase) {
     throw new Error("Supabase client not initialized. Please refresh the page.");
   }
   
   let imageURL = null;
 
-  // 1. Upload image to storage if exists
   if (base64Image && base64Image.trim() !== '') {
     try {
       console.log("Processing image...");
       
-      // Convert base64 to blob
       let imageBlob;
       let contentType = 'image/jpeg';
 
-        // Handle data URL format to get content type and base64 data
         let base64Data;
         if (base64Image.includes(',')) {
           const parts = base64Image.split(',');
@@ -83,12 +71,10 @@ export async function saveReportToSupabase(report, base64Image) {
           base64Data = base64Image;
         }
 
-        // Ensure content type is a valid image type
         if (!contentType.startsWith('image/')) {
           contentType = 'image/jpeg';
         }
 
-      // Generate unique filename with proper extension based on content type
       const timestamp = Date.now();
       const randomStr = Math.random().toString(36).substring(2, 15);
       let extension = 'jpg';
@@ -99,15 +85,12 @@ export async function saveReportToSupabase(report, base64Image) {
 
       try {
 
-        // Clean the base64 data - remove any whitespace
         base64Data = base64Data.replace(/\s/g, '');
 
-        // Validate base64 format
         if (!/^[A-Za-z0-9+/]*={0,2}$/.test(base64Data)) {
           throw new Error("Invalid base64 data format");
         }
 
-        // Decode base64
         const byteCharacters = atob(base64Data);
         const byteNumbers = new Array(byteCharacters.length);
 
@@ -120,16 +103,14 @@ export async function saveReportToSupabase(report, base64Image) {
 
         console.log(`Image blob created: ${imageBlob.size} bytes, type: ${contentType}`);
 
-        // Validate blob size (should be reasonable for an image)
         if (imageBlob.size > 10 * 1024 * 1024) { // 10MB limit
           throw new Error("Image file is too large. Please use a smaller image.");
         }
 
-        if (imageBlob.size < 1000) { // Less than 1KB is suspicious
+        if (imageBlob.size < 1000) {
           throw new Error("Image data appears to be corrupted. Please try again.");
         }
 
-        // Additional validation: check if it looks like image data
         const firstBytes = byteArray.slice(0, 4);
         const isValidImage = (
           // JPEG: FF D8 FF
@@ -165,8 +146,7 @@ export async function saveReportToSupabase(report, base64Image) {
 
       if (uploadError) {
         console.error("Supabase Upload Error:", uploadError);
-        
-        // Provide helpful error messages
+      
         if (uploadError.message && uploadError.message.includes('Bucket not found')) {
           throw new Error(`Storage bucket 'aid-upload' not found. Please create the bucket in Supabase Storage.`);
         }
@@ -196,7 +176,6 @@ export async function saveReportToSupabase(report, base64Image) {
 
       console.log("Upload successful:", uploadData);
 
-      // Get public URL
       const { data: publicUrlData } = supabase
         .storage
         .from("aid-upload")
@@ -207,21 +186,17 @@ export async function saveReportToSupabase(report, base64Image) {
       
     } catch (imageError) {
       console.error("Image upload failed:", imageError);
-      // Continue without image but warn the user
       console.log("Continuing without image due to upload error...");
-      // You could show a toast notification here
+     
     }
   }
 
-  // 2. Insert report into database
   try {
     console.log("Inserting report into database...");
     
-    // Ensure latitude and longitude are valid numbers
     const latitude = !isNaN(parseFloat(report.latitude)) ? parseFloat(report.latitude) : 0;
     const longitude = !isNaN(parseFloat(report.longitude)) ? parseFloat(report.longitude) : 0;
     
-    // Get reporter name from report or localStorage
     let reporterName = report.reporter || 'Anonymous';
     if (!reporterName || reporterName === 'Anonymous') {
       const accountData = localStorage.getItem('accountData');
@@ -233,16 +208,13 @@ export async function saveReportToSupabase(report, base64Image) {
           reporterName = 'Anonymous';
         }
       }
-      // Don't fall back to old reporterName - only use account data or Anonymous
     }
     
-    // Check if in guest mode
     const isGuestMode = localStorage.getItem('isGuestMode') === 'true';
     if (isGuestMode) {
-      // Use persistent unique guest ID for privacy
       const guestId = localStorage.getItem('guestId') || `guest-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
       localStorage.setItem('guestId', guestId);
-      reporterName = guestId; // Use unique ID for database queries
+      reporterName = guestId; 
     }
 
     const reportData = {
@@ -266,7 +238,7 @@ export async function saveReportToSupabase(report, base64Image) {
       .from('reports')
       .insert([reportData])
       .select()
-      .single();  // Get single record back
+      .single();  
 
     if (insertError) {
       console.error("Supabase Insert Error:", insertError);
@@ -277,7 +249,6 @@ export async function saveReportToSupabase(report, base64Image) {
         hint: insertError.hint
       });
 
-      // Helpful error messages based on common issues
       if (insertError.code === '42P01' || insertError.message?.includes('relation "reports" does not exist')) {
         throw new Error(`Database table 'reports' not found. Please create the table in Supabase.`);
       }
@@ -310,7 +281,6 @@ export async function saveReportToSupabase(report, base64Image) {
   } catch (dbError) {
     console.error("Database operation failed:", dbError);
     
-    // If we have a more specific error message, use it
     if (dbError.message) {
       throw dbError;
     }
@@ -318,10 +288,6 @@ export async function saveReportToSupabase(report, base64Image) {
     throw new Error(`Failed to save report: ${dbError.message || 'Unknown database error'}`);
   }
 }
-
-// ======================================================
-// ===== NOTIFICATION FUNCTIONS ======
-// ======================================================
 
 // Get unread notification count for user
 export async function getUnreadNotificationCount(userName) {
@@ -335,11 +301,9 @@ export async function getUnreadNotificationCount(userName) {
       return { count: 0, reports: [] };
     }
     
-    // Get last notification check time from localStorage
     const lastCheck = localStorage.getItem(`lastNotificationCheck_${userName}`);
     const lastCheckTime = lastCheck ? new Date(lastCheck) : new Date(0);
     
-    // Get user's reports from the last 24 hours
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
     
@@ -357,7 +321,6 @@ export async function getUnreadNotificationCount(userName) {
       return { count: 0, reports: [], error: error.message };
     }
     
-    // Filter for unread notifications (updated after last check)
     let unreadCount = 0;
     const unreadReports = [];
     
@@ -366,7 +329,6 @@ export async function getUnreadNotificationCount(userName) {
       const isUnread = reportUpdated > lastCheckTime;
       
       if (isUnread) {
-        // Check for important updates
         const hasResponders = report.assigned_responders && report.assigned_responders.trim() !== '';
         const hasStatusUpdate = report.status === 'investigating' || report.status === 'resolved';
         
@@ -390,17 +352,13 @@ export async function getUnreadNotificationCount(userName) {
   }
 }
 
-// Mark notifications as read for user
 export function markNotificationsAsRead(userName) {
   try {
     if (!userName || userName.trim() === '') {
       return { success: false, error: "Invalid username" };
     }
     
-    // Store current time as last check time
     localStorage.setItem(`lastNotificationCheck_${userName}`, new Date().toISOString());
-    
-    // Also clear the notification count in localStorage
     localStorage.setItem('notificationCount', '0');
     
     console.log(`Notifications marked as read for: ${userName}`);
@@ -412,7 +370,6 @@ export function markNotificationsAsRead(userName) {
   }
 }
 
-// Get recent reports for user
 export async function getUserReports(userName, limit = 50) {
   try {
     if (!supabase) {
@@ -438,14 +395,10 @@ export async function getUserReports(userName, limit = 50) {
   }
 }
 
-// ======================================================
-// ===== ADDITIONAL HELPER FUNCTIONS ======
-// ======================================================
 
 // Helper function to convert base64 to blob
 export function base64ToBlob(base64) {
   try {
-    // Remove data URL prefix if present
     const base64Data = base64.includes(',') ? base64.split(',')[1] : base64;
     const byteString = atob(base64Data);
     const mimeString = base64.includes(',') ? 
@@ -466,7 +419,6 @@ export function base64ToBlob(base64) {
   }
 }
 
-// Get all reports (for admin dashboard)
 export async function getAllReports(limit = 100) {
   try {
     if (!supabase) throw new Error("Supabase not initialized");
@@ -485,7 +437,6 @@ export async function getAllReports(limit = 100) {
   }
 }
 
-// Update report status
 export async function updateReportStatus(reportId, newStatus, assignedResponders = null) {
   try {
     if (!supabase) throw new Error("Supabase not initialized");
@@ -520,20 +471,17 @@ export async function updateReportStatus(reportId, newStatus, assignedResponders
   }
 }
 
-// Test Supabase connection
 export async function testSupabaseConnection() {
   try {
     if (!supabase) {
       return { connected: false, error: "Supabase client not initialized" };
     }
     
-    // Try to fetch schema or do a simple query
     const { data, error } = await supabase
       .from('reports')
       .select('count', { count: 'exact', head: true });
     
     if (error) {
-      // Check if it's a missing table error
       if (error.code === '42P01' || error.message?.includes('does not exist')) {
         return { 
           connected: true, 
@@ -554,7 +502,6 @@ export async function testSupabaseConnection() {
   }
 }
 
-// Get report count by status
 export async function getReportCounts() {
   try {
     if (!supabase) throw new Error("Supabase not initialized");
@@ -585,8 +532,6 @@ export async function getReportCounts() {
     return { counts: null, error: error.message };
   }
 }
-
-// Search reports by reporter name or type
 export async function searchReports(searchTerm, limit = 50) {
   try {
     if (!supabase) throw new Error("Supabase not initialized");
@@ -610,7 +555,6 @@ export async function searchReports(searchTerm, limit = 50) {
   }
 }
 
-// Delete report (admin only)
 export async function deleteReport(reportId) {
   try {
     if (!supabase) throw new Error("Supabase not initialized");
@@ -629,7 +573,6 @@ export async function deleteReport(reportId) {
   }
 }
 
-// Get reports by status
 export async function getReportsByStatus(status, limit = 50) {
   try {
     if (!supabase) throw new Error("Supabase not initialized");
@@ -649,7 +592,6 @@ export async function getReportsByStatus(status, limit = 50) {
   }
 }
 
-// Get today's reports
 export async function getTodaysReports() {
   try {
     if (!supabase) throw new Error("Supabase not initialized");
@@ -671,5 +613,4 @@ export async function getTodaysReports() {
   }
 }
 
-// Export supabase instance for direct use if needed
 export { supabase };
