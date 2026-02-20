@@ -5,15 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>AidTracker</title>
 <script src="https://cdn.tailwindcss.com"></script>
-<!-- Font Awesome for icons -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<!-- Google Fonts for better readability -->
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
-<!--logo-->
 <link rel="website icon" href="assets/aid-tracker-logo.png">
-<!-- Supabase -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<!-- Capacitor scripts - loaded for all platforms but only active on native -->
 <script src="https://unpkg.com/@capacitor/core@7/dist/capacitor.js"></script>
 <script src="https://unpkg.com/@capacitor/app@7/dist/plugin.js"></script>
 
@@ -1903,9 +1898,6 @@ background: #4ADE80;
         </button>
       </div>
     </div>
-    
-
-    
     <!-- Quick Stats -->
 <div class="mt-8 max-w-4xl mx-auto p-6 bg-white/5 rounded-2xl border border-green-400/20 backdrop-blur-sm">
       <h3 class="text-xl font-semibold text-green-400 mb-6">Emergency Response Features</h3>
@@ -2001,13 +1993,6 @@ background: #4ADE80;
     </div>
   </div>
 </div>
-
-
-
-
-
-
-
 <!-- ACCOUNT CHOICE MODAL -->
 <div class="hotline-modal" id="accountChoiceModal">
   <div class="hotline-box">
@@ -2158,11 +2143,9 @@ background: #4ADE80;
 </div>
 
 <script>
-// --- FIXED SUPABASE INITIALIZATION ---
+// --- SUPABASE INITIALIZATION ---
 const SUPABASE_URL = 'https://gwvepxupoxyyydnisulb.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd3dmVweHVwb3h5eXlkbmlzdWxiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ4MDE4ODcsImV4cCI6MjA4MDM3Nzg4N30.Ku9SXTAKNMvHilgEpxj5HcVA-0TPt4ziuEq0Irao5Qc';
-
-// Safely initialize Supabase
 try {
   if (window.supabase && window.supabase.createClient) {
     supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
@@ -2457,7 +2440,6 @@ function setupRealtimeSubscription() {
     });
 }
 
-// Check for existing notifications
 async function checkForNotifications() {
   if (!currentUser) return;
   
@@ -2511,13 +2493,11 @@ function handleReport(accidentType) {
   const hasAccount = checkUserHasAccount();
 
   if (!hasAccount) {
-    // User doesn't have an account - go directly to guest mode
     currentAccidentType = accidentType;
     localStorage.setItem('isGuestMode', 'true');
     localStorage.setItem('profileName', 'Guest User');
     showLegalNotice(accidentType);
   } else {
-    // User has an account - proceed normally
     currentAccidentType = accidentType;
     localStorage.setItem('isGuestMode', 'false');
     showLegalNotice(accidentType);
@@ -2547,10 +2527,8 @@ function showLegalNotice(accidentType) {
   }
 }
 
-// For backward compatibility - direct guest reporting button
 function startGuestReporting() {
   if (confirm("Report as guest? Your report will be anonymous and won't be saved to your personal account history, but will still be processed for emergency response.")) {
-    // Show emergency types modal for guest
     showEmergencyTypeModal();
   }
 }
@@ -2618,7 +2596,7 @@ function chooseCreateAccount() {
 function chooseGuestMode() {
   closeAccountChoiceModal();
   // Guest mode now goes directly to legal notice
-  currentAccidentType = 'general'; // Default type for guest mode
+  currentAccidentType = 'general';
   localStorage.setItem('isGuestMode', 'true');
   localStorage.setItem('profileName', 'Guest User');
   showLegalNotice('general');
@@ -2682,7 +2660,6 @@ menuOverlay.addEventListener('click', closeMobileMenu);
 
 // Initialize when page loads
 document.addEventListener('DOMContentLoaded', function() {
-  // Redirect to user choices if not already chosen
   if (!localStorage.getItem('isGuestMode') && !localStorage.getItem('userId')) {
     window.location.href = 'user-choices.html';
     return;
@@ -2718,7 +2695,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
 
-  // If user has account, ensure guest mode is disabled (but don't override if explicitly set to guest)
   if (hasAccount && localStorage.getItem('isGuestMode') !== 'true') {
     localStorage.setItem('isGuestMode', 'false');
     localStorage.removeItem('profileName');

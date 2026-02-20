@@ -4,14 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AidTracker Map</title>
-
-<!-- Leaflet -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-<!-- Font Awesome for icons -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<!--logo-->
 <link rel="website icon" href="assets/aid-tracker-logo.png">
 
 <style>
@@ -31,8 +26,6 @@ body {
   height:100vh; 
   width:100%; 
 }
-
-/* Pulsing user marker */
 .pulse {
   width:16px; 
   height:16px; 
@@ -60,7 +53,6 @@ body {
   100%{transform:translate(-50%,-50%) scale(0.8);opacity:0;}
 }
 
-/* Custom marker for pinpointed location */
 .pinpoint-marker {
   background-color: #4ADE80;
   width: 20px;
@@ -81,7 +73,6 @@ body {
   background-color: #0a1636;
 }
 
-/* FIXED: Button container for better mobile layout - HIDDEN WHEN CAMERA IS ACTIVE */
 .button-container {
   position: fixed;
   bottom: 20px;
@@ -124,7 +115,6 @@ body {
   transform: translateY(-2px);
 }
 
-/* Header */
 .header { 
   position: absolute; 
   top: 15px; 
@@ -148,7 +138,6 @@ body {
   transform: scale(1.05);
 }
 
-/* Page Title */
 .page-title {
   position: absolute;
   top: 20px;
@@ -163,7 +152,6 @@ body {
   pointer-events: none;
 }
 
-/* Popups - FIXED: Proper centering */
 .alert-overlay {
   position: fixed; 
   top: 0; 
@@ -211,7 +199,6 @@ body {
   line-height: 1.5;
 }
 
-/* Improved Form Alignment */
 .report-form {
   width: 100%;
   text-align: left;
@@ -230,7 +217,6 @@ body {
   text-align: left;
 }
 
-/* File Upload Styling - FIXED: Updated for optional photo */
 .file-upload-wrapper {
   width: 100%;
   margin-bottom: 20px;
@@ -292,7 +278,6 @@ body {
   text-align: center;
 }
 
-/* Button Styling */
 .button-group {
   display: flex;
   gap: 10px;
@@ -346,7 +331,6 @@ body {
   background: #d62839;
 }
 
-/* Form Action Buttons */
 .form-actions {
   display: flex;
   gap: 10px;
@@ -354,7 +338,6 @@ body {
   justify-content: center;
 }
 
-/* Image Preview - FIXED: Proper constraints */
 #capturedPreview {
   max-width: 100% !important;
   max-height: 250px !important;
@@ -376,7 +359,6 @@ body {
   display: none !important; 
 }
 
-/* =================== FIXED: CAMERA OVERLAY - RESPONSIVE =================== */
 #cameraOverlay {
   display: none;
   position: fixed;
@@ -385,7 +367,7 @@ body {
   width: 100%;
   height: 100%;
   background-color: rgba(10, 22, 54, 0.98);
-  z-index: 3001; /* Higher z-index than button container */
+  z-index: 3001; 
   overflow: hidden;
 }
 
@@ -522,12 +504,10 @@ body {
     top: 15px;
   }
   
-  /* Adjust image preview for mobile */
   #capturedPreview {
     max-height: 200px !important;
   }
-  
-  /* Camera adjustments for mobile */
+
   .camera-viewport {
     max-width: 90vw;
     margin: 15px auto;
@@ -543,7 +523,7 @@ body {
   }
   
   .camera-footer {
-    bottom: 25px; /* More spacing for mobile */
+    bottom: 25px; 
   }
 }
 
@@ -559,26 +539,24 @@ body {
   }
 
   .alert-overlay {
-    padding: 10px; /* Reduced padding for more space */
+    padding: 10px; 
   }
 
   .alert-box {
     padding: 15px;
     max-width: 95%;
-    max-height: 85vh; /* Limit height to prevent overflow */
-    overflow-y: auto; /* Allow scrolling if content is too tall */
+    max-height: 85vh;
+    overflow-y: auto;
   }
 
   .alert-box h2 {
     font-size: 1.3rem;
   }
 
-  /* Adjust image preview for small screens */
   #capturedPreview {
     max-height: 180px !important;
   }
 
-  /* Camera adjustments for small screens */
   .camera-viewport {
     max-width: 95vw;
     aspect-ratio: 3/4;
@@ -601,18 +579,16 @@ body {
   }
 
   .camera-footer {
-    bottom: 20px; /* Even more spacing for small screens */
+    bottom: 20px; 
     font-size: 0.8rem;
   }
 
-  /* Hide page title and header when camera is active on very small screens */
   body.camera-active .page-title,
   body.camera-active .header {
     display: none !important;
   }
 }
 
-/* Orientation-specific adjustments */
 @media (max-height: 600px) {
   .camera-viewport {
     max-height: 60vh;
@@ -635,7 +611,6 @@ body {
   }
 }
 
-/* When camera is active, hide map controls */
 body.camera-active .button-container,
 body.camera-active .header,
 body.camera-active .page-title,
@@ -643,7 +618,6 @@ body.camera-active #guestModeIndicator {
   display: none !important;
 }
 
-/* For landscape mode on mobile */
 @media (max-width: 768px) and (orientation: landscape) {
   .camera-viewport {
     max-height: 70vh;
@@ -721,8 +695,6 @@ body.camera-active #guestModeIndicator {
             Loading type...
           </div>
         </div>
-        
-        <!-- Photo Upload - UPDATED: Now optional with clear label -->
         <div class="form-group">
           <label>
             <span>Incident Photo</span>
@@ -786,8 +758,6 @@ body.camera-active #guestModeIndicator {
       <button onclick="goBackToIndex()" class="btn btn-primary">OK</button>
     </div>
   </div>
-
-  <!-- =================== FIXED: CAMERA OVERLAY - RESPONSIVE =================== -->
   <div id="cameraOverlay">
     <div class="camera-container">
       <div class="camera-header">
@@ -815,19 +785,16 @@ body.camera-active #guestModeIndicator {
 
   <!-- Supabase Module -->
   <script type="module">
-    // Import functions from notif-report.js
     import { 
         saveReportToSupabase, 
         testSupabaseConnection,
         getAllReports 
     } from "./notif-report.js";
     
-    // Make functions available globally
     window.saveReportToSupabase = saveReportToSupabase;
     window.testSupabaseConnection = testSupabaseConnection;
     window.getAllReports = getAllReports;
     
-    // Initialize form and camera button listeners
     document.addEventListener('DOMContentLoaded', function() {
         const captureBtn = document.getElementById('captureBtn');
         const closeCameraBtn = document.getElementById('closeCameraBtn');
@@ -848,7 +815,6 @@ body.camera-active #guestModeIndicator {
             });
         }
         
-        // Prevent form submission
         const form = document.getElementById('emergencyForm');
         if (form) {
             form.addEventListener('submit', function(e) {
@@ -857,14 +823,11 @@ body.camera-active #guestModeIndicator {
             });
         }
         
-        // Display the accident type when report form is shown
         updateEmergencyTypeDisplay();
         
-        // Test Supabase connection on load
         testConnection();
     });
-    
-    // Test Supabase connection
+
     async function testConnection() {
         try {
             if (window.testSupabaseConnection) {
@@ -886,8 +849,7 @@ body.camera-active #guestModeIndicator {
             console.error("Connection test error:", error);
         }
     }
-    
-    // FIXED: Handle file selection with preview
+
     function handleFileSelect(e) {
         const fileInput = document.getElementById('incidentPhoto');
         const fileName = document.getElementById('fileName');
@@ -895,8 +857,7 @@ body.camera-active #guestModeIndicator {
         
         if (e.target.files && e.target.files.length > 0) {
             const file = e.target.files[0];
-            
-            // Check if file is an image
+
             if (!file.type.match('image.*')) {
                 alert('Please select an image file (JPEG, PNG, etc.)');
                 fileInput.value = '';
@@ -924,11 +885,8 @@ body.camera-active #guestModeIndicator {
                     const img = new Image();
                     img.onload = function() {
                         if (img.width > 800 || img.height > 600) {
-                            // Create canvas to resize
                             const canvas = document.createElement('canvas');
                             const ctx = canvas.getContext('2d');
-                            
-                            // Calculate new dimensions
                             let width = img.width;
                             let height = img.height;
                             const MAX_WIDTH = 800;
@@ -949,15 +907,12 @@ body.camera-active #guestModeIndicator {
                             canvas.width = width;
                             canvas.height = height;
                             ctx.drawImage(img, 0, 0, width, height);
-                            
-                            // Update preview with resized image
                             capturedPreview.src = canvas.toDataURL('image/jpeg', 0.8);
                         }
                     };
                     img.src = e.target.result;
                 }
-                
-                // Clear any camera-captured image
+
                 capturedBase64 = null;
             };
             reader.readAsDataURL(file);
@@ -971,7 +926,6 @@ body.camera-active #guestModeIndicator {
         }
     }
     
-    // Quick test function - call this in browser console to debug
     window.testSupabaseManually = async function() {
         console.log("Testing Supabase connection manually...");
         console.log("Window.saveReportToSupabase exists:", typeof window.saveReportToSupabase);
@@ -990,20 +944,18 @@ body.camera-active #guestModeIndicator {
   <script>
     // Global variables
     let map = null;
-    let currentUserLocation = null;  // User's current GPS location
-    let reportLocation = null;        // Location to use for reporting
+    let currentUserLocation = null; 
+    let reportLocation = null;       
     let userMarker = null;
-    let pinpointMarker = null;        // Marker for pinpointed location
+    let pinpointMarker = null;      
     let capturedBase64 = null;
     let cameraStream = null;
     let mapButtons = null;
 
-    // Initialize when DOM loads
     document.addEventListener('DOMContentLoaded', function() {
       initializeMap();
       mapButtons = document.getElementById('mapButtons');
 
-      // Show/hide guest mode indicator
       const isGuestMode = localStorage.getItem('isGuestMode') === 'true';
       const guestIndicator = document.getElementById('guestModeIndicator');
 
@@ -1020,16 +972,13 @@ body.camera-active #guestModeIndicator {
     function initializeMap() {
       map = L.map('map').setView([12.35, 122.0], 11);
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-      
-      // Start GPS tracking for user's current location
       startGeoTracking();
     }
 
     function goBack() { 
       window.location = "index.html"; 
     }
-    
-    // NEW: Function to go back to index after report submission
+
     function goBackToIndex() {
       window.location.href = "index.html";
     }
@@ -1041,8 +990,6 @@ body.camera-active #guestModeIndicator {
         alert("Geolocation is not supported by your browser. You can still use the map by pinpointing locations manually.");
         return;
       }
-
-      // Check if we already have a location from localStorage
       const savedLocation = localStorage.getItem('lastKnownLocation');
       if (savedLocation) {
         try {
@@ -1064,11 +1011,10 @@ body.camera-active #guestModeIndicator {
         }
       }
 
-      // Try to get current location with better error handling
       const options = {
-        enableHighAccuracy: false, // Start with low accuracy
-        maximumAge: 300000, // Accept locations up to 5 minutes old
-        timeout: 15000 // 15 second timeout
+        enableHighAccuracy: false,
+        maximumAge: 300000, 
+        timeout: 15000 
       };
 
       navigator.geolocation.getCurrentPosition(
@@ -1095,13 +1041,11 @@ body.camera-active #guestModeIndicator {
             userMarker.setLatLng([latitude, longitude]);
           }
 
-          // Now start watching for position changes with low accuracy
           startPositionWatch();
         },
         (error) => {
           console.warn("Initial geolocation failed:", error);
 
-          // Provide user-friendly error messages
           let errorMessage = "Unable to get your location. ";
           switch(error.code) {
             case error.PERMISSION_DENIED:
@@ -1119,10 +1063,7 @@ body.camera-active #guestModeIndicator {
           }
 
           alert(errorMessage);
-
-          // Still allow map usage without GPS
           if (!userMarker) {
-            // Center on default location if no saved location
             map.setView([12.35, 122.0], 11);
           }
         },
@@ -1134,9 +1075,9 @@ body.camera-active #guestModeIndicator {
       if (!navigator.geolocation) return;
 
       const watchOptions = {
-        enableHighAccuracy: false, // Keep low accuracy for continuous tracking
-        maximumAge: 60000, // Accept 1 minute old locations
-        timeout: 30000 // 30 second timeout
+        enableHighAccuracy: false, 
+        maximumAge: 60000, 
+        timeout: 30000
       };
 
       navigator.geolocation.watchPosition(
@@ -1144,17 +1085,14 @@ body.camera-active #guestModeIndicator {
           const { latitude, longitude } = pos.coords;
           currentUserLocation = { lat: latitude, lng: longitude };
 
-          // Update localStorage
           localStorage.setItem('lastKnownLocation', JSON.stringify(currentUserLocation));
 
-          // Update marker position if it exists
           if (userMarker) {
             userMarker.setLatLng([latitude, longitude]);
           }
         },
         (error) => {
           console.warn("Position watch error:", error);
-          // Don't show alert for watch errors, just log them
         },
         watchOptions
       );
@@ -1169,12 +1107,10 @@ body.camera-active #guestModeIndicator {
       
       alert("Tap on map to set report location.");
       map.once("click", (e) => {
-        // Remove previous pinpoint marker if exists
         if (pinpointMarker) {
           map.removeLayer(pinpointMarker);
         }
         
-        // Create new pinpoint marker with custom style
         pinpointMarker = L.marker(e.latlng, {
           icon: L.divIcon({ 
             html: '<div class="pinpoint-marker"></div>',
@@ -1184,10 +1120,7 @@ body.camera-active #guestModeIndicator {
           })
         }).addTo(map);
         
-        // Bind popup to pinpoint marker
         pinpointMarker.bindPopup("Report will be submitted here").openPopup();
-        
-        // Set report location to the pinpointed location
         reportLocation = e.latlng;
         
         showPinConfirmPopup();
@@ -1198,10 +1131,7 @@ body.camera-active #guestModeIndicator {
     const reportPopup = document.getElementById("reportPopup");
     const pinConfirmPopup = document.getElementById("pinConfirmPopup");
     const alertOverlay = document.getElementById("alertOverlay");
-
-    // REMOVED: showPenaltyPopup function and penaltyPopup references
     
-    // UPDATED: Directly open report form
     function openReportForm() { 
       hideAll(); 
       reportPopup.classList.remove("hidden"); 
@@ -1224,8 +1154,7 @@ body.camera-active #guestModeIndicator {
     function showAlert() { 
       hideAll(); 
       alertOverlay.classList.remove("hidden"); 
-      
-      // Update the success message with status
+    
       const successMsg = document.getElementById("successMessage");
       if (successMsg) {
         successMsg.textContent = "Emergency report submitted successfully. Status: Pending - Awaiting response from emergency services.";
@@ -1240,26 +1169,21 @@ body.camera-active #guestModeIndicator {
       document.querySelectorAll(".alert-overlay").forEach(x => x.classList.add("hidden"));
     }
 
-    /* =================== FIXED: CAMERA FUNCTIONS - RESPONSIVE =================== */
+    /* ===================  CAMERA FUNCTIONS - RESPONSIVE =================== */
     const cameraOverlay = document.getElementById("cameraOverlay");
     const cameraVideo = document.getElementById("cameraFeed");
     const capturedPreview = document.getElementById("capturedPreview");
 
     async function openCamera() {
-      // Hide all overlays and map buttons
       hideAll();
       if (mapButtons) {
         mapButtons.classList.add('hidden');
       }
-      
-      // Add camera-active class to body
       document.body.classList.add('camera-active');
       
-      // Show camera overlay
       cameraOverlay.style.display = "block";
 
       try {
-        // Try to use rear camera (environment) first, fall back to any camera
         const constraints = {
           video: {
             facingMode: { ideal: 'environment' },
@@ -1270,15 +1194,10 @@ body.camera-active #guestModeIndicator {
 
         cameraStream = await navigator.mediaDevices.getUserMedia(constraints);
         cameraVideo.srcObject = cameraStream;
-        
-        // Wait for video to be ready
         return new Promise((resolve) => {
           cameraVideo.onloadedmetadata = () => {
             console.log("Camera ready, video dimensions:", cameraVideo.videoWidth, "x", cameraVideo.videoHeight);
-            
-            // Force a small delay for proper rendering
             setTimeout(() => {
-              // Fix for mobile Safari/WebKit browsers
               cameraVideo.play()
                 .then(() => {
                   console.log("Camera video playing successfully");
@@ -1293,8 +1212,6 @@ body.camera-active #guestModeIndicator {
         });
       } catch (error) {
         console.error("Camera error:", error);
-        
-        // Try again with less restrictive constraints
         try {
           console.log("Trying with simpler camera constraints...");
           cameraStream = await navigator.mediaDevices.getUserMedia({ 
@@ -1308,7 +1225,7 @@ body.camera-active #guestModeIndicator {
         } catch (secondError) {
           console.error("Second camera attempt failed:", secondError);
           alert("Unable to access camera. Please check camera permissions in your browser settings.");
-          closeCamera(); // Use closeCamera to properly restore UI
+          closeCamera(); 
         }
       }
     }
@@ -1321,14 +1238,12 @@ body.camera-active #guestModeIndicator {
 
       const canvas = document.createElement("canvas");
       
-      // Set maximum dimensions for the captured image
       const MAX_WIDTH = 1200;
       const MAX_HEIGHT = 900;
       
       let width = cameraVideo.videoWidth;
       let height = cameraVideo.videoHeight;
       
-      // Calculate new dimensions maintaining aspect ratio
       if (width > height) {
         if (width > MAX_WIDTH) {
           height = Math.round(height * (MAX_WIDTH / width));
@@ -1344,14 +1259,11 @@ body.camera-active #guestModeIndicator {
       canvas.width = width;
       canvas.height = height;
       
-      // Draw and scale the image
       const ctx = canvas.getContext("2d");
       ctx.drawImage(cameraVideo, 0, 0, width, height);
       
-      // Reduce image quality to save bandwidth (80% quality for good balance)
       capturedBase64 = canvas.toDataURL("image/jpeg", 0.8);
-
-      // Close camera and restore UI
+      
       stopCamera();
       closeCamera();
       
@@ -1361,38 +1273,29 @@ body.camera-active #guestModeIndicator {
         capturedPreview.classList.add("show");
       }
 
-      // Update file input display
-      const fileName = document.getElementById("fileName");
+   const fileName = document.getElementById("fileName");
       if (fileName) {
         fileName.textContent = "Photo captured from camera";
       }
 
-      // Clear any uploaded file
       const fileInput = document.getElementById("incidentPhoto");
       if (fileInput) {
         fileInput.value = '';
       }
 
-      // Show report form again
       reportPopup.classList.remove("hidden");
     }
 
     function closeCamera() {
-      // Stop camera
       stopCamera();
-      
-      // Hide camera overlay
       cameraOverlay.style.display = "none";
       
-      // Remove camera-active class from body
       document.body.classList.remove('camera-active');
       
-      // Restore map buttons
       if (mapButtons) {
         mapButtons.classList.remove('hidden');
       }
       
-      // Show report form again
       reportPopup.classList.remove("hidden");
     }
 
@@ -1412,7 +1315,6 @@ body.camera-active #guestModeIndicator {
       let displayText = "Emergency";
       let typeValue = "emergency";
 
-      // Map the accident type to display text and value
       switch(accidentType) {
         case "vehicular":
           displayText = "Vehicular Accident";
@@ -1434,21 +1336,18 @@ body.camera-active #guestModeIndicator {
           displayText = "Emergency";
           typeValue = "emergency";
       }
-      
-      // Update the display
+    
       const displayElement = document.getElementById("emergencyTypeDisplay");
       if (displayElement) {
         displayElement.textContent = displayText;
       }
       
-      // Store the actual type value for submission
       window.currentAccidentType = typeValue;
       window.currentAccidentDisplay = displayText;
     }
 
     /* ============================ SUBMIT REPORT ============================= */
     async function submitReport() {
-      // Check if we have a report location (either pinpointed or current)
       if (!reportLocation) {
         alert("Please select a location first. Use 'Pinpoint Location' or wait for GPS to get your current location.");
         return;
@@ -1457,17 +1356,13 @@ body.camera-active #guestModeIndicator {
       const fileInput = document.getElementById('incidentPhoto');
       let photoBase64 = capturedBase64;
 
-      // If no camera photo, check for uploaded file
       if (!photoBase64 && fileInput.files.length > 0) {
         const file = fileInput.files[0];
         photoBase64 = await toBase64(file);
       }
 
-      // Get the accident type from localStorage or use the current one
       const accidentType = localStorage.getItem("accidentType") || window.currentAccidentType || "emergency";
       const accidentDisplay = window.currentAccidentDisplay || "Emergency";
-      
-      // Get reporter name from localStorage - FIXED: Using reporterName from account page
       const reporterName = localStorage.getItem("reporterName") || "Anonymous";
       
       const report = {
@@ -1479,8 +1374,6 @@ body.camera-active #guestModeIndicator {
         timestamp: new Date().toISOString(),
         status: "pending"
       };
-
-      // Show location info for debugging
       console.log("Submitting report from location:", reportLocation);
       console.log("Current user location:", currentUserLocation);
       console.log("Using pinpoint location:", pinpointMarker ? "YES" : "NO");
@@ -1489,8 +1382,7 @@ body.camera-active #guestModeIndicator {
 
       try {
         console.log("Submitting report...", report);
-        
-        // Check if function is available
+      
         if (typeof window.saveReportToSupabase !== 'function') {
           throw new Error("Save function not loaded. Please check the console for import errors.");
         }
@@ -1503,8 +1395,7 @@ body.camera-active #guestModeIndicator {
         if (result && result.success) {
           hideReportPopup();
           showAlert();
-          
-          // Clear localStorage accident type after successful submission
+  
           localStorage.removeItem("accidentType");
         } else {
           throw new Error("Report submission failed without error");
@@ -1512,8 +1403,7 @@ body.camera-active #guestModeIndicator {
         
       } catch(err) {
         console.error("Report submission error:", err);
-        
-        // User-friendly error messages
+     
         let errorMessage = "Failed to submit report: ";
         
         if (err.message.includes("Database table 'reports' not found")) {

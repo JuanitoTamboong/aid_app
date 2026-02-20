@@ -15,26 +15,20 @@ const PORT = 3000;
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// ------------------ MIDDLEWARE ------------------ //
 app.use(cors());
-app.use(express.json({ limit: "100mb" })); // increase JSON limit for base64 images
+app.use(express.json({ limit: "100mb" }));
 app.use(express.static(__dirname));
-app.use("/uploads", express.static(path.join(__dirname, "uploads"))); // serve uploaded photos
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
-// ------------------ FILE PATHS ------------------ //
 const REPORTS_FILE = path.join(__dirname, "reports.json");
 const ACCOUNTS_FILE = path.join(__dirname, "accounts.json");
 
-
-// ------------------ PAGE ROUTES ------------------ //
 app.get("/", (req, res) => res.sendFile(path.join(__dirname, "home.html")));
 app.get("/map", (req, res) => res.sendFile(path.join(__dirname, "map.html")));
 app.get("/notif", (req, res) => res.sendFile(path.join(__dirname, "notif.html")));
 app.get("/login", (req, res) => res.sendFile(path.join(__dirname, "login.html")));
 app.get("/register", (req, res) => res.sendFile(path.join(__dirname, "register.html")));
 
-
-// ------------------ AUTH ROUTES ------------------ //
 app.post("/register", async (req, res) => {
   const { username, password } = req.body;
 
@@ -67,8 +61,6 @@ app.post("/login", async (req, res) => {
   res.json({ success: true });
 });
 
-
-// ------------------ REPORT ROUTES ------------------ //
 app.get("/api/reports", (req, res) => {
   if (!fs.existsSync(REPORTS_FILE)) fs.writeFileSync(REPORTS_FILE, "[]");
   const data = JSON.parse(fs.readFileSync(REPORTS_FILE, "utf8"));
@@ -82,29 +74,28 @@ app.post("/api/reports", (req, res) => {
   const report = req.body;
   report.reporter = report.reporter || "Unknown";
 
-  // ✅ Handle Base64 photo (if provided)
   if (report.photo) {
-  try {
-    const matches = report.photo.match(/^data:(image\/\w+);base64,(.+)$/);
-    if (!matches || matches.length !== 3) throw new Error("Invalid base64 data");
+    try {
+      const matches = report.photo.match(/^data:(image\/\w+);base64,(.+)$/);
+      if (!matches || matches.length !== 3) throw new Error("Invalid base64 data");
 
-    const mimeType = matches[1];              // e.g., image/jpeg
-    const imageData = matches[2];
-    const ext = mimeType.split("/")[1];       // -> jpeg, png, etc.
-    const fileName = `report_${Date.now()}.${ext}`;
-    const uploadDir = path.join(__dirname, "uploads");
+      const mimeType = matches[1];
+      const imageData = matches[2];
+      const ext = mimeType.split("/")[1];
+      const fileName = `report_${Date.now()}.${ext}`;
+      const uploadDir = path.join(__dirname, "uploads");
 
-    if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir);
+      if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir);
 
-    const filePath = path.join(uploadDir, fileName);
-    fs.writeFileSync(filePath, Buffer.from(imageData, "base64"));
+      const filePath = path.join(uploadDir, fileName);
+      fs.writeFileSync(filePath, Buffer.from(imageData, "base64"));
 
-    report.photo = `uploads/${fileName}`;     // relative path served by Express
-  } catch (err) {
-    console.error("⚠️ Failed to save photo:", err);
-    report.photo = null;
+      report.photo = `uploads/${fileName}`;
+    } catch (err) {
+      console.error("Failed to save photo:", err);
+      report.photo = null;
+    }
   }
-}
 
   data.push(report);
   fs.writeFileSync(REPORTS_FILE, JSON.stringify(data, null, 2));
@@ -113,8 +104,6 @@ app.post("/api/reports", (req, res) => {
   res.json({ message: "Report saved successfully", report });
 });
 
-
-// ------------------ START SERVER ------------------ //
 server.listen(PORT, () =>
-  console.log(`✅ Server running at http://localhost:${PORT}`)
+  console.log(`Server running at http://localhost:${PORT}`)
 );

@@ -10,7 +10,6 @@
 <!--logo-->
 <link rel="website icon" href="assets/aid-tracker-logo.png">
 <style>
-/* === History Styles === */
 * {
   margin: 0;
   padding: 0;
@@ -28,7 +27,6 @@ body {
   padding-bottom: 20px;
 }
 
-/* === Header === */
 .header {
   background: linear-gradient(135deg, #0a1636 0%, #1e3a8a 100%);
   color: #4ADE80;
@@ -68,14 +66,12 @@ body {
   box-shadow: 0 4px 12px rgba(74, 222, 128, 0.3);
 }
 
-/* === Main Container === */
 .container {
   max-width: 700px;
   margin: 0 auto;
   padding: 20px;
 }
 
-/* === History Cards === */
 .history-container {
   display: flex;
   flex-direction: column;
@@ -114,7 +110,6 @@ body {
   background: linear-gradient(to bottom, #4ADE80, #4ADE80);
 }
 
-/* Emergency Type Badge */
 .emergency-badge {
   display: inline-block;
   padding: 4px 12px;
@@ -150,7 +145,6 @@ body {
   border: 1px solid rgba(59, 130, 246, 0.4);
 }
 
-/* Card Content */
 .history-content {
   display: flex;
   justify-content: space-between;
@@ -232,8 +226,6 @@ body {
   color: #fca5a5;
   border: 1px solid rgba(239, 68, 68, 0.4);
 }
-
-/* Photo Preview */
 .photo-preview {
   width: 80px;
   height: 80px;
@@ -264,7 +256,6 @@ body {
   font-size: 0.8rem;
 }
 
-/* === Loading State === */
 #status {
   color: #f3f4f6;
   text-align: center;
@@ -284,7 +275,6 @@ body {
   60%, 100% { content: '...'; }
 }
 
-/* === Empty State === */
 .empty-state {
   text-align: center;
   padding: 60px 20px;
@@ -311,7 +301,6 @@ body {
   line-height: 1.5;
 }
 
-/* === Error State === */
 .error-state {
   text-align: center;
   padding: 40px 20px;
@@ -354,7 +343,6 @@ body {
   box-shadow: 0 4px 12px rgba(251, 191, 36, 0.3);
 }
 
-/* === User Info === */
 .user-info {
   display: flex;
   align-items: center;
@@ -497,7 +485,7 @@ body {
 
     // Get current user - ONLY account users can access history
     function getCurrentUser() {
-      // Check if in guest mode - guests cannot access history
+      
       const guestMode = localStorage.getItem('isGuestMode');
       if (guestMode === 'true') {
         return null; // No history access for guests
@@ -521,10 +509,9 @@ body {
         }
       }
 
-      return null; // No account = no history access
+      return null; 
     }
 
-    // Get badge class based on emergency type
     function getBadgeClass(type) {
       switch(type) {
         case 'motor': return 'motor-badge';
@@ -535,7 +522,7 @@ body {
       }
     }
 
-    // Get display text for emergency type
+  
     function getTypeDisplay(type) {
       switch(type) {
         case 'motor': return 'Vehicular Accident';
@@ -546,7 +533,6 @@ body {
       }
     }
 
-    // Get icon for emergency type
     function getTypeIcon(type) {
       switch(type) {
         case 'motor': return 'fas fa-car-crash';
@@ -557,13 +543,11 @@ body {
       }
     }
 
-    // Create a history card element
     function createHistoryCard(report, isLocal = false) {
       const reportId = report.id || `local-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
       let status = report.status || "Pending";
       status = String(status).trim();
 
-      // Determine status class
       let statusClass = 'status-pending';
       if (status.toLowerCase() === 'resolved') {
         statusClass = 'status-resolved';
@@ -637,7 +621,6 @@ body {
         </div>
       `;
 
-      // Click to view report (only for database reports)
       if (!isLocal && reportId && !reportId.startsWith('local-')) {
         div.onclick = (e) => {
           window.location.href = `view-report.html?id=${reportId}`;
@@ -650,12 +633,10 @@ body {
       return div;
     }
 
-    // Load guest history from localStorage - only show resolved reports
     function loadGuestHistory() {
       const guestReports = JSON.parse(localStorage.getItem('guestReports') || '[]');
       const container = document.getElementById("historyList");
 
-      // Filter only resolved reports
       const resolvedReports = guestReports.filter(report =>
         report.status && report.status.toLowerCase() === 'resolved'
       );
@@ -675,7 +656,6 @@ body {
       } else {
         container.innerHTML = "";
 
-        // Sort by timestamp (newest first)
         resolvedReports.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
         resolvedReports.forEach(report => {
@@ -701,7 +681,6 @@ body {
       statusEl.textContent = "Loading your report history...";
 
       try {
-        // Fetch only resolved reports for current user (history shows completed reports)
         const { data: reports, error } = await supabaseClient
           .from('reports')
           .select('*')
@@ -768,13 +747,11 @@ body {
       }
     }
 
-    // Initialize
     document.addEventListener('DOMContentLoaded', function() {
       currentUser = getCurrentUser();
       isGuestMode = localStorage.getItem('isGuestMode') === 'true';
 
       if (!currentUser) {
-        // No user at all - show no history message
         document.getElementById('status').style.display = 'none';
         document.getElementById('historyList').innerHTML = `
           <div class="empty-state">
@@ -789,8 +766,7 @@ body {
         `;
         return;
       }
-
-      // Update header
+      
       const headerTitle = document.getElementById('headerTitle');
       if (isGuestMode) {
         headerTitle.innerHTML = `<i class="fas fa-bell"></i> Guest Report Notifications`;
@@ -801,8 +777,6 @@ body {
         loadAccountHistory();
       }
     });
-
-    // Global functions
     window.loadAccountHistory = loadAccountHistory;
   </script>
 </body>

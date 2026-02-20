@@ -1,48 +1,24 @@
-# Dark Theme Implementation - COMPLETED
+# TODO: Remove All Comments from Code Files
 
-## Phase 1: Create Theme CSS File ✅
-- [x] Created theme.css with all CSS variables for colors
-- [x] Defined gradients, borders, shadows as specified
-- [x] Created base styles for common elements
-- [x] Added Safari -webkit-backdrop-filter support
+## Objective
+Remove all HTML comments (`<!-- -->`) and JavaScript comments (`//`, `/* */`) from all code files to make the code clean and professional.
 
-## Phase 2: Update HTML Files
-- [x] Added theme.css link to index.html
-- [ ] about.html - Still uses old colors (can be updated)
-- [ ] history.html - Still uses old colors (can be updated)
-- [ ] map.html - Still uses old colors (can be updated)
-- [ ] notifications.html - Still uses old colors (can be updated)
-- [ ] privacy-policy.html - Still uses old colors (can be updated)
-- [ ] user-choices.html - Still uses old colors (can be updated)
-- [ ] view-report.html - Still uses old colors (can be updated)
-- [ ] account.html - Still uses old colors (can be updated)
+## Files to Clean
 
-## Theme Colors Implemented in theme.css:
-- Background: #0A0C10 ✅
-- Cards: #111827 with rgba(74, 222, 128, 0.15) borders ✅
-- Card hover: rgba(22, 30, 40, 0.95) with #4ADE80 glow ✅
-- Primary text: #F3F4F6 ✅
-- Secondary text: #94A3B8 ✅
-- Muted text: #64748B ✅
-- Accent green: #4ADE80 (primary actions) ✅
-- Accent red: #EF4444 (emergency/danger) ✅
-- Accent amber: #FBBF24 (warnings) ✅
-- Accent blue: #38BDF8 (information) ✅
-- Accent teal: #34D399 (success/resolved) ✅
+### HTML Files
+- [ ] view-report.html - Many HTML and JS comments
+- [ ] index.html - Many HTML and JS comments
+- [ ] notifications.html - Some HTML and JS comments
+- [ ] map.html - Some HTML and JS comments
+- [ ] history.html - Needs checking
+- [ ] account.html - Needs checking
+- [ ] user-choices.html - Some HTML and JS comments
+- [ ] about.html - Needs checking
+- [ ] privacy-policy.html - Needs checking
 
-## Gradients:
-- Dark buttons: linear-gradient(135deg, #1E293B, #0F172A) ✅
-- Emergency: linear-gradient(135deg, #EF4444, #DC2626) ✅
-- Success: linear-gradient(135deg, #4ADE80, #2DD4BF) ✅
+### JavaScript Files
+- [ ] server.js - No comments (clean)
+- [ ] notif-report.js - Needs checking
 
-## Borders:
-- Light green: rgba(74, 222, 128, 0.15) ✅
-- Medium green: rgba(74, 222, 128, 0.3) ✅
-- Strong green: rgba(74, 222, 128, 0.5) ✅
-
-## Shadows:
-- Small: 0 4px 12px rgba(0, 0, 0, 0.3) ✅
-- Medium: 0 8px 30px rgba(0, 0, 0, 0.5) ✅
-- Green glow: 0 16px 48px rgba(74, 222, 128, 0.2) ✅
-- Red glow: 0 8px 30px rgba(239, 68, 68, 0.3) ✅
-
+### Status
+- [ ] All files cleaned and verified

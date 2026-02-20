@@ -4,10 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>View Report Location</title>
-
-  <!-- Leaflet CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <!-- Google Fonts for better readability -->
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
   <link rel="website icon" href="assets/aid-tracker-logo.png">
   <style>
@@ -18,8 +15,6 @@
     font-size: 18px;
   }
     html, body { height: 100%; margin: 0; }
-
-    /* === Header === */
     .header {
       background: linear-gradient(135deg, #0a1636 0%, #1e3a8a 100%);
       color: #4ADE80;
@@ -287,8 +282,7 @@
       
       // Check for contact in ALL possible field names
       let contactValue = null;
-      
-      // Try all possible contact field names
+    
       const contactFields = [
         'contact',
         'responder_contact', 
@@ -331,7 +325,6 @@
         }
       }
       
-      // Check if we have any responder data
       const hasData = (assignedResponders && assignedResponders.toString().trim() !== '') ||
                      (assignedUnit && assignedUnit.toString().trim() !== '') ||
                      (formattedContact && formattedContact.trim() !== '');
@@ -340,13 +333,10 @@
         console.log("No responder data found in any column");
         return null;
       }
-      
-      // Parse the assigned_responders string if it contains multiple responders
       let responders = [];
       if (assignedResponders) {
         const responderString = assignedResponders.toString().trim();
         if (responderString !== '') {
-          // Split by comma to get individual responder names
           const responderList = responderString.split(',').map(r => r.trim()).filter(r => r !== '');
           responders = responderList;
           console.log("Parsed responders list:", responders);
@@ -370,10 +360,7 @@
       console.log("=== FINAL RESPONDER INFO ===", responderInfo);
       return responderInfo;
     }
-
-    // --- GET CURRENT USER ---
     function getCurrentUser() {
-      // Check for guest mode FIRST - prioritize guest over account data
       const isGuestMode = localStorage.getItem('isGuestMode') === 'true';
       if (isGuestMode) {
         // Use persistent unique guest ID for privacy
@@ -382,12 +369,10 @@
         return {
           id: guestId,
           name: 'Guest User',
-          reporter: guestId, // Use unique ID for database queries
+          reporter: guestId,
           isGuest: true
         };
       }
-
-      // Try to get from accountData (your created account)
       const accountData = localStorage.getItem('accountData');
       if (accountData) {
         try {
@@ -403,8 +388,6 @@
           console.error("Error parsing account data:", e);
         }
       }
-
-      // Try reporterName (from guest reporting)
       const reporterName = localStorage.getItem('reporterName');
       if (reporterName && reporterName.trim() !== '') {
         return {
@@ -439,11 +422,9 @@
           return;
         }
 
-        // Fetch report from Supabase with ALL columns including the separate responder columns
-        // Using wildcard * to get ALL columns including any custom columns
         const { data: report, error } = await supabaseClient
           .from('reports')
-          .select('*')  // Get ALL columns to see what's actually available
+          .select('*') 
           .eq('id', reportID)
           .single();
 
@@ -513,8 +494,6 @@
               <p><strong>Coordinates:</strong> ${formattedCoords}</p>
               <p><strong>Location:</strong> ${escapeHTML(displayLocation)}</p>
         `;
-        
-        // Add responder information section from separate columns
         if (responderInfo) {
           // Check if we have any data to display
           const hasAnyData = responderInfo.hasResponders || responderInfo.hasUnit || responderInfo.hasContact;
@@ -620,10 +599,8 @@
             popupAnchor: [1, -34]
           })
         }).addTo(map);
-        
-        marker.bindPopup(popupContent).openPopup();
 
-        // Add circle around report
+        marker.bindPopup(popupContent).openPopup();
         L.circle([report.latitude, report.longitude], {
           color: 'red',
           fillColor: '#f03',
@@ -631,10 +608,8 @@
           radius: 100
         }).addTo(map);
 
-        // Add scale control
         L.control.scale({ imperial: false, position: 'bottomleft' }).addTo(map);
-
-        // Update page title
+  
         let titleLocation = displayLocation.split(',')[0];
         if (titleLocation.length > 20) {
           titleLocation = titleLocation.substring(0, 20) + '...';
@@ -652,7 +627,6 @@
       }
     }
 
-    // Helper function for HTML escaping
     function escapeHTML(str) {
       if (!str) return '';
       return str.replace(/[&<>"']/g, m => ({
@@ -660,7 +634,6 @@
       }[m]));
     }
 
-    // Load when page is ready
     document.addEventListener('DOMContentLoaded', loadReport);
   </script>
 </body>
