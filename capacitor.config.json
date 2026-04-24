@@ -1,11 +1,13 @@
 {
   "appId": "com.AidTracker.app",
   "appName": "AidTracker",
+  "webDir": "www",
+  "bundledWebRuntime": false,
   "server": {
     "url": "https://aid-app-user.vercel.app",
+    "cleartext": false,
     "androidScheme": "https"
   },
-  "webDir": ".",
   "plugins": {
     "App": {},
     "SplashScreen": {
@@ -23,5 +25,8 @@
       "layoutName": "launch_screen",
       "useDialog": true
     }
+  },
+  "android": {
+    "allowMixedContent": false
   }
 }
