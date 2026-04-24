@@ -2,7 +2,7 @@
   "appId": "com.AidTracker.app",
   "appName": "AidTracker",
   "server": {
-    "url": "https://aid-tracker.vercel.app",
+    "url": "https://aid-app-user.vercel.app",
     "androidScheme": "https"
   },
   "webDir": ".",
