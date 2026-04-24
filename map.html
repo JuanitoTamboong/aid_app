@@ -7,7 +7,6 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<link rel="website icon" href="assets/aid-tracker-logo.png">
 
 <style>
 html,body { 
@@ -783,8 +782,8 @@ body.camera-active #guestModeIndicator {
     </div>
   </div>
 
-  <!-- Supabase Module -->
-  <script type="module">
+ <!-- Supabase Module -->
+<script type="module">
     import { 
         saveReportToSupabase, 
         testSupabaseConnection,
@@ -831,22 +830,10 @@ body.camera-active #guestModeIndicator {
     async function testConnection() {
         try {
             if (window.testSupabaseConnection) {
-                const result = await window.testSupabaseConnection();
-                console.log("Supabase connection test:", result);
-                
-                if (!result.connected) {
-                    console.warn("Supabase connection warning:", result.error);
-                    
-                    // Show warning if not connected
-                    if (result.error && !result.error.includes('42P01')) {
-                        console.warn("Supabase may not be properly configured.");
-                    }
-                } else {
-                    console.log("✓ Supabase connection successful");
-                }
+                await window.testSupabaseConnection();
             }
         } catch (error) {
-            console.error("Connection test error:", error);
+            // Silently handle connection error
         }
     }
 
@@ -927,21 +914,14 @@ body.camera-active #guestModeIndicator {
     }
     
     window.testSupabaseManually = async function() {
-        console.log("Testing Supabase connection manually...");
-        console.log("Window.saveReportToSupabase exists:", typeof window.saveReportToSupabase);
-        
         if (typeof window.testSupabaseConnection === 'function') {
-            const result = await window.testSupabaseConnection();
-            console.log("Connection test result:", result);
-            return result;
-        } else {
-            console.error("testSupabaseConnection function not available");
-            return { connected: false, error: "Function not loaded" };
+            return await window.testSupabaseConnection();
         }
+        return { connected: false, error: "Function not loaded" };
     };
-  </script>
+</script>
 
-  <script>
+<script>
     // Global variables
     let map = null;
     let currentUserLocation = null; 
@@ -953,178 +933,172 @@ body.camera-active #guestModeIndicator {
     let mapButtons = null;
 
     document.addEventListener('DOMContentLoaded', function() {
-      initializeMap();
-      mapButtons = document.getElementById('mapButtons');
+        initializeMap();
+        mapButtons = document.getElementById('mapButtons');
 
-      const isGuestMode = localStorage.getItem('isGuestMode') === 'true';
-      const guestIndicator = document.getElementById('guestModeIndicator');
+        const isGuestMode = localStorage.getItem('isGuestMode') === 'true';
+        const guestIndicator = document.getElementById('guestModeIndicator');
 
-      if (guestIndicator) {
-        if (isGuestMode) {
-          guestIndicator.classList.remove('hidden');
-        } else {
-          guestIndicator.classList.add('hidden');
+        if (guestIndicator) {
+            if (isGuestMode) {
+                guestIndicator.classList.remove('hidden');
+            } else {
+                guestIndicator.classList.add('hidden');
+            }
         }
-      }
     });
 
     /* ============================ MAP INITIALIZATION ============================= */
     function initializeMap() {
-      map = L.map('map').setView([12.35, 122.0], 11);
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-      startGeoTracking();
+        map = L.map('map').setView([12.35, 122.0], 11);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+        startGeoTracking();
     }
 
     function goBack() { 
-      window.location = "index.html"; 
+        window.location = "index.html"; 
     }
 
     function goBackToIndex() {
-      window.location.href = "index.html";
+        window.location.href = "index.html";
     }
 
     /* ============================ GPS TRACKING ============================= */
     function startGeoTracking() {
-      if (!navigator.geolocation) {
-        console.warn("Geolocation is not supported by this browser");
-        alert("Geolocation is not supported by your browser. You can still use the map by pinpointing locations manually.");
-        return;
-      }
-      const savedLocation = localStorage.getItem('lastKnownLocation');
-      if (savedLocation) {
-        try {
-          const location = JSON.parse(savedLocation);
-          if (location && location.lat && location.lng) {
-            currentUserLocation = location;
-            if (!reportLocation) {
-              reportLocation = location;
-            }
-            if (!userMarker) {
-              userMarker = L.marker([location.lat, location.lng], {
-                icon: L.divIcon({ html: '<div class="pulse"></div>' })
-              }).addTo(map);
-              map.setView([location.lat, location.lng], 14);
-            }
-          }
-        } catch (e) {
-          console.warn("Error parsing saved location:", e);
+        if (!navigator.geolocation) {
+            alert("Geolocation is not supported by your browser. You can still use the map by pinpointing locations manually.");
+            return;
         }
-      }
+        
+        const savedLocation = localStorage.getItem('lastKnownLocation');
+        if (savedLocation) {
+            try {
+                const location = JSON.parse(savedLocation);
+                if (location && location.lat && location.lng) {
+                    currentUserLocation = location;
+                    if (!reportLocation) {
+                        reportLocation = location;
+                    }
+                    if (!userMarker) {
+                        userMarker = L.marker([location.lat, location.lng], {
+                            icon: L.divIcon({ html: '<div class="pulse"></div>' })
+                        }).addTo(map);
+                        map.setView([location.lat, location.lng], 14);
+                    }
+                }
+            } catch (e) {
+                // Silently handle error
+            }
+        }
 
-      const options = {
-        enableHighAccuracy: false,
-        maximumAge: 300000, 
-        timeout: 15000 
-      };
+        const options = {
+            enableHighAccuracy: false,
+            maximumAge: 300000, 
+            timeout: 15000 
+        };
 
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          const { latitude, longitude, accuracy } = pos.coords;
-          console.log(`Location obtained with accuracy: ${accuracy} meters`);
+        navigator.geolocation.getCurrentPosition(
+            (pos) => {
+                const { latitude, longitude } = pos.coords;
 
-          currentUserLocation = { lat: latitude, lng: longitude };
+                currentUserLocation = { lat: latitude, lng: longitude };
 
-          // Save to localStorage for future use
-          localStorage.setItem('lastKnownLocation', JSON.stringify(currentUserLocation));
+                // Save to localStorage for future use
+                localStorage.setItem('lastKnownLocation', JSON.stringify(currentUserLocation));
 
-          // Set initial report location to current location
-          if (!reportLocation) {
-            reportLocation = { lat: latitude, lng: longitude };
-          }
+                // Set initial report location to current location
+                if (!reportLocation) {
+                    reportLocation = { lat: latitude, lng: longitude };
+                }
 
-          if (!userMarker) {
-            userMarker = L.marker([latitude, longitude], {
-              icon: L.divIcon({ html: '<div class="pulse"></div>' })
-            }).addTo(map);
-            map.setView([latitude, longitude], 14);
-          } else {
-            userMarker.setLatLng([latitude, longitude]);
-          }
+                if (!userMarker) {
+                    userMarker = L.marker([latitude, longitude], {
+                        icon: L.divIcon({ html: '<div class="pulse"></div>' })
+                    }).addTo(map);
+                    map.setView([latitude, longitude], 14);
+                } else {
+                    userMarker.setLatLng([latitude, longitude]);
+                }
 
-          startPositionWatch();
-        },
-        (error) => {
-          console.warn("Initial geolocation failed:", error);
+                startPositionWatch();
+            },
+            (error) => {
+                let errorMessage = "Unable to get your location. ";
+                switch(error.code) {
+                    case error.PERMISSION_DENIED:
+                        errorMessage += "Please enable location permissions in your browser settings and refresh the page.";
+                        break;
+                    case error.POSITION_UNAVAILABLE:
+                        errorMessage += "Location information is unavailable. You can still use the map by pinpointing locations manually.";
+                        break;
+                    case error.TIMEOUT:
+                        errorMessage += "Location request timed out. You can still use the map by pinpointing locations manually.";
+                        break;
+                    default:
+                        errorMessage += "You can still use the map by pinpointing locations manually.";
+                        break;
+                }
 
-          let errorMessage = "Unable to get your location. ";
-          switch(error.code) {
-            case error.PERMISSION_DENIED:
-              errorMessage += "Please enable location permissions in your browser settings and refresh the page.";
-              break;
-            case error.POSITION_UNAVAILABLE:
-              errorMessage += "Location information is unavailable. You can still use the map by pinpointing locations manually.";
-              break;
-            case error.TIMEOUT:
-              errorMessage += "Location request timed out. You can still use the map by pinpointing locations manually.";
-              break;
-            default:
-              errorMessage += "You can still use the map by pinpointing locations manually.";
-              break;
-          }
-
-          alert(errorMessage);
-          if (!userMarker) {
-            map.setView([12.35, 122.0], 11);
-          }
-        },
-        options
-      );
+                alert(errorMessage);
+                if (!userMarker) {
+                    map.setView([12.35, 122.0], 11);
+                }
+            },
+            options
+        );
     }
 
     function startPositionWatch() {
-      if (!navigator.geolocation) return;
+        if (!navigator.geolocation) return;
 
-      const watchOptions = {
-        enableHighAccuracy: false, 
-        maximumAge: 60000, 
-        timeout: 30000
-      };
+        const watchOptions = {
+            enableHighAccuracy: false, 
+            maximumAge: 60000, 
+            timeout: 30000
+        };
 
-      navigator.geolocation.watchPosition(
-        (pos) => {
-          const { latitude, longitude } = pos.coords;
-          currentUserLocation = { lat: latitude, lng: longitude };
+        navigator.geolocation.watchPosition(
+            (pos) => {
+                const { latitude, longitude } = pos.coords;
+                currentUserLocation = { lat: latitude, lng: longitude };
 
-          localStorage.setItem('lastKnownLocation', JSON.stringify(currentUserLocation));
+                localStorage.setItem('lastKnownLocation', JSON.stringify(currentUserLocation));
 
-          if (userMarker) {
-            userMarker.setLatLng([latitude, longitude]);
-          }
-        },
-        (error) => {
-          console.warn("Position watch error:", error);
-        },
-        watchOptions
-      );
+                if (userMarker) {
+                    userMarker.setLatLng([latitude, longitude]);
+                }
+            },
+            () => {} // Silently handle watch errors
+        );
     }
 
     /* ============================ PINPOINT ============================= */
     function startPinpoint() {
-      if (!map) {
-        alert("Map not loaded yet. Please wait.");
-        return;
-      }
-      
-      alert("Tap on map to set report location.");
-      map.once("click", (e) => {
-        if (pinpointMarker) {
-          map.removeLayer(pinpointMarker);
+        if (!map) {
+            alert("Map not loaded yet. Please wait.");
+            return;
         }
         
-        pinpointMarker = L.marker(e.latlng, {
-          icon: L.divIcon({ 
-            html: '<div class="pinpoint-marker"></div>',
-            className: 'pinpoint-icon',
-            iconSize: [20, 35],
-            iconAnchor: [10, 35]
-          })
-        }).addTo(map);
-        
-        pinpointMarker.bindPopup("Report will be submitted here").openPopup();
-        reportLocation = e.latlng;
-        
-        showPinConfirmPopup();
-      });
+        alert("Tap on map to set report location.");
+        map.once("click", (e) => {
+            if (pinpointMarker) {
+                map.removeLayer(pinpointMarker);
+            }
+            
+            pinpointMarker = L.marker(e.latlng, {
+                icon: L.divIcon({ 
+                    html: '<div class="pinpoint-marker"></div>',
+                    className: 'pinpoint-icon',
+                    iconSize: [20, 35],
+                    iconAnchor: [10, 35]
+                })
+            }).addTo(map);
+            
+            pinpointMarker.bindPopup("Report will be submitted here").openPopup();
+            reportLocation = e.latlng;
+            
+            showPinConfirmPopup();
+        });
     }
 
     /* ============================ POPUP MANAGEMENT ============================= */
@@ -1133,40 +1107,40 @@ body.camera-active #guestModeIndicator {
     const alertOverlay = document.getElementById("alertOverlay");
     
     function openReportForm() { 
-      hideAll(); 
-      reportPopup.classList.remove("hidden"); 
+        hideAll(); 
+        reportPopup.classList.remove("hidden"); 
     }
 
     function showPinConfirmPopup() { 
-      hideAll(); 
-      pinConfirmPopup.classList.remove("hidden"); 
+        hideAll(); 
+        pinConfirmPopup.classList.remove("hidden"); 
     }
 
     function hidePinConfirmPopup() { 
-      pinConfirmPopup.classList.add("hidden"); 
+        pinConfirmPopup.classList.add("hidden"); 
     }
 
     function continueFromPin() { 
-      hidePinConfirmPopup(); 
-      openReportForm(); 
+        hidePinConfirmPopup(); 
+        openReportForm(); 
     }
 
     function showAlert() { 
-      hideAll(); 
-      alertOverlay.classList.remove("hidden"); 
+        hideAll(); 
+        alertOverlay.classList.remove("hidden"); 
     
-      const successMsg = document.getElementById("successMessage");
-      if (successMsg) {
-        successMsg.textContent = "Emergency report submitted successfully. Status: Pending - Awaiting response from emergency services.";
-      }
+        const successMsg = document.getElementById("successMessage");
+        if (successMsg) {
+            successMsg.textContent = "Emergency report submitted successfully. Status: Pending - Awaiting response from emergency services.";
+        }
     }
 
     function hideAlert() { 
-      alertOverlay.classList.add("hidden"); 
+        alertOverlay.classList.add("hidden"); 
     }
 
     function hideAll() {
-      document.querySelectorAll(".alert-overlay").forEach(x => x.classList.add("hidden"));
+        document.querySelectorAll(".alert-overlay").forEach(x => x.classList.add("hidden"));
     }
 
     /* ===================  CAMERA FUNCTIONS - RESPONSIVE =================== */
@@ -1175,293 +1149,271 @@ body.camera-active #guestModeIndicator {
     const capturedPreview = document.getElementById("capturedPreview");
 
     async function openCamera() {
-      hideAll();
-      if (mapButtons) {
-        mapButtons.classList.add('hidden');
-      }
-      document.body.classList.add('camera-active');
-      
-      cameraOverlay.style.display = "block";
-
-      try {
-        const constraints = {
-          video: {
-            facingMode: { ideal: 'environment' },
-            width: { ideal: 1280 },
-            height: { ideal: 720 }
-          }
-        };
-
-        cameraStream = await navigator.mediaDevices.getUserMedia(constraints);
-        cameraVideo.srcObject = cameraStream;
-        return new Promise((resolve) => {
-          cameraVideo.onloadedmetadata = () => {
-            console.log("Camera ready, video dimensions:", cameraVideo.videoWidth, "x", cameraVideo.videoHeight);
-            setTimeout(() => {
-              cameraVideo.play()
-                .then(() => {
-                  console.log("Camera video playing successfully");
-                  resolve(true);
-                })
-                .catch(err => {
-                  console.warn("Video play failed, but camera should work:", err);
-                  resolve(true);
-                });
-            }, 300);
-          };
-        });
-      } catch (error) {
-        console.error("Camera error:", error);
-        try {
-          console.log("Trying with simpler camera constraints...");
-          cameraStream = await navigator.mediaDevices.getUserMedia({ 
-            video: true 
-          });
-          cameraVideo.srcObject = cameraStream;
-          
-          cameraVideo.onloadedmetadata = () => {
-            cameraVideo.play().catch(e => console.warn("Play warning:", e));
-          };
-        } catch (secondError) {
-          console.error("Second camera attempt failed:", secondError);
-          alert("Unable to access camera. Please check camera permissions in your browser settings.");
-          closeCamera(); 
+        hideAll();
+        if (mapButtons) {
+            mapButtons.classList.add('hidden');
         }
-      }
+        document.body.classList.add('camera-active');
+        
+        cameraOverlay.style.display = "block";
+
+        try {
+            const constraints = {
+                video: {
+                    facingMode: { ideal: 'environment' },
+                    width: { ideal: 1280 },
+                    height: { ideal: 720 }
+                }
+            };
+
+            cameraStream = await navigator.mediaDevices.getUserMedia(constraints);
+            cameraVideo.srcObject = cameraStream;
+            
+            return new Promise((resolve) => {
+                cameraVideo.onloadedmetadata = () => {
+                    setTimeout(() => {
+                        cameraVideo.play()
+                            .then(() => resolve(true))
+                            .catch(() => resolve(true));
+                    }, 300);
+                };
+            });
+        } catch (error) {
+            try {
+                cameraStream = await navigator.mediaDevices.getUserMedia({ 
+                    video: true 
+                });
+                cameraVideo.srcObject = cameraStream;
+                
+                cameraVideo.onloadedmetadata = () => {
+                    cameraVideo.play().catch(() => {});
+                };
+            } catch (secondError) {
+                alert("Unable to access camera. Please check camera permissions in your browser settings.");
+                closeCamera(); 
+            }
+        }
     }
 
     function capturePhoto() {
-      if (!cameraVideo || !cameraVideo.videoWidth) {
-        alert("Camera not ready. Please try again.");
-        return;
-      }
-
-      const canvas = document.createElement("canvas");
-      
-      const MAX_WIDTH = 1200;
-      const MAX_HEIGHT = 900;
-      
-      let width = cameraVideo.videoWidth;
-      let height = cameraVideo.videoHeight;
-      
-      if (width > height) {
-        if (width > MAX_WIDTH) {
-          height = Math.round(height * (MAX_WIDTH / width));
-          width = MAX_WIDTH;
+        if (!cameraVideo || !cameraVideo.videoWidth) {
+            alert("Camera not ready. Please try again.");
+            return;
         }
-      } else {
-        if (height > MAX_HEIGHT) {
-          width = Math.round(width * (MAX_HEIGHT / height));
-          height = MAX_HEIGHT;
+
+        const canvas = document.createElement("canvas");
+        
+        const MAX_WIDTH = 1200;
+        const MAX_HEIGHT = 900;
+        
+        let width = cameraVideo.videoWidth;
+        let height = cameraVideo.videoHeight;
+        
+        if (width > height) {
+            if (width > MAX_WIDTH) {
+                height = Math.round(height * (MAX_WIDTH / width));
+                width = MAX_WIDTH;
+            }
+        } else {
+            if (height > MAX_HEIGHT) {
+                width = Math.round(width * (MAX_HEIGHT / height));
+                height = MAX_HEIGHT;
+            }
         }
-      }
-      
-      canvas.width = width;
-      canvas.height = height;
-      
-      const ctx = canvas.getContext("2d");
-      ctx.drawImage(cameraVideo, 0, 0, width, height);
-      
-      capturedBase64 = canvas.toDataURL("image/jpeg", 0.8);
-      
-      stopCamera();
-      closeCamera();
-      
-      if (capturedPreview) {
-        capturedPreview.src = capturedBase64;
-        capturedPreview.classList.remove("hidden");
-        capturedPreview.classList.add("show");
-      }
+        
+        canvas.width = width;
+        canvas.height = height;
+        
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(cameraVideo, 0, 0, width, height);
+        
+        capturedBase64 = canvas.toDataURL("image/jpeg", 0.8);
+        
+        stopCamera();
+        closeCamera();
+        
+        if (capturedPreview) {
+            capturedPreview.src = capturedBase64;
+            capturedPreview.classList.remove("hidden");
+            capturedPreview.classList.add("show");
+        }
 
-   const fileName = document.getElementById("fileName");
-      if (fileName) {
-        fileName.textContent = "Photo captured from camera";
-      }
+        const fileName = document.getElementById("fileName");
+        if (fileName) {
+            fileName.textContent = "Photo captured from camera";
+        }
 
-      const fileInput = document.getElementById("incidentPhoto");
-      if (fileInput) {
-        fileInput.value = '';
-      }
+        const fileInput = document.getElementById("incidentPhoto");
+        if (fileInput) {
+            fileInput.value = '';
+        }
 
-      reportPopup.classList.remove("hidden");
+        reportPopup.classList.remove("hidden");
     }
 
     function closeCamera() {
-      stopCamera();
-      cameraOverlay.style.display = "none";
-      
-      document.body.classList.remove('camera-active');
-      
-      if (mapButtons) {
-        mapButtons.classList.remove('hidden');
-      }
-      
-      reportPopup.classList.remove("hidden");
+        stopCamera();
+        cameraOverlay.style.display = "none";
+        
+        document.body.classList.remove('camera-active');
+        
+        if (mapButtons) {
+            mapButtons.classList.remove('hidden');
+        }
+        
+        reportPopup.classList.remove("hidden");
     }
 
     function stopCamera() {
-      if (cameraStream) {
-        cameraStream.getTracks().forEach(track => {
-          track.stop();
-        });
-        cameraStream = null;
-        cameraVideo.srcObject = null;
-      }
+        if (cameraStream) {
+            cameraStream.getTracks().forEach(track => {
+                track.stop();
+            });
+            cameraStream = null;
+            cameraVideo.srcObject = null;
+        }
     }
 
     /* ============================ UPDATE EMERGENCY TYPE DISPLAY ============================= */
     function updateEmergencyTypeDisplay() {
-      const accidentType = localStorage.getItem("accidentType") || "emergency";
-      let displayText = "Emergency";
-      let typeValue = "emergency";
+        const accidentType = localStorage.getItem("accidentType") || "emergency";
+        let displayText = "Emergency";
+        let typeValue = "emergency";
 
-      switch(accidentType) {
-        case "vehicular":
-          displayText = "Vehicular Accident";
-          typeValue = "vehicular";
-          break;
-        case "medical":
-          displayText = "Medical Emergency";
-          typeValue = "medical";
-          break;
-        case "fire":
-          displayText = "Fire Accident";
-          typeValue = "fire";
-          break;
-        case "assault":
-          displayText = "Assault Crime";
-          typeValue = "assault";
-          break;
-        default:
-          displayText = "Emergency";
-          typeValue = "emergency";
-      }
+        switch(accidentType) {
+            case "vehicular":
+                displayText = "Vehicular Accident";
+                typeValue = "vehicular";
+                break;
+            case "medical":
+                displayText = "Medical Emergency";
+                typeValue = "medical";
+                break;
+            case "fire":
+                displayText = "Fire Accident";
+                typeValue = "fire";
+                break;
+            case "assault":
+                displayText = "Assault Crime";
+                typeValue = "assault";
+                break;
+            default:
+                displayText = "Emergency";
+                typeValue = "emergency";
+        }
     
-      const displayElement = document.getElementById("emergencyTypeDisplay");
-      if (displayElement) {
-        displayElement.textContent = displayText;
-      }
-      
-      window.currentAccidentType = typeValue;
-      window.currentAccidentDisplay = displayText;
+        const displayElement = document.getElementById("emergencyTypeDisplay");
+        if (displayElement) {
+            displayElement.textContent = displayText;
+        }
+        
+        window.currentAccidentType = typeValue;
+        window.currentAccidentDisplay = displayText;
     }
 
     /* ============================ SUBMIT REPORT ============================= */
     async function submitReport() {
-      if (!reportLocation) {
-        alert("Please select a location first. Use 'Pinpoint Location' or wait for GPS to get your current location.");
-        return;
-      }
-
-      const fileInput = document.getElementById('incidentPhoto');
-      let photoBase64 = capturedBase64;
-
-      if (!photoBase64 && fileInput.files.length > 0) {
-        const file = fileInput.files[0];
-        photoBase64 = await toBase64(file);
-      }
-
-      const accidentType = localStorage.getItem("accidentType") || window.currentAccidentType || "emergency";
-      const accidentDisplay = window.currentAccidentDisplay || "Emergency";
-      const reporterName = localStorage.getItem("reporterName") || "Anonymous";
-      
-      const report = {
-        type: accidentType,
-        type_display: accidentDisplay,
-        reporter: reporterName,
-        latitude: reportLocation.lat,
-        longitude: reportLocation.lng,
-        timestamp: new Date().toISOString(),
-        status: "pending"
-      };
-      console.log("Submitting report from location:", reportLocation);
-      console.log("Current user location:", currentUserLocation);
-      console.log("Using pinpoint location:", pinpointMarker ? "YES" : "NO");
-      console.log("Report status:", report.status);
-      console.log("Reporter name:", report.reporter);
-
-      try {
-        console.log("Submitting report...", report);
-      
-        if (typeof window.saveReportToSupabase !== 'function') {
-          throw new Error("Save function not loaded. Please check the console for import errors.");
+        if (!reportLocation) {
+            alert("Please select a location first. Use 'Pinpoint Location' or wait for GPS to get your current location.");
+            return;
         }
-        
-        console.log("Calling saveReportToSupabase...");
-        const result = await window.saveReportToSupabase(report, photoBase64);
-        
-        console.log("Report submission result:", result);
-        
-        if (result && result.success) {
-          hideReportPopup();
-          showAlert();
-  
-          localStorage.removeItem("accidentType");
-        } else {
-          throw new Error("Report submission failed without error");
+
+        const fileInput = document.getElementById('incidentPhoto');
+        let photoBase64 = capturedBase64;
+
+        if (!photoBase64 && fileInput.files.length > 0) {
+            const file = fileInput.files[0];
+            photoBase64 = await toBase64(file);
         }
+
+        const accidentType = localStorage.getItem("accidentType") || window.currentAccidentType || "emergency";
+        const accidentDisplay = window.currentAccidentDisplay || "Emergency";
+        const reporterName = localStorage.getItem("reporterName") || "Anonymous";
         
-      } catch(err) {
-        console.error("Report submission error:", err);
-     
-        let errorMessage = "Failed to submit report: ";
-        
-        if (err.message.includes("Database table 'reports' not found")) {
-          errorMessage += "Database table not found. Please create the 'reports' table in Supabase.";
-        } else if (err.message.includes("Bucket not found")) {
-          errorMessage += "Storage bucket not found. Please create the 'aid-upload' bucket in Supabase Storage.";
-        } else if (err.message.includes("Supabase client not initialized")) {
-          errorMessage += "Connection failed. Please refresh the page and check your internet connection.";
-        } else if (err.message.includes("Invalid status value")) {
-          errorMessage += "Invalid report status. Please contact support.";
-        } else if (err.message.includes("row-level security policy")) {
-          errorMessage += "Permission denied. Check Supabase Row Level Security policies.";
-        } else if (err.message.includes("Could not find")) {
-          errorMessage += "Resource not found. Please check your Supabase setup.";
-        } else {
-          errorMessage += err.message;
+        const report = {
+            type: accidentType,
+            type_display: accidentDisplay,
+            reporter: reporterName,
+            latitude: reportLocation.lat,
+            longitude: reportLocation.lng,
+            timestamp: new Date().toISOString(),
+            status: "pending"
+        };
+
+        try {
+            if (typeof window.saveReportToSupabase !== 'function') {
+                throw new Error("Save function not loaded. Please check the console for import errors.");
+            }
+            
+            const result = await window.saveReportToSupabase(report, photoBase64);
+            
+            if (result && result.success) {
+                hideReportPopup();
+                showAlert();
+                localStorage.removeItem("accidentType");
+            } else {
+                throw new Error("Report submission failed without error");
+            }
+            
+        } catch(err) {
+            let errorMessage = "Failed to submit report: ";
+            
+            if (err.message.includes("Database table 'reports' not found")) {
+                errorMessage += "Database table not found. Please create the 'reports' table in Supabase.";
+            } else if (err.message.includes("Bucket not found")) {
+                errorMessage += "Storage bucket not found. Please create the 'aid-upload' bucket in Supabase Storage.";
+            } else if (err.message.includes("Supabase client not initialized")) {
+                errorMessage += "Connection failed. Please refresh the page and check your internet connection.";
+            } else if (err.message.includes("Invalid status value")) {
+                errorMessage += "Invalid report status. Please contact support.";
+            } else if (err.message.includes("row-level security policy")) {
+                errorMessage += "Permission denied. Check Supabase Row Level Security policies.";
+            } else if (err.message.includes("Could not find")) {
+                errorMessage += "Resource not found. Please check your Supabase setup.";
+            } else {
+                errorMessage += err.message;
+            }
+            
+            alert(errorMessage);
         }
-        
-        alert(errorMessage);
-      }
     }
 
     function hideReportPopup() {
-      reportPopup.classList.add("hidden");
-      capturedBase64 = null;
-      
-      if (capturedPreview) {
-        capturedPreview.src = "";
-        capturedPreview.classList.add("hidden");
-        capturedPreview.classList.remove("show");
-      }
-      
-      // Reset form
-      const form = document.getElementById("emergencyForm");
-      if (form) {
-        form.reset();
-      }
-      
-      const fileName = document.getElementById("fileName");
-      if (fileName) {
-        fileName.textContent = "";
-      }
-      
-      // Clear file input
-      const fileInput = document.getElementById("incidentPhoto");
-      if (fileInput) {
-        fileInput.value = '';
-      }
+        reportPopup.classList.add("hidden");
+        capturedBase64 = null;
+        
+        if (capturedPreview) {
+            capturedPreview.src = "";
+            capturedPreview.classList.add("hidden");
+            capturedPreview.classList.remove("show");
+        }
+        
+        // Reset form
+        const form = document.getElementById("emergencyForm");
+        if (form) {
+            form.reset();
+        }
+        
+        const fileName = document.getElementById("fileName");
+        if (fileName) {
+            fileName.textContent = "";
+        }
+        
+        // Clear file input
+        const fileInput = document.getElementById("incidentPhoto");
+        if (fileInput) {
+            fileInput.value = '';
+        }
     }
 
     function toBase64(file) {
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-      });
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
+        });
     }
-  </script>
+</script>
 </body>
 </html>

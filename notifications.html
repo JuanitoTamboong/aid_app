@@ -7,8 +7,6 @@
 <script src="https://cdn.tailwindcss.com"></script>
 <!-- Font Awesome -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<!--logo-->
-<link rel="website icon" href="assets/aid-tracker-logo.png">
 <style>
    html{
     font-size: 18px;
@@ -790,7 +788,7 @@ span#headerTitle {
             };
           }
         } catch (e) {
-          console.error("Error parsing account data:", e);
+          // Silently handle error
         }
       }
 
@@ -817,7 +815,7 @@ span#headerTitle {
             };
           }
         } catch (e) {
-          console.error("Error parsing profile data:", e);
+          // Silently handle error
         }
       }
 
@@ -867,9 +865,9 @@ span#headerTitle {
       try {
         const sound = document.getElementById('notificationSound');
         sound.currentTime = 0;
-        sound.play().catch(e => console.log('Audio play failed:', e));
+        sound.play().catch(() => {});
       } catch (e) {
-        console.log('Error playing sound:', e);
+        // Silently handle error
       }
     }
 
@@ -881,8 +879,6 @@ span#headerTitle {
         
         // Clear notification count in localStorage
         localStorage.setItem('notificationCount', '0');
-        
-        console.log('All notifications marked as read for:', currentUser.name);
       }
     }
 
@@ -1248,7 +1244,6 @@ span#headerTitle {
         updateConnectionStatus(true);
 
       } catch (err) {
-        console.error("Error loading reports:", err);
         statusEl.style.display = 'none';
         container.innerHTML = `
           <div class="error-state">
@@ -1303,9 +1298,7 @@ span#headerTitle {
           }
         )
         .subscribe((status) => {
-          if (status === 'SUBSCRIBED') {
-            updateConnectionStatus(true);
-          } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+          if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
             updateConnectionStatus(false);
             setTimeout(() => {
               if (realtimeSubscription) {

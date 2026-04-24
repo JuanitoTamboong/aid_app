@@ -6,14 +6,13 @@
   <title>View Report Location</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
-  <link rel="website icon" href="assets/aid-tracker-logo.png">
   <style>
     * {
       font-family: 'Poppins', 'Roboto', sans-serif;
     }
- html{
-    font-size: 18px;
-  }
+    html{
+      font-size: 18px;
+    }
     html, body { height: 100%; margin: 0; }
     .header {
       background: linear-gradient(135deg, #0a1636 0%, #1e3a8a 100%);
@@ -202,8 +201,6 @@
         const apiKey = '0a78fbd8bcd74be398f210b34682c77c';
         const url = `https://api.opencagedata.com/geocode/v1/json?q=${lat}+${lng}&key=${apiKey}&language=en&pretty=1&no_annotations=1`;
         
-        console.log("Geocoding coordinates:", lat, lng);
-        
         const response = await fetch(url, {
           method: 'GET',
           headers: {
@@ -212,13 +209,10 @@
         });
         
         if (!response.ok) {
-          console.error("Geocoding API error:", response.status);
           throw new Error(`Geocoding failed: ${response.status}`);
         }
         
         const data = await response.json();
-        
-        console.log("Geocoding API response:", data);
         
         if (data.results && data.results.length > 0) {
           const result = data.results[0];
@@ -250,7 +244,6 @@
         return `Coordinates: ${lat.toFixed(6)}, ${lng.toFixed(6)}`;
         
       } catch (error) {
-        console.error("Geocoding error:", error);
         return `Coordinates: ${lat.toFixed(6)}, ${lng.toFixed(6)}`;
       }
     }
@@ -259,17 +252,7 @@
     function extractResponderInfo(reportData) {
       if (!reportData) return null;
       
-      console.log("=== EXTRACTING RESPONDER INFO ===");
-      console.log("Full report data:", reportData);
-      
-      // Debug: List all available keys
-      console.log("All available keys in report data:");
-      Object.keys(reportData).forEach(key => {
-        console.log(`- ${key}:`, reportData[key], "(type:", typeof reportData[key], ")");
-      });
-      
       // Extract data from separate columns 
-      // Check ALL possible column names to find where data is stored
       const assignedResponders = reportData.assigned_responders || 
                                 reportData.assigned_resp || 
                                 reportData.responders ||
@@ -280,7 +263,7 @@
                           reportData.unit ||
                           null;
       
-      // Check for contact in ALL possible field names
+      // Check for contact in possible field names
       let contactValue = null;
     
       const contactFields = [
@@ -297,22 +280,14 @@
       for (const field of contactFields) {
         if (reportData[field] !== undefined && reportData[field] !== null && reportData[field] !== '') {
           contactValue = reportData[field];
-          console.log(`Found contact in field '${field}':`, contactValue);
           break;
         }
       }
       
-      console.log("=== EXTRACTION RESULTS ===");
-      console.log("assigned_responders:", assignedResponders, "(type:", typeof assignedResponders, ")");
-      console.log("assigned_unit:", assignedUnit, "(type:", typeof assignedUnit, ")");
-      console.log("contact:", contactValue, "(type:", typeof contactValue, ")");
-      
       // Format contact value properly
       let formattedContact = null;
       if (contactValue !== null && contactValue !== undefined && contactValue !== '') {
-        // Convert to string and clean it
         formattedContact = contactValue.toString().trim();
-        console.log("Formatted contact:", formattedContact);
         
         // If it's a number, format it nicely
         if (/^\d+$/.test(formattedContact)) {
@@ -330,16 +305,15 @@
                      (formattedContact && formattedContact.trim() !== '');
       
       if (!hasData) {
-        console.log("No responder data found in any column");
         return null;
       }
+      
       let responders = [];
       if (assignedResponders) {
         const responderString = assignedResponders.toString().trim();
         if (responderString !== '') {
           const responderList = responderString.split(',').map(r => r.trim()).filter(r => r !== '');
           responders = responderList;
-          console.log("Parsed responders list:", responders);
         }
       }
       
@@ -357,9 +331,9 @@
         }
       };
       
-      console.log("=== FINAL RESPONDER INFO ===", responderInfo);
       return responderInfo;
     }
+    
     function getCurrentUser() {
       const isGuestMode = localStorage.getItem('isGuestMode') === 'true';
       if (isGuestMode) {
@@ -385,7 +359,7 @@
             };
           }
         } catch (e) {
-          console.error("Error parsing account data:", e);
+          // Silently handle error
         }
       }
       const reporterName = localStorage.getItem('reporterName');
@@ -409,8 +383,6 @@
           return;
         }
 
-        console.log("Fetching report ID:", reportID);
-
         const loadingDiv = document.getElementById('loading');
         loadingDiv.innerHTML = "Loading report information...";
 
@@ -429,7 +401,6 @@
           .single();
 
         if (error) {
-          console.error("Supabase error:", error);
           alert("Report not found or database error: " + error.message);
           window.location.href = "notifications.html";
           return;
@@ -448,8 +419,6 @@
           return;
         }
 
-        console.log("=== FULL REPORT DATA FROM SUPABASE ===", report);
-
         if (!report.latitude || !report.longitude) {
           alert("Report is missing coordinates!");
           return;
@@ -457,7 +426,6 @@
 
         // Extract responder info from separate columns
         const responderInfo = extractResponderInfo(report);
-        console.log("Responder info from separate columns:", responderInfo);
 
         // Get location name
         loadingDiv.innerHTML = "Getting location name...";
@@ -494,6 +462,7 @@
               <p><strong>Coordinates:</strong> ${formattedCoords}</p>
               <p><strong>Location:</strong> ${escapeHTML(displayLocation)}</p>
         `;
+        
         if (responderInfo) {
           // Check if we have any data to display
           const hasAnyData = responderInfo.hasResponders || responderInfo.hasUnit || responderInfo.hasContact;
@@ -518,7 +487,7 @@
               popupContent += `<div class="responder-detail"><strong>Responders:</strong> ${escapeHTML(responderInfo.names.join(', '))}</div>`;
             }
             
-            // Show contact if available - FIXED HERE
+            // Show contact if available
             if (responderInfo.hasContact) {
               const telLink = `tel:${responderInfo.contact.replace(/\D/g, '')}`;
               popupContent += `
@@ -575,12 +544,12 @@
           
           popupContent += `
             <div style="margin-top: 12px;">
-      <img src="${escapedPhotoUrl}"
-           class="popup-img"
-           alt="Report photo"
-           crossorigin="anonymous"
-           onclick="window.open('${escapedPhotoUrl}', '_blank')"
-           title="Click to view full size">
+              <img src="${escapedPhotoUrl}"
+                   class="popup-img"
+                   alt="Report photo"
+                   crossorigin="anonymous"
+                   onclick="window.open('${escapedPhotoUrl}', '_blank')"
+                   title="Click to view full size">
               <p style="color: #6b7280; font-size: 11px; margin-top: 4px;">
                 Click image to view full size
               </p>
@@ -617,7 +586,6 @@
         document.title = `Report: ${escapeHTML(report.type_display || report.type || 'Emergency')} at ${titleLocation}`;
 
       } catch (error) {
-        console.error("Error loading report:", error);
         document.getElementById('loading').innerHTML = 
           '<div style="color: red; text-align: center; padding: 20px;">' +
           '<h3 style="margin-bottom: 10px;">Error loading report</h3>' +

@@ -7,11 +7,9 @@
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
-<link rel="website icon" href="assets/aid-tracker-logo.png">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="https://unpkg.com/@capacitor/core@7/dist/capacitor.js"></script>
 <script src="https://unpkg.com/@capacitor/app@7/dist/plugin.js"></script>
-
 <style>
   * {
     font-family: 'Poppins', 'Roboto', sans-serif;
@@ -2142,10 +2140,11 @@ background: #4ADE80;
   </div>
 </div>
 
-<script>
+<SCript>
 // --- SUPABASE INITIALIZATION ---
 const SUPABASE_URL = 'https://gwvepxupoxyyydnisulb.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd3dmVweHVwb3h5eXlkbmlzdWxiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ4MDE4ODcsImV4cCI6MjA4MDM3Nzg4N30.Ku9SXTAKNMvHilgEpxj5HcVA-0TPt4ziuEq0Irao5Qc';
+
 try {
   if (window.supabase && window.supabase.createClient) {
     supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
@@ -2155,14 +2154,10 @@ try {
         }
       }
     });
-    console.log('Supabase client initialized successfully');
   } else {
-    console.warn('Supabase SDK not fully loaded, using fallback');
     throw new Error('Supabase SDK not loaded');
   }
 } catch (error) {
-  console.error('Failed to initialize Supabase:', error);
-
   // Create a mock supabase object to prevent errors
   supabase = {
     from: () => ({
@@ -2198,7 +2193,7 @@ function checkUserHasAccount() {
         return true;
       }
     } catch (e) {
-      console.error("Error parsing account data:", e);
+      // Silently handle error
     }
   }
   
@@ -2225,7 +2220,7 @@ function getCurrentUser() {
         };
       }
     } catch (e) {
-      console.error("Error parsing account data:", e);
+      // Silently handle error
     }
   }
 
@@ -2298,9 +2293,9 @@ function playNotificationSound() {
   try {
     const audio = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-correct-answer-tone-2870.mp3');
     audio.volume = 0.5;
-    audio.play().catch(e => console.log('Audio play failed:', e));
+    audio.play().catch(() => {});
   } catch (e) {
-    console.log('Error playing sound:', e);
+    // Silently handle error
   }
 }
 
@@ -2356,15 +2351,12 @@ function hasImportantChanges(oldReport, newReport) {
 // Setup realtime subscription
 function setupRealtimeSubscription() {
   if (!currentUser) {
-    console.log('No current user, cannot setup subscription');
     return;
   }
   
   if (realtimeSubscription) {
     supabase.removeChannel(realtimeSubscription);
   }
-
-  console.log('Setting up realtime subscription for user:', currentUser.name);
 
   realtimeSubscription = supabase
     .channel('reports-changes')
@@ -2425,12 +2417,7 @@ function setupRealtimeSubscription() {
       }
     )
     .subscribe((status) => {
-      console.log('Realtime subscription status:', status);
-      
-      if (status === 'SUBSCRIBED') {
-        console.log('Successfully subscribed to realtime updates');
-      } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
-        console.log('Realtime subscription error, retrying in 5 seconds...');
+      if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
         setTimeout(() => {
           if (realtimeSubscription) {
             setupRealtimeSubscription();
@@ -2479,7 +2466,7 @@ async function checkForNotifications() {
     updateNotificationCount();
     
   } catch (error) {
-    console.error('Error checking for notifications:', error);
+    // Silently handle error
   }
 }
 
@@ -2622,7 +2609,6 @@ function handleExit() {
           alert('Unable to exit app. Please use your device\'s back button or home button.');
         }
       } catch (error) {
-        console.log('Error exiting app:', error);
         alert('Unable to exit app. Please use your device\'s back button or home button.');
       }
     } else {
@@ -2726,8 +2712,6 @@ document.addEventListener('DOMContentLoaded', function() {
     clearAllNotifications();
   }
 
-
-
   document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') {
       const legalNotice = document.getElementById('legalNoticeOverlay');
@@ -2771,6 +2755,6 @@ document.addEventListener('click', (e) => {
     closeMobileMenu();
   }
 });
-</script>
+</SCript>
 </body>
 </html>
